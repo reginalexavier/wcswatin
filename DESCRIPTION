@@ -1,0 +1,20 @@
+Package: cwswatinput
+Title: Climate and Weater SWAT input
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given = "Reginal",
+           family = "Exavier",
+           role = c("aut", "cre"),
+           email = "reginalexavier@rocketmail.com",
+           comment = c(ORCID = "0000-0002-5237-523X")),
+    person(given = "Peter",
+           family = "Zeilhofer",
+           role = "aut",
+           email = "zeilhoferpeter@gmail.com"))
+Description: What the package does (one paragraph).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
