@@ -24,3 +24,5 @@ Imports:
     dplyr,
     tidyr,
     raster
+URL: https://github.com/reginalexavier/cwswatinput
+BugReports: https://github.com/reginalexavier/cwswatinput/issues
