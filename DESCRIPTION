@@ -31,5 +31,5 @@ Imports:
     data.table,
     glue,
     stringr
-URL: https://github.com/reginalexavier/cwswatinput
-BugReports: https://github.com/reginalexavier/cwswatinput/issues
+URL: https://github.com/swatufmt/cwswatinput
+BugReports: https://github.com/swatufmt/cwswatinput/issues
