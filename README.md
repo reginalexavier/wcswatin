@@ -6,15 +6,17 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of cwswatinput is to …
+cwswatinput (Climate & Weater SWAT input) is an open-source R package
+for preparing weather and climate data for the Soil & Water Assessment
+Tool (SWAT) input format.
 
 ## Installation
 
-You can install the released version of cwswatinput from
-[CRAN](https://CRAN.R-project.org) with:
+You can install the development version from GitHub with:
 
 ``` r
-#install.packages("cwswatinput")
+# install.packages("devtools")
+devtools::install_github("reginalexavier/cwswatinput")
 ```
 
 ## Example

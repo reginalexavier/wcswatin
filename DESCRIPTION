@@ -1,5 +1,5 @@
 Package: cwswatinput
-Title: Climate and Weater SWAT input
+Title: Climate & Weater SWAT Input
 Version: 0.0.0.9000
 Authors@R: c(
     person(given = "Reginal",
@@ -11,7 +11,9 @@ Authors@R: c(
            family = "Zeilhofer",
            role = "aut",
            email = "zeilhoferpeter@gmail.com"))
-Description: What the package does (one paragraph).
+Description: Climate & Weater SWAT input (cwswatinput) is an open-source R package for
+    preparing weather and climate data for the Soil & Water Assessment Tool (SWAT) 
+    input format.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -23,6 +25,11 @@ Config/testthat/edition: 3
 Imports: 
     dplyr,
     tidyr,
-    raster
+    raster,
+    ncdf4,
+    sp,
+    data.table,
+    glue,
+    stringr
 URL: https://github.com/reginalexavier/cwswatinput
 BugReports: https://github.com/reginalexavier/cwswatinput/issues
