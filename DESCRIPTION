@@ -30,6 +30,8 @@ Imports:
     sp,
     data.table,
     glue,
-    stringr
+    stringr,
+    vroom,
+    sf
 URL: https://github.com/swatufmt/cwswatinput
 BugReports: https://github.com/swatufmt/cwswatinput/issues

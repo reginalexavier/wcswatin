@@ -2,7 +2,12 @@
 
 export(point_to_daily)
 export(save_daily_tbl)
+export(ts_bypoint)
+export(varMain_creator)
 import(dplyr)
+importFrom(stats,as.formula)
+importFrom(stats,lm)
 importFrom(stats,na.omit)
+importFrom(stats,predict)
 importFrom(utils,setTxtProgressBar)
 importFrom(utils,txtProgressBar)
