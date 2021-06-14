@@ -2,7 +2,8 @@
 
 export(point_to_daily)
 export(save_daily_tbl)
-export(ts_bypoint)
+export(ts_to_area)
+export(ts_to_point)
 export(varMain_creator)
 import(dplyr)
 importFrom(stats,as.formula)
