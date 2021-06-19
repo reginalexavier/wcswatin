@@ -34,7 +34,9 @@ Imports:
     glue,
     stringr,
     vroom,
-    sf
+    sf,
+    lubridate,
+    rgdal
 URL: https://github.com/swatufmt/cwswatinput
 BugReports: https://github.com/swatufmt/cwswatinput/issues
 VignetteBuilder: knitr
