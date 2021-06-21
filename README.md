@@ -32,7 +32,7 @@ disponibilizados em sites como [Climate Change
 Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview),
 [GES
 DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords=%22IMERG%20final%22),
-[s PERSIANN-CCS](https://chrsdata.eng.uci.edu/). Esses dados são
+[PERSIANN-CCS](https://chrsdata.eng.uci.edu/). Esses dados são
 disponibilizados em formato de raster(.tif) ou em formato de netcdf *(um
 formato muito utilizado para disponibilizar séries temporais de dados)*.
 Cada plataforma disponibiliza em seu site mais detalhes sobre os
@@ -5889,18 +5889,55 @@ Esta função interpola os pontos de entrada para uma área inteira e cria
 um raster para cada dia
 
 ``` r
-ts_to_area(my_folder = pasta_dados_diarios,
+raster_interpolated <- ts_to_area(my_folder = pasta_dados_diarios,
            bassin_limit_path = bassin_path,
            poly_degree = 2,
-           resolution = 0.5)
+           resolution = 0.01)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
+
+raster_interpolated
 #> class      : RasterBrick 
-#> dimensions : 4, 4, 16, 5  (nrow, ncol, ncell, nlayers)
-#> resolution : 0.5, 0.5  (x, y)
-#> extent     : -55.6531, -53.6531, -17.42436, -15.42436  (xmin, xmax, ymin, ymax)
+#> dimensions : 170, 170, 28900, 5  (nrow, ncol, ncell, nlayers)
+#> resolution : 0.01, 0.01  (x, y)
+#> extent     : -55.4081, -53.7081, -17.17936, -15.47936  (xmin, xmax, ymin, ymax)
 #> crs        : +proj=longlat +datum=WGS84 +no_defs 
 #> source     : memory
 #> names      : day_2002.01.01, day_2002.01.02, day_2002.01.03, day_2002.01.04, day_2002.01.05 
 #> min values :              0,              0,              0,              0,              0 
-#> max values :      70.404189,      26.468815,       3.372788,       7.704003,      25.763596
+#> max values :      70.404189,      26.468815,       3.381214,       7.842061,      25.763596
 ```
+
+Para verificação, uma camada pode ser plotada com ajuda do pacote `tmap`
+como segue abaixo, e adicionando ao raster interpolado os pontos de
+observação que foram interpolados.
+
+``` r
+tmap::tm_shape(raster_interpolated[[1]]) +
+  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface",
+                  midpoint = NA,
+                  n = 15, palette = "-RdBu",
+                  style = c("cat", "fixed", "sd", "equal", "pretty", "quantile",
+                            "kmeans", "hclust", "bclust", "fisher",
+                            "dpih", "headtails")[7]) +
+  tmap::tm_shape(sf::read_sf(bassin_path)) +
+  tmap::tm_borders(col = "red") +
+  tmap::tm_shape(sf::st_as_sf(as.data.frame(dados_diarios[[1]]), coords = c("LONG", "LAT"),
+                              crs = "+proj=longlat +datum=WGS84 +no_defs")) +
+  tmap::tm_text(text = "pcp", just = c(-0.5, 0), size = .8) +
+  tmap::tm_dots(shape = 1,
+                col = "blue",
+                size = "pcp",
+                title.size = "Precipitação Observada em Campo") +
+  tmap::tm_legend(legend.outside = TRUE) +
+  tmap::tm_compass(type = "arrow", position = c(0.08,0.1), size = 2) +
+  tmap::tm_scale_bar(text.size = .5,
+                     position = c(0.01, 0),
+  )
+```
+
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+
+<br><br><br><br>
+
+A documentação das funções criadas está disponivel e acessivel via
+`? nome da função`

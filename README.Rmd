@@ -52,7 +52,7 @@ bassin_path <- file.path(base_path, "shapefiles/cba_slc.shp")
 
 # Rotinas para dados NetCDF ou raster
 
-A ideia aqui consiste em extrair séries de dados de uma variável para cada pixel de uma área de estudo. Os produtos climáticos são disponibilizados em sites como [Climate Change Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview), [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final"), [s PERSIANN-CCS](https://chrsdata.eng.uci.edu/). Esses dados são disponibilizados em formato de raster(.tif) ou em formato de netcdf _(um formato muito utilizado para disponibilizar séries temporais de dados)_. Cada plataforma disponibiliza em seu site mais detalhes sobre os produtos disponibilizados e a forma correta para baixá-los.
+A ideia aqui consiste em extrair séries de dados de uma variável para cada pixel de uma área de estudo. Os produtos climáticos são disponibilizados em sites como [Climate Change Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview), [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final"), [PERSIANN-CCS](https://chrsdata.eng.uci.edu/). Esses dados são disponibilizados em formato de raster(.tif) ou em formato de netcdf _(um formato muito utilizado para disponibilizar séries temporais de dados)_. Cada plataforma disponibiliza em seu site mais detalhes sobre os produtos disponibilizados e a forma correta para baixá-los.
 Esses dados para serem utilizados dentro do SWAT precisam ser extraídos para um formato especifico em tabelas. Para facilitar, o pacote `cwswatinput` disponibiliza, por meio de funções, formas automatizadas da extração uma vez baixados.
 
 ## Passo a passo:
@@ -285,10 +285,50 @@ varMain_creator(targeted_points_path = centroides_path,
 
 Esta função interpola os pontos de entrada para uma área inteira e cria um raster para cada dia
 ```{r}
-ts_to_area(my_folder = pasta_dados_diarios,
+raster_interpolated <- ts_to_area(my_folder = pasta_dados_diarios,
            bassin_limit_path = bassin_path,
            poly_degree = 2,
-           resolution = 0.5)
+           resolution = 0.01)
+
+raster_interpolated
 ```
+
+
+Para verificação, uma camada pode ser plotada com ajuda do pacote `tmap` como segue abaixo, e adicionando ao raster interpolado os pontos de observação que foram interpolados.
+
+```{r}
+tmap::tm_shape(raster_interpolated[[1]]) +
+  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface",
+                  midpoint = NA,
+                  n = 15, palette = "-RdBu",
+                  style = c("cat", "fixed", "sd", "equal", "pretty", "quantile",
+                            "kmeans", "hclust", "bclust", "fisher",
+                            "dpih", "headtails")[7]) +
+  tmap::tm_shape(sf::read_sf(bassin_path)) +
+  tmap::tm_borders(col = "red") +
+  tmap::tm_shape(sf::st_as_sf(as.data.frame(dados_diarios[[1]]), coords = c("LONG", "LAT"),
+                              crs = "+proj=longlat +datum=WGS84 +no_defs")) +
+  tmap::tm_text(text = "pcp", just = c(-0.5, 0), size = .8) +
+  tmap::tm_dots(shape = 1,
+                col = "blue",
+                size = "pcp",
+                title.size = "Precipitação Observada em Campo") +
+  tmap::tm_legend(legend.outside = TRUE) +
+  tmap::tm_compass(type = "arrow", position = c(0.08,0.1), size = 2) +
+  tmap::tm_scale_bar(text.size = .5,
+                     position = c(0.01, 0),
+  )
+
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+map_ts_poly2
+```
+
+<br><br><br><br>
+
+A documentação das funções criadas está disponivel e acessivel via `? nome da função`
 
 
