@@ -45,7 +45,7 @@ ts_to_point <- function(my_folder,
 
     pcp_temp <- vroom::vroom((var_files[i]),
                              delim = ",",
-                             col_types = "cddddd")
+                             col_types = "dcdddd")
 
     # o polynomio do modelo
     my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))
@@ -98,7 +98,7 @@ ts_to_point <- function(my_folder,
 #'
 #' @param my_folder Folder containing the ts input files.
 #' @param bassin_limit_path A shapefile containing the bassin limit where the trend
-#' suface function have to predict values.
+#' suface function have to be predicted.
 #' @param poly_degree The degree to be used in the polynomial function for the trend surface.
 #' @param resolution The resolution for the output raster in degree.
 #'
@@ -107,7 +107,7 @@ ts_to_point <- function(my_folder,
 #'
 #' @examples
 #' ts_to_area(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-#'           bassin_limit_path = system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
+#'           bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
 #'           package = "cwswatinput"),
 #'           poly_degree = 2,
 #'           resolution = 0.5)

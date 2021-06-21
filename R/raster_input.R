@@ -91,7 +91,8 @@ raster2vec <- function(rasterbrick, study_area){
 
   names(tbl_list) <- names(rasterbrick)
 
-  tbl_list
+  do.call(rbind, tbl_list)
+
 }
 
 
@@ -102,7 +103,7 @@ raster2vec <- function(rasterbrick, study_area){
 #' organize these values in the format of swat input, i.e, a time serie for every pixel
 #' of the study area.
 #'
-#' @param tbl_list List. Values extracted by raster
+#' @param layer_values List. Values extracted by raster
 #' @param tb_name A vector contain the names for every table created. These names are
 #' in the mainTable
 #' @param col_name A name for the column of everery swatinput table created. Commonly this
@@ -111,9 +112,10 @@ raster2vec <- function(rasterbrick, study_area){
 #' @return A list of table
 #' @export
 #'
-pixel_values <- function(tbl_list,
-                         tb_name,
-                         col_name = "20170101000000"){
+layerValues2pixel <- function(layer_values,
+                              tb_name,
+                              col_name = "20170101000000"){
+  tbl_list <- split(layer_values[, 1], layer_values[,2])
   layer_list <- vector(mode = "list", length = length(tbl_list))
   px_list <- vector(mode = "list", length = nrow(tbl_list[[1]])) #length(tbl_list[[1]]))
 
@@ -136,5 +138,81 @@ pixel_values <- function(tbl_list,
   close(pb)
 
   px_list
+}
+
+
+
+
+#' NetCDF to Raster
+#'
+#' NetCDF to Raster
+#'
+#' @param ncdf_file A ncdf file to be transformed to raster
+#' @param var_name The variable to be
+#' @param time_step_start The time step for the first datetime
+#' @param time_step_end The time step for the last datetime (1 for unique layer
+#' e -1 for all see ncdf4::ncvar_get)
+#' @param datetime The datetime for the layer
+#' @param coordinate_rs The coordinate reference system see sp::CRS()
+#'
+#' @return A raster
+#' @export
+ncdf2raster <- function(ncdf_file,
+                        var_name = "my_variable",
+                        time_step_start = 1,
+                        time_step_end = 1,
+                        datetime = "2000-01-01",
+                        coordinate_rs = sp::CRS('+proj=longlat +datum=WGS84')
+                        ){
+  nc <- ncdf4::nc_open(ncdf_file)
+  ###getting the x values (longitudes in degrees east)
+  nc_long <- ncdf4::ncvar_get(nc,
+                              c("lon", "longitude")[c("lon", "longitude") %in%
+                                                      names(nc$dim)])
+  ####getting the y values (latitudes in degrees north)
+  nc_lat <- ncdf4::ncvar_get(nc,
+                             c("lat", "latitude")[c("lat", "latitude") %in%
+                                                    names(nc$dim)])
+
+  # extract values
+  start <- rep(1, nc$ndims)
+  start[which(rev(names(nc$dim)) %in% "time")] <- time_step_start
+  count <- nc$var[[var_name]]$varsize
+  count[which(rev(names(nc$dim)) %in% "time")] <- time_step_end
+  var_values <- ncdf4::ncvar_get(nc, var_name,
+                                 start = start,
+                                 count = count
+  )
+  length(time_step_start:time_step_end)
+  # reorder the rows (negative delta, indicando inversão das linhas)
+  # stars::read_stars(file_path, var = "precipitationCal")
+  # latitude needs reorder????
+  if (nc_lat[1] == max(nc_lat) &
+      nc_lat[nrow(nc_lat)] == min(nc_lat)) {
+    var_values
+  } else {
+    var_values <- var_values[nrow(var_values):1,]
+  }
+
+  # need to reverse rows and columns for consistency???
+  if (nrow(var_values) != length(nc_lat) &
+      ncol(var_values) != length(nc_long)) {
+    var_values <- t(var_values)
+  } else {
+    var_values
+  }
+
+
+  ncdf4::nc_close(nc)
+  #save the daily climate var_values values in a raster
+  ncdf_raster <- raster::raster(x = as.matrix(var_values),
+                                xmn = min(nc_long),
+                                xmx = max(nc_long),
+                                ymn = min(nc_lat),
+                                ymx = max(nc_lat),
+                                crs = coordinate_rs
+  )
+  names(ncdf_raster) <- datetime
+  ncdf_raster
 }
 

@@ -10,7 +10,7 @@ ts_to_area(my_folder, bassin_limit_path, poly_degree = 2, resolution = 0.01)
 \item{my_folder}{Folder containing the ts input files.}
 
 \item{bassin_limit_path}{A shapefile containing the bassin limit where the trend
-suface function have to predict values.}
+suface function have to be predicted.}
 
 \item{poly_degree}{The degree to be used in the polynomial function for the trend surface.}
 
@@ -26,7 +26,7 @@ for all the serie on the input.
 }
 \examples{
 ts_to_area(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-          bassin_limit_path = system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
+          bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
           package = "cwswatinput"),
           poly_degree = 2,
           resolution = 0.5)
