@@ -8,7 +8,7 @@
 
 cwswatinput (Climate & Weater SWAT input) is an open-source R package
 for preparing weather and climate data from different sources for input in the Soil & Water Assessment
-Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCSF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods.
+Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods.
 
 ## Installation
 
@@ -27,17 +27,16 @@ library(cwswatinput)
 
 # Rotinas para dados NetCDF ou raster
 
-A ideia aqui consiste em extrair séries de dados de uma variável para
-cada pixel de uma área de estudo. Os produtos climáticos são
+As rotinas permitem a extração espacial e temporal de conjuntos de dados de variáveis climatológicos e meteorológicos de grades globais como
 disponibilizados em sites como [Climate Change
 Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview),
 [GES
 DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords=%22IMERG%20final%22),
-[PERSIANN-CCS](https://chrsdata.eng.uci.edu/). Esses dados são
-disponibilizados em formato de raster(.tif) ou em formato de netcdf *(um
+[PERSIANN-CCS](https://chrsdata.eng.uci.edu/) entre outros. Esses dados são
+disponibilizados em formato de raster(.tif) ou em formato de NetCDF *(um
 formato muito utilizado para disponibilizar séries temporais de dados)*.
-Cada plataforma disponibiliza em seu site mais detalhes sobre os
-produtos disponibilizados e a forma correta para baixá-los. Esses dados
+Para aumentar a eficiencia computacional no processamento, os respectivos produtos devem ser inicialmente baixados e armazenados localmente.
+As caracteristicas específicas de cada produto (parametros disponibilizados, resolução temporal e espacial) são detalhadas nos respectivos portais, mas são extraídas também pelas rotinas desenvolvidas. Esses dados
 para serem utilizados dentro do SWAT precisam ser extraídos para um
 formato especifico em tabelas. Para facilitar, o pacote `cwswatinput`
 disponibiliza, por meio de funções, formas automatizadas da extração uma
