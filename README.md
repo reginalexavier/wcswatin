@@ -34,13 +34,10 @@ Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land
 DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords=%22IMERG%20final%22),
 [PERSIANN-CCS](https://chrsdata.eng.uci.edu/) entre outros. Esses dados são
 disponibilizados em formato de raster(.tif) ou em formato de NetCDF *(um
-formato muito utilizado para disponibilizar séries temporais de dados)*.
+formato binário muito utilizado para disponibilizar séries espaço-temporais de dados multiparamétricos)*.
 Para aumentar a eficiencia computacional no processamento, os respectivos produtos devem ser inicialmente baixados e armazenados localmente.
-As caracteristicas específicas de cada produto (parametros disponibilizados, resolução temporal e espacial) são detalhadas nos respectivos portais, mas são extraídas também pelas rotinas desenvolvidas. Esses dados
-para serem utilizados dentro do SWAT precisam ser extraídos para um
-formato especifico em tabelas. Para facilitar, o pacote `cwswatinput`
-disponibiliza, por meio de funções, formas automatizadas da extração uma
-vez baixados.
+As caracteristicas específicas de cada produto (parametros disponibilizados, resolução temporal e espacial) são detalhadas nos respectivos portais, mas são extraídas também pelas rotinas desenvolvidas. Para serem utilizados como entradas no SWAT, os dados meteorológicos e climatológicos são transformados em conjuntos de tabelas em formato txt demandados pelo modelo. Testados para conjuntos de dados de reanalise (ERA5_Land) e as grades de precipitação PERSIANN e GPM, o pacote `cwswatinput`
+disponibiliza porém, por meio de funções, rotinas gerais e universais para extração de grades provenientes de outras instituições.
 
 ## Passo a passo:
 
