@@ -168,14 +168,14 @@ knitr::kable(mainFile[1:10, ])
 |  62 | uas62 | -14.37 | -55.27 |  327.0550 |
 |  63 | uas63 | -14.37 | -55.17 |  346.9489 |
 
-> Para ncdf com muitas variaveis é preciso ciar uma tabela master par
-> cada uma das variaveis.
+> De acordo com as padronizações das entradas climatológicas no SWAT, é preciso ciar uma tabela master para
+> cada uma das variaveis (NetCDF de múltiplas variaveis).
 
-###### 6. Extrair os dados e guardar em uma tabela
+###### 6. Extrair os dados do parametro climatológico e guardar em uma tabela
 
 Esta função faz a extração dos dados de um raster multilayer e guarda em
-uma tabela. A tabela criada contem duas colunas (values) que guarda os
-valores extraídos na mesma ordem dos ID e (layer\_name) guardando o nome
+uma tabela. A tabela criada contem duas colunas (values) que guardam os
+valores extraídos na mesma ordem dos IDs e (layer\_name) guardando o nome
 de cada layer extraído (geralmente é a data).
 
 ``` r
