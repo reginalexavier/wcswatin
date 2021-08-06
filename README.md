@@ -211,13 +211,13 @@ data.table::fwrite(tbls,
                    row.names = TRUE)
 ```
 
-###### 6.1 Quando varios netcdf constituem a mesma série é precisa criar um lista de rasters. A função `raster2vec` precisa ser iterada sobre cada um deles. O resultado é uma lista de tabela, cuja cada uma representa um arquivo.
+###### 6.1 Quando varios NetCDFs constituem uma única série temporal é preciso criar um lista de rasters. A função `raster2vec` precisa ser iterada sobre cada um deles. O resultado é uma lista de tabela, cuja cada uma representa um arquivo.
 
 ``` r
 tbls1 <- lapply(list_brick, raster2vec, study_area)
 ```
 
-As tabelas podem ser valvas com essas linhas:
+As tabelas podem ser salvas com essas linhas:
 
 ``` {r
 # este arquivo pode ser salvo como tabelas individuais como:
@@ -5714,9 +5714,9 @@ knitr::kable(cell_tables)
 </tbody>
 </table>
 
-## Rotinas para dados de estações em uma área especifica
+## Rotinas para interpolação de dados de estações físicas em uma área especifica
 
-Arquivos dentro de uma pasta após a coleta:
+Os arquivos de entrada devem possuir a formatação utilizada pelo SWAT e se encontrar em uma única pasta:
 
 ``` r
 list.files(pasta_estcoes)
@@ -5726,13 +5726,11 @@ list.files(pasta_estcoes)
 #> [13] "p-83358.txt"   "p-A907.txt"    "pcp.txt"
 ```
 
-A pasta é composta por arquivos da série para cada estão e um arquivo
-master:
+Assim, a pasta deve incluir um arquivo dos dados da série para cada estação e um arquivo
+master das coordenadas etc. das estações (no exemplo: pcp.txt):
 
-Exemplos:
-
--   Uma serie para cada estação, onde o nome da coluna é a primeira data
-    da série `p-1553003.txt`
+Numa série temporal é uma tabela txt de coluna única, onde o nome da coluna é a primeira data, seguidos pelos dados do parametro de acordo com a resolução temporal (geralmente diária). 
+Exemplo da série `p-1553003.txt`
 
 <!-- -->
 
@@ -5758,8 +5756,8 @@ Exemplos:
     #> 19       0.0
     #> 20       5.4
 
--   Um arquivo master contendo os nomes as coordenadas e a elevação de
-    cada estação `pcp.txt`
+Arquivo master contendo IDs sequenciais, os nomes das estações, suas coordenadas e sua elevação 
+`pcp.txt`
 
 <!-- -->
 
@@ -5779,11 +5777,10 @@ Exemplos:
     #> 13 13   p-83358 -15.8274 -54.3955    374.35
     #> 14 14    p-A907 -16.4625 -54.5802    289.88
 
-Esta função pega as séries de todos os pontos/estações e cria uma tabela
-única para cada dia
+Para preparar a interpolação entre as estações com ajuste individual para cada passo de tempo, a função `point_to_daily` capta as séries de todos os pontos/estações e cria uma tabela única para cada dia
 
 ``` r
-dados_diarios <- point_to_daily(my_folder = pasta_estcoes,
+dados_diarios <- point_to_daily(my_folder = pasta_estações,
                          var_pattern = "p-",
                          main_pattern = "pcp",
                          start_date = "20020101",
@@ -5813,9 +5810,9 @@ dados_diarios[1] # exemplo de uma tabela
 ```
 
 As tabelas diárias podem ser salvas com a função `save_daily_tbl`do
-pacote `cwswatinput`, por favor olhe para documentação da função.
+pacote `cwswatinput` (por favor consultar a documentação da função).
 
-Os centroides
+Segue a leitura dos centroides das estações utilizadas nas interpolações:
 
 ``` r
 sf::read_sf(centroides_path)
@@ -5840,8 +5837,8 @@ sf::read_sf(centroides_path)
 #> # … with 248 more rows
 ```
 
-Esta função faz a interpolação por meio do método trend surface para os
-pontos indicados por meio de um shapefile contendo os pontos desejados.
+A função `ts_to_point` faz a interpolação, no exemplo, utilizando o método "Trend surface" com polinómio de segundo grau para os
+pontos indicados por meio de um shapefile contendo os pontos desejados. Para uso dos dados interpolados no SWAT recomenda-se por exemplo um shape dos centroides de cada subbacia parametrizada. É gerado um arquivo txt com a série temporal de cada ponto interpolado.
 
 ``` r
 serie_pontos <- ts_to_point(my_folder = pasta_dados_diarios,
@@ -5861,8 +5858,8 @@ serie_pontos[1]
 #> 5     1 day_2002-01-05 1.29
 ```
 
-Esta função cria uma tabela master para swat input para os dados
-interpolados
+A função `varMain_creator` cria uma tabela master para entrada no SWAT para os dados
+da grade regular ou irregular interpolada
 
 ``` r
 varMain_creator(targeted_points_path = centroides_path,
@@ -5884,8 +5881,8 @@ varMain_creator(targeted_points_path = centroides_path,
 #> # … with 248 more rows
 ```
 
-Esta função interpola os pontos de entrada para uma área inteira e cria
-um raster para cada dia
+A função `ts_to_area` ainda permite interpolar os pontos de entrada para uma área de estudo inteiro e cria
+um raster para cada dia em uma resolução espacial a ser definida (no exemplo 0.01°)
 
 ``` r
 raster_interpolated <- ts_to_area(my_folder = pasta_dados_diarios,
@@ -5906,9 +5903,7 @@ raster_interpolated
 #> max values :      70.404189,      26.468815,       3.381214,       7.842061,      25.763596
 ```
 
-Para verificação, uma camada pode ser plotada com ajuda do pacote `tmap`
-como segue abaixo, e adicionando ao raster interpolado os pontos de
-observação que foram interpolados.
+Para visualização de uma camada interpolada e sua validação é utilizado o pacote `tmap` que combina o raster interpolado com as estações utilizadas na interpolação.
 
 ``` r
 tmap::tm_shape(raster_interpolated[[1]]) +
