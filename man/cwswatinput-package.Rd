@@ -6,9 +6,13 @@
 \alias{cwswatinput}
 \title{cwswatinput: Climate & Weater SWAT Input.}
 \description{
-Climate & Weater SWAT input (cwswatinput) is an open-source R package for
-preparing weather and climate data for the Soil & Water Assessment Tool (SWAT)
-input format.
+cwswatinput (Climate & Weater SWAT input) is an open-source R package for
+preparing weather and climate data from different sources for input in the
+Soil & Water Assessment Tool (SWAT). Currently two blocks of processing
+routines are implemented, one for the pre-processing of NetCDF and tif raster
+files as made available from a increasing number of data-providing
+institutions around the globe and a second one for the upscaling of physical
+station data by interpolation methods.
 }
 \author{
 Reginal Exavier \email{reginalexavier@rocketmail.com}, Peter Zeilhofer \email{zeilhoferpeter@gmail.com}

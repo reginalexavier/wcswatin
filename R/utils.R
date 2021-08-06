@@ -126,3 +126,19 @@ save_daily_tbl <- function(tbl_list, path){
 
   }
 }
+
+
+
+#' Shows the variables present in a netcdf
+#'
+#' @param path Path where the netcdf file is located
+#'
+#' @return List of variable names
+#' @export
+#'
+var_names <- function(path){
+  names(ncdf4::nc_open(path)$var)
+}
+
+
+
