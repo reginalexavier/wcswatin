@@ -7,8 +7,8 @@
 <!-- badges: end -->
 
 cwswatinput (Climate & Weater SWAT input) is an open-source R package
-for preparing weather and climate data for the Soil & Water Assessment
-Tool (SWAT) input format.
+for preparing weather and climate data from different sources for input in the Soil & Water Assessment
+Tool (SWAT).
 
 ## Installation
 
