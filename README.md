@@ -8,7 +8,7 @@
 
 cwswatinput (Climate & Weater SWAT input) is an open-source R package
 for preparing weather and climate data from different sources for input in the Soil & Water Assessment
-Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods.
+Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordenates using WGS 84 as datum. 
 
 ## Installation
 
@@ -41,13 +41,13 @@ disponibiliza porém, por meio de funções, rotinas gerais e universais para ex
 
 ## Passo a passo:
 
-###### 1. Informar o caminho onde o arquivo se encontra
+###### 1. Informar o caminho onde o arquivo se encontra (NetCDF)
 
 ``` r
 era5land_2017 <- file.path(base_path, "ERA5-Land_data/Y2017.nc")
 ```
 
-###### 2. Verificar as variaveis presentes no arquivo
+###### 2. Verificar as variaveis presentes no arquivo (NetCDF)
 
 ``` r
 #verificar as variáveis presentes nos arquivos ncdf baixados
@@ -59,11 +59,11 @@ var_name
 
 Este arquivo por exemplo contem 6 variáveis
 
-###### 3. Criar um raster multilayer com o arquivo, escolhendo uma variavel desejada entre as mostradas em var\_name
+###### 3. Criar um raster multilayer com o arquivo, escolhendo uma variavel desejada entre as mostradas em var\_name (NetCDF + TIF)
 
 ``` r
-# carregando um arquivo ncdf e transformando-os em raster
-# para um ncdf
+# NetCDF: carregando um arquivo NetCDF e transformar em raster
+
 one_brick <- raster::brick(era5land_2018,
                            varname = "uas")[[1:3]]
 one_brick
@@ -75,18 +75,20 @@ one_brick
 #> names      : X2018.01.01.00.00.00, X2018.01.01.01.00.00, X2018.01.01.02.00.00
 ```
 
-> Os mesmos passos são válidos para dados de entrada como raster(.tif)
-> uma vez que a partir deste passo estamos mexendo com rasters vindo da
-> transformação dos netcdf. Os rasters podem ser importados e juntados
+> Alguns arquivos NetCDF invertem a sequencia entre latitude com
+> longitude, causando erros na transformação para raster. Neste caso `cwswatinput` tem a
+> função `ncdf2raster()` que faz essa transformação.
+
+
+# TIF 
+> Os mesmos passos são válidos para dados de entrada como raster(.tif),
+> uma vez que a partir deste passo estão sendo manipulados rasters vindo da
+> transformação dos NetCDF. Os rasters podem ser importados e juntados
 > para arquivos multilayer por meio das funções (raster::brick ou
 > raster::stack).
 
-> Alguns arquivos netcdf vem de uma forma invertida latitude com
-> longitude, ao transformá-los para raster simplesmente importando não
-> resolve e comprometa todo o processo. Neste caso `cwswatinput` tem a
-> função `ncdf2raster()` que faz essa transformação.
 
-###### 3.1 Caso forem varios arquivos, pode se criar uma lista raster multilayer
+###### 3.1 Caso forem varios arquivos, pode se criar uma lista raster multilayer (NetCDF)
 
 ``` r
 # para carregar vários arquivos de ncdf para um lista
@@ -113,7 +115,7 @@ list_brick
 #> names      : X2018.01.01.00.00.00, X2018.01.01.01.00.00, X2018.01.01.02.00.00
 ```
 
-###### 4. Criar um arquivo contendo o caminho dos pixels que caem dentro da área de estudo e a elevavão corespondente
+###### 4. Criar um arquivo contendo as coordenadas dos pixels da grade dentro de uma área de estudo e sua elevavão corespondente a partir de um MNT (.tif).
 
 ``` r
 study_area <- study_area_records(raster = one_brick[[1]], # raster de exemplo, dos mesmos que serão extraídos os dados
