@@ -8,7 +8,7 @@
 
 cwswatinput (Climate & Weater SWAT input) is an open-source R package
 for preparing weather and climate data from different sources for input in the Soil & Water Assessment
-Tool (SWAT).
+Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCSF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods.
 
 ## Installation
 
@@ -23,6 +23,7 @@ devtools::install_github("swatufmt/cwswatinput")
 library(cwswatinput)
 ## basic example code
 ```
+
 
 # Rotinas para dados NetCDF ou raster
 
