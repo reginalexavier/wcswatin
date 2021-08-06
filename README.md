@@ -115,7 +115,7 @@ list_brick
 #> names      : X2018.01.01.00.00.00, X2018.01.01.01.00.00, X2018.01.01.02.00.00
 ```
 
-###### 4. Criar um arquivo contendo as coordenadas centrais dos pixels da grade dentro de uma área de estudo e sua elevavão corespondente a partir de um MNT (.tif).
+###### 4. Criar um arquivo contendo as coordenadas centrais dos pixels da grade dentro de uma área de estudo (necessita de um arquivo SHAPE poligonal) e sua elevavão corespondente a partir de um MNT (.tif).
 
 ``` r
 study_area <- study_area_records(raster = one_brick[[1]], # raster de exemplo, dos mesmos que serão extraídos os dados
