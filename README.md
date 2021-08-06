@@ -8,7 +8,7 @@
 
 cwswatinput (Climate & Weater SWAT input) is an open-source R package
 for preparing weather and climate data from different sources for input in the Soil & Water Assessment
-Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods.
+Tool (SWAT). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordenates using WGS 84 as datum. 
 
 ## Installation
 
@@ -25,7 +25,7 @@ library(cwswatinput)
 ```
 
 
-# Rotinas para dados NetCDF ou raster
+# Rotinas para dados NetCDF ou raster (TIF)
 
 As rotinas permitem a extração espacial e temporal de conjuntos de dados de variáveis climatológicos e meteorológicos de grades globais como
 disponibilizados em sites como [Climate Change
@@ -41,13 +41,13 @@ disponibiliza porém, por meio de funções, rotinas gerais e universais para ex
 
 ## Passo a passo:
 
-###### 1. Informar o caminho onde o arquivo se encontra
+###### 1. Informar o caminho onde o arquivo se encontra (NetCDF)
 
 ``` r
 era5land_2017 <- file.path(base_path, "ERA5-Land_data/Y2017.nc")
 ```
 
-###### 2. Verificar as variaveis presentes no arquivo
+###### 2. Verificar as variaveis presentes no arquivo (NetCDF)
 
 ``` r
 #verificar as variáveis presentes nos arquivos ncdf baixados
@@ -59,11 +59,11 @@ var_name
 
 Este arquivo por exemplo contem 6 variáveis
 
-###### 3. Criar um raster multilayer com o arquivo, escolhendo uma variavel desejada entre as mostradas em var\_name
+###### 3. Criar um raster multilayer com o arquivo, escolhendo uma variavel desejada entre as mostradas em var\_name (NetCDF + TIF)
 
 ``` r
-# carregando um arquivo ncdf e transformando-os em raster
-# para um ncdf
+# NetCDF: carregando um arquivo NetCDF e transformar em raster
+
 one_brick <- raster::brick(era5land_2018,
                            varname = "uas")[[1:3]]
 one_brick
@@ -75,18 +75,20 @@ one_brick
 #> names      : X2018.01.01.00.00.00, X2018.01.01.01.00.00, X2018.01.01.02.00.00
 ```
 
-> Os mesmos passos são válidos para dados de entrada como raster(.tif)
-> uma vez que a partir deste passo estamos mexendo com rasters vindo da
-> transformação dos netcdf. Os rasters podem ser importados e juntados
+> Alguns arquivos NetCDF invertem a sequencia entre latitude com
+> longitude, causando erros na transformação para raster. Neste caso `cwswatinput` tem a
+> função `ncdf2raster()` que faz essa transformação.
+
+
+# TIF 
+> Os mesmos passos são válidos para dados de entrada como raster(.tif),
+> uma vez que a partir deste passo estão sendo manipulados rasters vindo da
+> transformação dos NetCDF. Os rasters podem ser importados e juntados
 > para arquivos multilayer por meio das funções (raster::brick ou
 > raster::stack).
 
-> Alguns arquivos netcdf vem de uma forma invertida latitude com
-> longitude, ao transformá-los para raster simplesmente importando não
-> resolve e comprometa todo o processo. Neste caso `cwswatinput` tem a
-> função `ncdf2raster()` que faz essa transformação.
 
-###### 3.1 Caso forem varios arquivos, pode se criar uma lista raster multilayer
+###### 3.1 Caso forem varios arquivos, pode se criar uma lista raster multilayer (NetCDF)
 
 ``` r
 # para carregar vários arquivos de ncdf para um lista
@@ -113,12 +115,12 @@ list_brick
 #> names      : X2018.01.01.00.00.00, X2018.01.01.01.00.00, X2018.01.01.02.00.00
 ```
 
-###### 4. Criar um arquivo contendo o caminho dos pixels que caem dentro da área de estudo e a elevavão corespondente
+###### 4. Criar um arquivo contendo as coordenadas centrais dos pixels da grade dentro de uma área de estudo (necessita de um arquivo SHAPE poligonal) e sua elevavão corespondente a partir de um MNT (.tif).
 
 ``` r
 study_area <- study_area_records(raster = one_brick[[1]], # raster de exemplo, dos mesmos que serão extraídos os dados
-                                 watershed = bassin_path, # shapefile par a delimitação da área de estudo
-                                 DEM = dem_path) #raster de elevação para extrair a elevação de dada pixel
+                                 watershed = basin_path, # shapefile poligonal que delimita a área de estudo
+                                 DEM = dem_path) #raster do MNT para extrair a elevação de dado ponto central da grade
 ```
 
 Resultado:
@@ -140,7 +142,7 @@ knitr::kable(study_area[1:10, ])
 | -55.27 | -14.37 |  62 |   2 |  23 |  327.0550 |
 | -55.17 | -14.37 |  63 |   2 |  24 |  346.9489 |
 
-###### 5. Com a tabela sobre a area de estudo, esta função cria a tabela master para cada variavel contida nos arquivos ncdf, basta informa o nome da variavel.
+###### 5. Com a tabela dos pontos da grade da area de estudo, esta função cria a tabela master para cada variavel contida nos arquivos NetCDF, basta informa o nome da variavel. No caso de arquivos TIF de uma variável (principalmente utilizados para grades de precipitação) essa operação precisa ser realizada somente uma única vez. 
 
 ``` r
 mainFile <- mainInput_var(study_area = study_area,
@@ -166,14 +168,14 @@ knitr::kable(mainFile[1:10, ])
 |  62 | uas62 | -14.37 | -55.27 |  327.0550 |
 |  63 | uas63 | -14.37 | -55.17 |  346.9489 |
 
-> Para ncdf com muitas variaveis é preciso ciar uma tabela master par
-> cada uma das variaveis.
+> De acordo com as padronizações das entradas climatológicas no SWAT, é preciso ciar uma tabela master para
+> cada uma das variaveis (NetCDF de múltiplas variaveis).
 
-###### 6. Extrair os dados e guardar em uma tabela
+###### 6. Extrair os dados do parametro climatológico e guardar em uma tabela
 
 Esta função faz a extração dos dados de um raster multilayer e guarda em
-uma tabela. A tabela criada contem duas colunas (values) que guarda os
-valores extraídos na mesma ordem dos ID e (layer\_name) guardando o nome
+uma tabela. A tabela criada contem duas colunas (values) que guardam os
+valores extraídos na mesma ordem dos IDs e (layer\_name) guardando o nome
 de cada layer extraído (geralmente é a data).
 
 ``` r
