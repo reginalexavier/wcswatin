@@ -25,7 +25,7 @@ library(cwswatinput)
 ```
 
 
-# Rotinas para dados NetCDF ou raster
+# Rotinas para dados NetCDF ou raster (TIF)
 
 As rotinas permitem a extração espacial e temporal de conjuntos de dados de variáveis climatológicos e meteorológicos de grades globais como
 disponibilizados em sites como [Climate Change
@@ -115,12 +115,12 @@ list_brick
 #> names      : X2018.01.01.00.00.00, X2018.01.01.01.00.00, X2018.01.01.02.00.00
 ```
 
-###### 4. Criar um arquivo contendo as coordenadas dos pixels da grade dentro de uma área de estudo e sua elevavão corespondente a partir de um MNT (.tif).
+###### 4. Criar um arquivo contendo as coordenadas centrais dos pixels da grade dentro de uma área de estudo e sua elevavão corespondente a partir de um MNT (.tif).
 
 ``` r
 study_area <- study_area_records(raster = one_brick[[1]], # raster de exemplo, dos mesmos que serão extraídos os dados
-                                 watershed = bassin_path, # shapefile par a delimitação da área de estudo
-                                 DEM = dem_path) #raster de elevação para extrair a elevação de dada pixel
+                                 watershed = basin_path, # shapefile poligonal que delimita a área de estudo
+                                 DEM = dem_path) #raster do MNT para extrair a elevação de dado ponto central da grade
 ```
 
 Resultado:
@@ -142,7 +142,7 @@ knitr::kable(study_area[1:10, ])
 | -55.27 | -14.37 |  62 |   2 |  23 |  327.0550 |
 | -55.17 | -14.37 |  63 |   2 |  24 |  346.9489 |
 
-###### 5. Com a tabela sobre a area de estudo, esta função cria a tabela master para cada variavel contida nos arquivos ncdf, basta informa o nome da variavel.
+###### 5. Com a tabela dos pontos da grade da area de estudo, esta função cria a tabela master para cada variavel contida nos arquivos NetCDF, basta informa o nome da variavel. No caso de arquivos TIF de uma variável (principalmente utilizados para grades de precipitação) essa operação precisa ser realizada somente uma única vez. 
 
 ``` r
 mainFile <- mainInput_var(study_area = study_area,
