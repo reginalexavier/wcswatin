@@ -6,11 +6,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-cwswatinput (Climate & Weather SWAT input) is an open-source R package
+cwswatinput (Climate & Weater SWAT input) is an open-source R package
 for preparing weather and climate data from different sources for input
-in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded
-by the Critical Ecosystem Partnership Fund (CEPF).
-Currently two blocks of processing routines are implemented, one for the
+in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)),
+funded by the Critical Ecosystem Partnership Fund (CEPF). Currently two
+blocks of processing routines are implemented, one for the
 pre-processing of NetCDF and tif raster files as made available from a
 increasing number of data-providing institutions around the globe and a
 second one for the upscaling of physical station data by interpolation
@@ -5840,7 +5840,7 @@ sf::read_sf(centroides_path)
 #> Dimension:     XY
 #> Bounding box:  xmin: -55.27486 ymin: -17.14102 xmax: -53.76752 ymax: -15.53671
 #> Geodetic CRS:  WGS 84
-#> # A tibble: 258 × 6
+#> # A tibble: 258 x 6
 #>    OBJECTID Subbasin  Elev Lat_dec Lon_dec              geometry
 #>       <dbl>    <dbl> <dbl>   <dbl>   <dbl>           <POINT [°]>
 #>  1        1        1   556   -15.5   -54.9 (-54.94489 -15.53671)
@@ -5853,7 +5853,7 @@ sf::read_sf(centroides_path)
 #>  8        8        8   532   -15.6   -54.6 (-54.62564 -15.63742)
 #>  9        9        9   530   -15.6   -54.8 (-54.83962 -15.59748)
 #> 10       10       10   432   -15.7   -54.8  (-54.79766 -15.6824)
-#> # … with 248 more rows
+#> # ... with 248 more rows
 ```
 
 A função `ts_to_point` faz a interpolação, no exemplo, utilizando o
@@ -5868,10 +5868,9 @@ serie_pontos <- ts_to_point(my_folder = pasta_dados_diarios,
                       targeted_points_path = centroides_path,
                       poly_degree = 2)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
-
 serie_pontos[1]
 #> $`1`
-#> # A tibble: 5 × 3
+#> # A tibble: 5 x 3
 #>      ID date           value
 #>   <int> <chr>          <dbl>
 #> 1     1 day_2002-01-01 0    
@@ -5888,7 +5887,7 @@ para os dados da grade regular ou irregular interpolada
 varMain_creator(targeted_points_path = centroides_path,
                 var_name = "pcp",
                 col_elev = "Elev")
-#> # A tibble: 258 × 5
+#> # A tibble: 258 x 5
 #>       ID NAME    LAT  LONG ELEVATION
 #>    <dbl> <chr> <dbl> <dbl>     <dbl>
 #>  1     1 pcp1  -15.5 -54.9       556
@@ -5901,7 +5900,7 @@ varMain_creator(targeted_points_path = centroides_path,
 #>  8     8 pcp8  -15.6 -54.6       532
 #>  9     9 pcp9  -15.6 -54.8       530
 #> 10    10 pcp10 -15.7 -54.8       432
-#> # … with 248 more rows
+#> # ... with 248 more rows
 ```
 
 A função `ts_to_area` ainda permite interpolar os pontos de entrada para
@@ -5914,7 +5913,6 @@ raster_interpolated <- ts_to_area(my_folder = pasta_dados_diarios,
            poly_degree = 2,
            resolution = 0.01)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
-
 raster_interpolated
 #> class      : RasterBrick 
 #> dimensions : 170, 170, 28900, 5  (nrow, ncol, ncell, nlayers)
