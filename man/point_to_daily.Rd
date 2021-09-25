@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{point_to_daily}
 \alias{point_to_daily}
-\title{Transform the raw value from point perspective to a daily perspective}
+\title{Transforms the raw value from point perspective to a daily perspective}
 \usage{
 point_to_daily(
   my_folder,
@@ -19,23 +19,27 @@ point_to_daily(
 \arguments{
 \item{my_folder}{character. The path to the raw files.}
 
-\item{var_pattern}{character. A pattern for the observatin/station points name.}
+\item{var_pattern}{character. A pattern for the observation/station points name.}
 
 \item{main_pattern}{character. A pattern for the main file  containing all the
 points with ID, NAME, LAT, LONG and ELEVATION.}
 
-\item{start_date}{character. Inform the start date of the serie in the format yyyymmdd.}
+\item{start_date}{character. Inform the start date of the serie in the format
+yyyymmdd.}
 
-\item{end_date}{character. Inform the end date of the serie in the format yyyymmdd.}
+\item{end_date}{character. Inform the end date of the serie in the format
+yyyymmdd.}
 
-\item{interval}{charactere. Inform the inteval betwenn two observations. See the function x}
+\item{interval}{charactere. Inform the inteval betwenn two observations. See
+the function x}
 
-\item{na_value}{numeric. Value encoded as not available, use \code{NA} for NA.}
+\item{na_value}{numeric. Value encoded as not available, use \code{NA} for
+NA.}
 
 \item{negatif_number}{logical. Inform if negative values should be kept.}
 
-\item{prefix}{character. A prefix for naming the table in the format of "prefix+date".
-for more detail.}
+\item{prefix}{character. A prefix for naming the table in the format of
+"prefix+date". for more detail.}
 }
 \value{
 A list of table

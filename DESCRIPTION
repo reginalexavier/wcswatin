@@ -37,7 +37,8 @@ Imports:
     vroom,
     sf,
     lubridate,
-    rgdal
+    rgdal,
+    hyfo
 URL: https://github.com/swatufmt/cwswatinput
 BugReports: https://github.com/swatufmt/cwswatinput/issues
 VignetteBuilder: knitr

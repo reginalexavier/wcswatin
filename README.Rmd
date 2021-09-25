@@ -67,8 +67,9 @@ era5land_2017 <- file.path(base_path, "ERA5-Land_data/Y2017.nc")
 
 ```{r}
 #verificar as variáveis presentes nos arquivos ncdf baixados
-var_name <- names(ncdf4::nc_open(era5land_2017)$var)
-var_name
+
+var_names(era5land_2017)
+
 ```
 
 > Este arquivo por exemplo contem 6 variáveis
@@ -199,17 +200,20 @@ knitr::kable(cell_tables)
 ## Rotinas para interpolação de dados de estações físicas em uma área especifica
 
 ```{r include=FALSE}
-pasta_estcoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
+pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
 
-estacoes <- list.files(pasta_estcoes, full.names = TRUE)
+estacoes <- list.files(pasta_estacoes, 
+                       full.names = TRUE)
 
 ```
 
 
 Os arquivos de entrada devem possuir a formatação utilizada pelo SWAT e se encontrar em uma única pasta:
 ```{r}
-list.files(pasta_estcoes)
+list.files(pasta_estacoes)
 ```
+
+> Essa amostra de dados comtem observaçoes de dados de chuva de 14 estações no periodo de 01/03/2017 a 31/03/2017. Os valores -99 são uma codificação para dados faltantes(falhas).
 
 Assim, a pasta deve incluir um arquivo dos dados da série para cada estação e um arquivo master das coordenadas etc. das estações (no exemplo: pcp.txt):
 
@@ -226,33 +230,106 @@ Arquivo master contendo IDs sequenciais, os nomes das estações, suas coordenad
 read.csv(estacoes[15])
 ```
 
+## Preenchimento de falhas
+Antes de proseguir para as transformações, pode se efetuar uma verificação dos dados no quesito de dados faltantes. Para isso temos duas funções:
+
+- `files_to_table()`: importa todas as series em uma unica tabela;
+- `count_na()`: verifica a quantidade de dados faltantes em cada coluna de dados, i. e., para cada estção.
+- `fill_gap()`: permite preencher as falhas de dados presentes.
+- `table_to_files()`: exporta cada coluna da tabela pós-preenchimento em um arquivo separado.
+
+
+Importando os dados:
+
+```{r}
+unique_table <- files_to_table(files_path = pasta_estacoes,
+                              files_pattern = "p-",
+                              start_date = "2017-03-01",
+                              end_date = "2017-03-31",
+                              na_value = -99,
+                              neg_to_zero = FALSE
+)
+
+```
+
+#### Visão geral de dados das 14 estações:
+```{r echo=FALSE}
+#unique_table[2:8]
+knitr::kable(unique_table[-1])
+```
+
+
+#### Calculo das porcentagens de NA em cada coluna:
+
+```{r}
+cwswatinput::count_na(unique_table[-1], percent = TRUE)
+```
+
+
+#### Executando o preenchimento das falhas:
+
+```{r
+gap_filled <- cwswatinput::fill_gap(dataset = unique_table,
+                                    corPeriod = "daily")
+```
+
+```{r include=FALSE}
+gap_filled <- cwswatinput::fill_gap(dataset = unique_table,
+                                    corPeriod = "daily")
+```
+
+#### Após o preenchimento de falhas:
+```{r echo=FALSE}
+knitr::kable(gap_filled[-1])
+```
+
+
+> Após desses passos, é preciso salvar os dados com as falhas corrigidas com a função `table_to_files()` em uma pasta local, e passam a ser os dados de entrada para o restante do processamento.
+
+
+```{r include=FALSE}
+pasta_estacoes1 <- tempdir()
+
+table_to_files(table = gap_filled[-1],
+               folder_path = pasta_estacoes1,
+               first_date = "20170301",
+               file_extention = "txt")
+file.copy(from = file.path(pasta_estacoes, "pcp.txt"), 
+            to = file.path(pasta_estacoes1, "pcp.txt"))
+```
 
 Para preparar a interpolação entre as estações com ajuste individual para cada passo de tempo, a função `point_to_daily` capta as séries de todos os pontos/estações e cria uma tabela única para cada dia
 
 ```{r}
-dados_diarios <- point_to_daily(my_folder = pasta_estcoes,
-                         var_pattern = "p-",
-                         main_pattern = "pcp",
-                         start_date = "20020101",
-                         end_date = "20020120",
-                         interval = "day",
-                         na_value = -99,
-                         negatif_number = TRUE,
-                         prefix = "day_")
-dados_diarios[1] # exemplo de uma tabela
+dados_diarios <- point_to_daily(my_folder = pasta_estacoes1,
+                                var_pattern = "p-",
+                                main_pattern = "pcp",
+                                start_date = "20170301",
+                                end_date = "20170331",
+                                interval = "day",
+                                na_value = -99,
+                                negatif_number = TRUE,
+                                prefix = "day_")
+dados_diarios[18] # exemplo de uma tabela
 ```
 
 
 As tabelas diárias podem ser salvas com a função `save_daily_tbl` do pacote `cwswatinput` (por favor consultar a documentação da função).
 
 ```{r include=FALSE}
-pasta_dados_diarios <- system.file("extdata/ts_input", package = "cwswatinput")
+#pasta_dados_diarios <- system.file("extdata/ts_input", package = "cwswatinput")
+
+dir.create(file.path(pasta_estacoes1, "test"))
+save_daily_tbl(dados_diarios,
+               path = file.path(pasta_estacoes1, "test"))
+pasta_dados_diarios <- file.path(pasta_estacoes1, "test")
 
 centroides_path <- system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
                           package = "cwswatinput")
 
 bassin_path <- system.file("extdata/sl_bassin/sl_bassin_limit.shp",
                            package = "cwswatinput")
+
 ```
 
 
@@ -267,10 +344,10 @@ A função `ts_to_point` faz a interpolação, no exemplo, utilizando o método 
 
 ```{r}
 serie_pontos <- ts_to_point(my_folder = pasta_dados_diarios,
-                      targeted_points_path = centroides_path,
-                      poly_degree = 2)
+                            targeted_points_path = centroides_path,
+                            poly_degree = 2)
 
-serie_pontos[1]
+serie_pontos[1] 
 ```
 
 
@@ -292,14 +369,15 @@ raster_interpolated <- ts_to_area(my_folder = pasta_dados_diarios,
            poly_degree = 2,
            resolution = 0.01)
 
-raster_interpolated
+raster_interpolated[[18]]
 ```
 
 
 Para visualização de uma camada interpolada e sua validação é utilizado o pacote `tmap` que combina o raster interpolado com as estações utilizadas na interpolação.
 
 ```{r}
-tmap::tm_shape(raster_interpolated[[1]]) +
+dia <- 18
+tmap::tm_shape(raster_interpolated[[dia]]) +
   tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface",
                   midpoint = NA,
                   n = 15, palette = "-RdBu",
@@ -308,9 +386,11 @@ tmap::tm_shape(raster_interpolated[[1]]) +
                             "dpih", "headtails")[7]) +
   tmap::tm_shape(sf::read_sf(bassin_path)) +
   tmap::tm_borders(col = "red") +
-  tmap::tm_shape(sf::st_as_sf(as.data.frame(dados_diarios[[1]]), coords = c("LONG", "LAT"),
+  tmap::tm_shape(sf::st_as_sf(as.data.frame(dados_diarios[[dia]]), coords = c("LONG", "LAT"),
                               crs = "+proj=longlat +datum=WGS84 +no_defs")) +
-  tmap::tm_text(text = "pcp", just = c(-0.5, 0), size = .8) +
+  tmap::tm_text(text = "pcp", 
+                auto.placement = 1,
+                size = .8) +
   tmap::tm_dots(shape = 1,
                 col = "blue",
                 size = "pcp",
@@ -332,4 +412,8 @@ map_ts_poly2
 <br><br><br><br>
 
 A documentação das funções criadas está disponivel e acessivel via `? nome da função`
+
+```{r include=FALSE}
+unlink(pasta_estacoes1, recursive = TRUE)
+```
 
