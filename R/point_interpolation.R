@@ -209,3 +209,7 @@ varMain_creator <- function(targeted_points_path,
                 LONG = points$X,
                 ELEVATION = targeted_points[[col_elev]])
 }
+
+
+
+

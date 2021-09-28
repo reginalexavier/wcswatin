@@ -145,47 +145,51 @@ layerValues2pixel <- function(layer_values,
 
 #' NetCDF to Raster
 #'
-#' NetCDF to Raster
+#' Transformation/convertion of a NetCDF file into a Raster file.
 #'
-#' @param ncdf_file A ncdf file to be transformed to raster
-#' @param var_name The variable to be
-#' @param time_step_start The time step for the first datetime
-#' @param time_step_end The time step for the last datetime (1 for unique layer
-#' e -1 for all see ncdf4::ncvar_get)
-#' @param datetime The datetime for the layer
-#' @param coordinate_rs The coordinate reference system see sp::CRS()
+#' @param ncdf_file Character string of the path of the NetCDF file to be
+#'   transformed into raster.
+#' @param var_name Character string of the variable name to be extracted.
+#' @param time_step_start Numeric value for the time dimension of the first
+#'   datetime. See \code{\link[ncdf4]{ncvar_get}}.
+#' @param time_step_end Numeric value for the time dimension of the last
+#'   datetime (1 for unique layer. and -1 for all see
+#'   \code{\link[ncdf4]{ncvar_get}}).
+#' @param datetime If not NULL, a string character informing the datetime for
+#'   the layer. The date time should be in this format \code{%y%m%d}.
+#' @param coordinate_rs Character string of the coordinate reference system, see
+#'   \code{\link[sp]{CRS}}.
+#'
 #'
 #' @return A raster
 #' @export
-ncdf2raster <- function(ncdf_file,
-                        var_name = "my_variable",
-                        time_step_start = 1,
-                        time_step_end = 1,
-                        datetime = "2000-01-01",
-                        coordinate_rs = sp::CRS('+proj=longlat +datum=WGS84')
-                        ){
-  nc <- ncdf4::nc_open(ncdf_file)
-  ###getting the x values (longitudes in degrees east)
-  nc_long <- ncdf4::ncvar_get(nc,
+ncdf_to_raster <- function(ncdf_file,
+                           var_name,
+                           time_step_start = 1,
+                           time_step_end = 1,
+                           datetime = NULL,
+                           coordinate_rs = sp::CRS('+proj=longlat +datum=WGS84')
+){
+  nc_file <- ncdf4::nc_open(ncdf_file)
+  ###getting the x values (longitudes in degrees)
+  nc_long <- ncdf4::ncvar_get(nc_file,
                               c("lon", "longitude")[c("lon", "longitude") %in%
-                                                      names(nc$dim)])
-  ####getting the y values (latitudes in degrees north)
-  nc_lat <- ncdf4::ncvar_get(nc,
+                                                      names(nc_file$dim)])
+  ####getting the y values (latitudes in degrees)
+  nc_lat <- ncdf4::ncvar_get(nc_file,
                              c("lat", "latitude")[c("lat", "latitude") %in%
-                                                    names(nc$dim)])
-
+                                                    names(nc_file$dim)])
   # extract values
-  start <- rep(1, nc$ndims)
-  start[which(rev(names(nc$dim)) %in% "time")] <- time_step_start
-  count <- nc$var[[var_name]]$varsize
-  count[which(rev(names(nc$dim)) %in% "time")] <- time_step_end
-  var_values <- ncdf4::ncvar_get(nc, var_name,
+  start <- rep(1, nc_file$var[[var_name]]$ndims)
+  start[nc_file$var[[var_name]]$ndims] <- time_step_start
+  count <- nc_file$var[[var_name]]$varsize
+  count[nc_file$var[[var_name]]$ndims] <- time_step_end
+  var_values <- ncdf4::ncvar_get(nc = nc_file,
+                                 varid = var_name,
                                  start = start,
                                  count = count
   )
-  length(time_step_start:time_step_end)
-  # reorder the rows (negative delta, indicando inversão das linhas)
-  # stars::read_stars(file_path, var = "precipitationCal")
+
   # latitude needs reorder????
   if (nc_lat[1] == max(nc_lat) &
       nc_lat[nrow(nc_lat)] == min(nc_lat)) {
@@ -202,8 +206,17 @@ ncdf2raster <- function(ncdf_file,
     var_values
   }
 
+  # setting the datetime for the ncdf file
+  if (is.null(datetime)){
+    datetime <- as.Date.numeric(x = ncdf4::ncvar_get(nc_file, "time"),
+                                origin = stringr::str_extract(string = nc_file$dim$time$units,
+                                                              pattern = "[0-9]+.+"))
+  } else {
+    datetime
+  }
 
-  ncdf4::nc_close(nc)
+  ncdf4::nc_close(nc_file)
+
   #save the daily climate var_values values in a raster
   ncdf_raster <- raster::raster(x = as.matrix(var_values),
                                 xmn = min(nc_long),
@@ -212,7 +225,10 @@ ncdf2raster <- function(ncdf_file,
                                 ymx = max(nc_lat),
                                 crs = coordinate_rs
   )
+
+
   names(ncdf_raster) <- datetime
+
   ncdf_raster
 }
 

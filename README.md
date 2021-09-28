@@ -72,8 +72,6 @@ era5land_2017 <- file.path(base_path, "ERA5-Land_data/Y2017.nc")
 var_names(era5land_2017)
 #> [1] "uas"              "vas"              "dpt"              "tas"             
 #> [5] "rsds_accumulated" "tp"
-# var_name <- names(ncdf4::nc_open(era5land_2017)$var)
-# var_name
 ```
 
 > Este arquivo por exemplo contem 6 variáveis
