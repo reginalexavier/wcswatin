@@ -135,8 +135,8 @@ table_to_files <- function(table,
 point_to_daily <- function(my_folder,
                            var_pattern = "p-",
                            main_pattern = "pcp",
-                           start_date = "20020101", #TODO: transformar o formato
-                           end_date = "20020120",
+                           start_date = "20170301", #TODO: transformar o formato
+                           end_date = "20170331",
                            interval = "day",
                            na_value = -99,
                            negatif_number = TRUE,

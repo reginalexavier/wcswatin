@@ -7,9 +7,7 @@
 ncdf_to_raster(
   ncdf_file,
   var_name,
-  time_step_start = 1,
-  time_step_end = 1,
-  datetime = NULL,
+  time_step_end = NULL,
   coordinate_rs = sp::CRS("+proj=longlat +datum=WGS84")
 )
 }
@@ -19,12 +17,8 @@ transformed into raster.}
 
 \item{var_name}{Character string of the variable name to be extracted.}
 
-\item{time_step_start}{Numeric value for the time dimension of the first
-datetime. See \code{\link[ncdf4]{ncvar_get}}.}
-
-\item{time_step_end}{Numeric value for the time dimension of the last
-datetime (1 for unique layer. and -1 for all see
-\code{\link[ncdf4]{ncvar_get}}).}
+\item{time_step_end}{If not NULL, a numeric value for the final time step. When NULL,
+all the time steps are read if exist in the raw NetCDF file.}
 
 \item{coordinate_rs}{Character string of the coordinate reference system, see
 \code{\link[sp]{CRS}}.}

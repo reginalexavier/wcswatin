@@ -150,26 +150,19 @@ layerValues2pixel <- function(layer_values,
 #' @param ncdf_file Character string of the path of the NetCDF file to be
 #'   transformed into raster.
 #' @param var_name Character string of the variable name to be extracted.
-#' @param time_step_start Numeric value for the time dimension of the first
-#'   datetime. See \code{\link[ncdf4]{ncvar_get}}.
-#' @param time_step_end Numeric value for the time dimension of the last
-#'   datetime (1 for unique layer. and -1 for all see
-#'   \code{\link[ncdf4]{ncvar_get}}).
-#' @param datetime If not NULL, a string character informing the datetime for
-#'   the layer. The date time should be in this format \code{%y%m%d}.
+#' @param time_step_end If not NULL, a numeric value for the final time step. When NULL,
+#' all the time steps are read if exist in the raw NetCDF file.
 #' @param coordinate_rs Character string of the coordinate reference system, see
 #'   \code{\link[sp]{CRS}}.
 #'
 #'
 #' @return A raster
 #' @export
+
 ncdf_to_raster <- function(ncdf_file,
                            var_name,
-                           time_step_start = 1,
-                           time_step_end = 1,
-                           datetime = NULL,
-                           coordinate_rs = sp::CRS('+proj=longlat +datum=WGS84')
-){
+                           time_step_end = NULL,
+                           coordinate_rs = sp::CRS('+proj=longlat +datum=WGS84')) {
   nc_file <- ncdf4::nc_open(ncdf_file)
   ###getting the x values (longitudes in degrees)
   nc_long <- ncdf4::ncvar_get(nc_file,
@@ -179,56 +172,118 @@ ncdf_to_raster <- function(ncdf_file,
   nc_lat <- ncdf4::ncvar_get(nc_file,
                              c("lat", "latitude")[c("lat", "latitude") %in%
                                                     names(nc_file$dim)])
-  # extract values
-  start <- rep(1, nc_file$var[[var_name]]$ndims)
-  start[nc_file$var[[var_name]]$ndims] <- time_step_start
-  count <- nc_file$var[[var_name]]$varsize
-  count[nc_file$var[[var_name]]$ndims] <- time_step_end
-  var_values <- ncdf4::ncvar_get(nc = nc_file,
-                                 varid = var_name,
-                                 start = start,
-                                 count = count
-  )
-
-  # latitude needs reorder????
-  if (nc_lat[1] == max(nc_lat) &
-      nc_lat[nrow(nc_lat)] == min(nc_lat)) {
-    var_values
-  } else {
-    var_values <- var_values[nrow(var_values):1,]
-  }
-
-  # need to reverse rows and columns for consistency???
-  if (nrow(var_values) != length(nc_lat) &
-      ncol(var_values) != length(nc_long)) {
-    var_values <- t(var_values)
-  } else {
-    var_values
-  }
-
   # setting the datetime for the ncdf file
-  if (is.null(datetime)){
-    datetime <- as.Date.numeric(x = ncdf4::ncvar_get(nc_file, "time"),
-                                origin = stringr::str_extract(string = nc_file$dim$time$units,
-                                                              pattern = "[0-9]+.+"))
+  datetime <-
+    as.character(ncdf4.helpers::nc.get.time.series(nc_file,
+                                                   v = var_name,
+                                                   time.dim.name = "time"))
+  if (!is.null(time_step_end)) {
+    datetime <- datetime[1:time_step_end]
+  }
+  # extract values
+  var_values <- ncdf4::ncvar_get(nc = nc_file,
+                                 varid = var_name)
+
+  if (length(datetime) == 1) {
+    # ncdf with one timestep
+    if (length(dim(var_values)) == 3) {
+      var_values <- var_values[, , 1]
+    }
+    # latitude needs reorder????
+    if (nc_lat[1] == max(nc_lat) &
+        nc_lat[nrow(nc_lat)] == min(nc_lat)) {
+      var_values
+    } else {
+      var_values <- var_values[nrow(var_values):1, ]
+    }
+
+    # need to reverse rows and columns for consistency???
+    if (nrow(var_values) != length(nc_lat) &
+        ncol(var_values) != length(nc_long)) {
+      var_values <- t(var_values)
+    } else {
+      var_values
+    }
+
+    #save the daily climate var_values values in a raster
+    ncdf_raster <- raster::raster(
+      x = as.matrix(var_values),
+      xmn = min(nc_long),
+      xmx = max(nc_long),
+      ymn = min(nc_lat),
+      ymx = max(nc_lat),
+      crs = coordinate_rs
+    )
+
+
+    names(ncdf_raster) <- datetime
+
+    ncdf_raster <- ncdf_raster
+
+
+
   } else {
-    datetime
+    # ncdf with multiple timestep
+
+    #transformando o array tridimencional para uma lista de array bidimencional
+    val_list <- vector(mode = "list", length = length(datetime))
+
+    for (i in seq_along(datetime)) {
+      val_list[[i]] <- var_values[, , i]
+    }
+
+    for (i in seq_along(val_list)) {
+      # latitude needs reorder????
+      if (nc_lat[1] == max(nc_lat) &
+          nc_lat[nrow(nc_lat)] == min(nc_lat)) {
+        val_list[[i]]
+      } else {
+        val_list[[i]] <- val_list[[i]][nrow(val_list[[i]]):1, ]
+      }
+
+      # need to reverse rows and columns for consistency???
+      if (nrow(val_list[[i]]) != length(nc_lat) &
+          ncol(val_list[[i]]) != length(nc_long)) {
+        val_list[[i]] <- t(val_list[[i]])
+      } else {
+        val_list[[i]]
+      }
+    }
+
+    generic_layer <- raster::raster(
+      nrows = length(nc_lat),
+      ncols = length(nc_long),
+      xmn = min(nc_long),
+      xmx = max(nc_long),
+      ymn = min(nc_lat),
+      ymx = max(nc_lat),
+      crs = coordinate_rs
+    )
+
+    raster_list <- vector(mode = "list", length = length(val_list))
+
+    cat(glue::glue(
+      "Transforming {length(val_list)} timesteps into raster layer"
+    ))
+
+    # iterate with progress bar
+    pb <- txtProgressBar(min = 0,
+                         max = length(val_list),
+                         style = 3)
+    for (i in seq_along(val_list)) {
+      raster_list[[i]] <- raster::setValues(generic_layer,
+                                            values = val_list[[i]])
+      names(raster_list[[i]]) <- datetime[i]
+      setTxtProgressBar(pb, i)
+    }
+
+    ncdf_raster <- raster::brick(raster_list)
+
   }
 
   ncdf4::nc_close(nc_file)
 
-  #save the daily climate var_values values in a raster
-  ncdf_raster <- raster::raster(x = as.matrix(var_values),
-                                xmn = min(nc_long),
-                                xmx = max(nc_long),
-                                ymn = min(nc_lat),
-                                ymx = max(nc_lat),
-                                crs = coordinate_rs
-  )
-
-
-  names(ncdf_raster) <- datetime
-
   ncdf_raster
 }
+
 
