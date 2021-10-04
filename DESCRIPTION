@@ -39,7 +39,8 @@ Imports:
     lubridate,
     rgdal,
     hyfo,
-    ncdf4.helpers
+    ncdf4.helpers,
+    stringi
 URL: https://github.com/swatufmt/cwswatinput
 BugReports: https://github.com/swatufmt/cwswatinput/issues
 VignetteBuilder: knitr

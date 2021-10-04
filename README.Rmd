@@ -378,7 +378,7 @@ Para visualização de uma camada interpolada e sua validação é utilizado o p
 ```{r}
 dia <- 18
 tmap::tm_shape(raster_interpolated[[dia]]) +
-  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface",
+  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface (mm)",
                   midpoint = NA,
                   n = 15, palette = "-RdBu",
                   style = c("cat", "fixed", "sd", "equal", "pretty", "quantile",
@@ -409,11 +409,110 @@ tmap::tm_shape(raster_interpolated[[dia]]) +
 map_ts_poly2
 ```
 
-<br><br><br><br>
+<br><br>
 
-A documentação das funções criadas está disponivel e acessivel via `? nome da função`
 
 ```{r include=FALSE}
 unlink(pasta_estacoes1, recursive = TRUE)
+```
+
+
+# Validação de dados simulados com dados coletados em campo
+
+```{r include=FALSE}
+pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
+
+estacoes <- list.files(pasta_estacoes,
+                       full.names = TRUE)
+
+ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
+```
+
+A validação consiste em criar uma tabela unica contendo os dados de campo e os dados "simulados" de precipitação. Tendo isso, pode-se utilizar as funções `ggof()` _(Graphical Goodness of Fit)_ ou `gof` _(Numerical Goodness-of-fit measures)_ do pacote `hydroGOF` para comparar os dados observados e os dados simulados.
+
+Como exemplo, pegamos dados de precipitação coletados de 14 estações da ANA e INMET para o periodo de 01/03/2017 a 31/03/2017 como dados observados e dados provenientes do produto [GPM IMERG Final Precipitation L3](https://gpm.nasa.gov/data/directory) da plataforma [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final") de precipitação para o mesmo periodo.
+
+## Os passos:
+
+- Criar uma tabela unica com os dados de campo com ajuda da função `cwswatinput::files_to_table()`;
+- Transformar os arquivos NetCDF para dados em formato Raster com ajuda da função `cwswatinput::ncdf_to_raster()`;
+- Extrair os dados de precipitação nos dados em formato Raster com ajuda da função `cwswatinput::tbl_from_references()`;
+- Juntar as duas tabelas em uma unica tabela;
+- Rodar a função `hydroGOF::ggof()`
+
+
+Dados das estções:
+```{r}
+list.files(pasta_estacoes,
+                       full.names = FALSE)
+```
+
+O arquivo `pcp.txt` contem as localizações dos 14 estações:
+```{r echo=FALSE}
+read.csv(file.path(pasta_estacoes, "pcp.txt"))
+```
+
+
+Os arquivos baixados:
+```{r}
+# lista dos arquivos
+list.files(ncdf_path,
+           pattern = "nc4*",
+           full.names = FALSE)
+```
+
+
+Transformar os arquivos NetCDF para raster:
+```{r}
+gpm_raster_list <- lapply(list.files(ncdf_path,
+                                     pattern = "nc4*",
+                                     full.names = TRUE),
+                          ncdf_to_raster,
+                          "precipitationCal")
+
+
+gpm_stack <- raster::stack(gpm_raster_list)
+```
+
+
+Criação das duas tabelas, de referencia e sinulado:
+```{r}
+tbl_ref <- files_to_table(files_path = pasta_estacoes,
+                          files_pattern = "p-",
+                          start_date = "2017-03-01",
+                          end_date = "2017-03-31",
+                          na_value = -99,
+                          neg_to_zero = FALSE
+                          )
+
+tbl_sim <- tbl_from_references(raster_file = gpm_stack,
+                               ref_points = file.path(pasta_estacoes, "pcp.txt"),
+                               prefix_colname = "sim",
+                               buffer = 1,
+                               fun = mean)
+```
+
+
+Juntando as duas tabelas:
+
+```{r}
+all_tabl <- cbind(tbl_ref, tbl_sim)
+```
+
+Comparando os dados da primeira estação:
+
+```{r}
+hydroGOF::gof(sim = all_tabl$`p-1553003`,
+               obs = all_tabl$`sim_p-1553003`)
+```
+
+
+```{r}
+hydroGOF::ggof(sim = all_tabl$`p-1553003`,
+               obs = all_tabl$`sim_p-1553003`,
+               dates = all_tabl$date,
+               ftype = "o",
+               FUN = mean
+)
 ```
 

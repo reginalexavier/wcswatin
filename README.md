@@ -6082,7 +6082,7 @@ utilizadas na interpolação.
 ``` r
 dia <- 18
 tmap::tm_shape(raster_interpolated[[dia]]) +
-  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface",
+  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface (mm)",
                   midpoint = NA,
                   n = 15, palette = "-RdBu",
                   style = c("cat", "fixed", "sd", "equal", "pretty", "quantile",
@@ -6108,7 +6108,180 @@ tmap::tm_shape(raster_interpolated[[dia]]) +
 
 <img src="man/figures/README-unnamed-chunk-32-1.png" width="100%" />
 
-<br><br><br><br>
+<br><br>
 
-A documentação das funções criadas está disponivel e acessivel via
-`? nome da função`
+# Validação de dados simulados com dados coletados em campo
+
+A validação consiste em criar uma tabela unica contendo os dados de
+campo e os dados “simulados” de precipitação. Tendo isso, pode-se
+utilizar as funções `ggof()` *(Graphical Goodness of Fit)* ou `gof`
+*(Numerical Goodness-of-fit measures)* do pacote `hydroGOF` para
+comparar os dados observados e os dados simulados.
+
+Como exemplo, pegamos dados de precipitação coletados de 14 estações da
+ANA e INMET para o periodo de 01/03/2017 a 31/03/2017 como dados
+observados e dados provenientes do produto [GPM IMERG Final
+Precipitation L3](https://gpm.nasa.gov/data/directory) da plataforma
+[GES
+DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords=%22IMERG%20final%22)
+de precipitação para o mesmo periodo.
+
+## Os passos:
+
+-   Criar uma tabela unica com os dados de campo com ajuda da função
+    `cwswatinput::files_to_table()`;
+-   Transformar os arquivos NetCDF para dados em formato Raster com
+    ajuda da função `cwswatinput::ncdf_to_raster()`;
+-   Extrair os dados de precipitação nos dados em formato Raster com
+    ajuda da função `cwswatinput::tbl_from_references()`;
+-   Juntar as duas tabelas em uma unica tabela;
+-   Rodar a função `hydroGOF::ggof()`
+
+Dados das estções:
+
+``` r
+list.files(pasta_estacoes,
+                       full.names = FALSE)
+#>  [1] "p-1553003.txt" "p-1554006.txt" "p-1555005.txt" "p-1556007.txt"
+#>  [5] "p-1653002.txt" "p-1653004.txt" "p-1653005.txt" "p-1654000.txt"
+#>  [9] "p-1654001.txt" "p-1654004.txt" "p-1654005.txt" "p-1754000.txt"
+#> [13] "p-83358.txt"   "p-A907.txt"    "pcp.txt"
+```
+
+O arquivo `pcp.txt` contem as localizações dos 14 estações:
+
+    #>    ID      NAME      LAT     LONG ELEVATION
+    #> 1   1 p-1553003 -15.9400 -53.4500    597.00
+    #> 2   2 p-1554006 -15.9890 -54.9680    256.00
+    #> 3   3 p-1555005 -15.8400 -55.3200    783.00
+    #> 4   4 p-1556007 -15.6990 -55.1360    699.00
+    #> 5   5 p-1653002 -16.3500 -53.7600    482.00
+    #> 6   6 p-1653004 -16.9400 -53.5300    735.00
+    #> 7   7 p-1653005 -16.6700 -53.4500    533.00
+    #> 8   8 p-1654000 -16.4710 -54.6570    231.00
+    #> 9   9 p-1654001 -16.6740 -54.2660    314.00
+    #> 10 10 p-1654004 -16.8430 -54.4080    295.00
+    #> 11 11 p-1654005 -16.3910 -54.1490    381.00
+    #> 12 12 p-1754000 -17.2100 -54.1400    527.00
+    #> 13 13   p-83358 -15.8274 -54.3955    374.35
+    #> 14 14    p-A907 -16.4625 -54.5802    289.88
+
+Os arquivos baixados:
+
+``` r
+# lista dos arquivos
+list.files(ncdf_path,
+           pattern = "nc4*",
+           full.names = FALSE)
+#>  [1] "3B-DAY.MS.MRG.3IMERG.20170301-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [2] "3B-DAY.MS.MRG.3IMERG.20170302-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [3] "3B-DAY.MS.MRG.3IMERG.20170303-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [4] "3B-DAY.MS.MRG.3IMERG.20170304-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [5] "3B-DAY.MS.MRG.3IMERG.20170305-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [6] "3B-DAY.MS.MRG.3IMERG.20170306-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [7] "3B-DAY.MS.MRG.3IMERG.20170307-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [8] "3B-DAY.MS.MRG.3IMERG.20170308-S000000-E235959.V06.nc4.SUB.nc4"
+#>  [9] "3B-DAY.MS.MRG.3IMERG.20170309-S000000-E235959.V06.nc4.SUB.nc4"
+#> [10] "3B-DAY.MS.MRG.3IMERG.20170310-S000000-E235959.V06.nc4.SUB.nc4"
+#> [11] "3B-DAY.MS.MRG.3IMERG.20170311-S000000-E235959.V06.nc4.SUB.nc4"
+#> [12] "3B-DAY.MS.MRG.3IMERG.20170312-S000000-E235959.V06.nc4.SUB.nc4"
+#> [13] "3B-DAY.MS.MRG.3IMERG.20170313-S000000-E235959.V06.nc4.SUB.nc4"
+#> [14] "3B-DAY.MS.MRG.3IMERG.20170314-S000000-E235959.V06.nc4.SUB.nc4"
+#> [15] "3B-DAY.MS.MRG.3IMERG.20170315-S000000-E235959.V06.nc4.SUB.nc4"
+#> [16] "3B-DAY.MS.MRG.3IMERG.20170316-S000000-E235959.V06.nc4.SUB.nc4"
+#> [17] "3B-DAY.MS.MRG.3IMERG.20170317-S000000-E235959.V06.nc4.SUB.nc4"
+#> [18] "3B-DAY.MS.MRG.3IMERG.20170318-S000000-E235959.V06.nc4.SUB.nc4"
+#> [19] "3B-DAY.MS.MRG.3IMERG.20170319-S000000-E235959.V06.nc4.SUB.nc4"
+#> [20] "3B-DAY.MS.MRG.3IMERG.20170320-S000000-E235959.V06.nc4.SUB.nc4"
+#> [21] "3B-DAY.MS.MRG.3IMERG.20170321-S000000-E235959.V06.nc4.SUB.nc4"
+#> [22] "3B-DAY.MS.MRG.3IMERG.20170322-S000000-E235959.V06.nc4.SUB.nc4"
+#> [23] "3B-DAY.MS.MRG.3IMERG.20170323-S000000-E235959.V06.nc4.SUB.nc4"
+#> [24] "3B-DAY.MS.MRG.3IMERG.20170324-S000000-E235959.V06.nc4.SUB.nc4"
+#> [25] "3B-DAY.MS.MRG.3IMERG.20170325-S000000-E235959.V06.nc4.SUB.nc4"
+#> [26] "3B-DAY.MS.MRG.3IMERG.20170326-S000000-E235959.V06.nc4.SUB.nc4"
+#> [27] "3B-DAY.MS.MRG.3IMERG.20170327-S000000-E235959.V06.nc4.SUB.nc4"
+#> [28] "3B-DAY.MS.MRG.3IMERG.20170328-S000000-E235959.V06.nc4.SUB.nc4"
+#> [29] "3B-DAY.MS.MRG.3IMERG.20170329-S000000-E235959.V06.nc4.SUB.nc4"
+#> [30] "3B-DAY.MS.MRG.3IMERG.20170330-S000000-E235959.V06.nc4.SUB.nc4"
+#> [31] "3B-DAY.MS.MRG.3IMERG.20170331-S000000-E235959.V06.nc4.SUB.nc4"
+```
+
+Transformar os arquivos NetCDF para raster:
+
+``` r
+gpm_raster_list <- lapply(list.files(ncdf_path,
+                                     pattern = "nc4*",
+                                     full.names = TRUE),
+                          ncdf_to_raster,
+                          "precipitationCal")
+
+
+gpm_stack <- raster::stack(gpm_raster_list)
+```
+
+Criação das duas tabelas, de referencia e sinulado:
+
+``` r
+tbl_ref <- files_to_table(files_path = pasta_estacoes,
+                          files_pattern = "p-",
+                          start_date = "2017-03-01",
+                          end_date = "2017-03-31",
+                          na_value = -99,
+                          neg_to_zero = FALSE
+                          )
+
+tbl_sim <- tbl_from_references(raster_file = gpm_stack,
+                               ref_points = file.path(pasta_estacoes, "pcp.txt"),
+                               prefix_colname = "sim",
+                               buffer = 1,
+                               fun = mean)
+```
+
+Juntando as duas tabelas:
+
+``` r
+all_tabl <- cbind(tbl_ref, tbl_sim)
+```
+
+Comparando os dados da primeira estação:
+
+``` r
+hydroGOF::gof(sim = all_tabl$`p-1553003`,
+               obs = all_tabl$`sim_p-1553003`)
+#> Warning: 'rNSE' can not be computed: some elements in 'obs' are zero !
+#> Warning: 'rd' can not be computed: some elements in 'obs' are zero !
+#>           [,1]
+#> ME        0.78
+#> MAE      10.52
+#> MSE     521.03
+#> RMSE     22.83
+#> NRMSE % 204.10
+#> PBIAS %   9.90
+#> RSR       2.04
+#> rSD       2.73
+#> NSE      -3.35
+#> mNSE     -0.26
+#> rNSE       NaN
+#> d         0.67
+#> md        0.50
+#> rd         NaN
+#> cp       -0.86
+#> r         0.75
+#> R2        0.57
+#> bR2       0.33
+#> KGE      -0.75
+#> VE       -0.35
+```
+
+``` r
+hydroGOF::ggof(sim = all_tabl$`p-1553003`,
+               obs = all_tabl$`sim_p-1553003`,
+               dates = all_tabl$date,
+               ftype = "o",
+               FUN = mean
+)
+#> Warning: 'rNSE' can not be computed: some elements in 'obs' are zero !
+#> Warning: 'rd' can not be computed: some elements in 'obs' are zero !
+```
+
+<img src="man/figures/README-unnamed-chunk-43-1.png" width="100%" />
