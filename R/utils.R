@@ -1,4 +1,6 @@
-
+utils::globalVariables(c("day", "hours", "temperature", "max_min",
+                         "m", "dpt", "Tn", "tas", "month_val", "all_values",
+                         "values", "."))
 
 #' Turns multiple time series files into a single table
 #'
@@ -333,7 +335,7 @@ tbl_from_references <- function(raster_file,
                                coords = c("LONG", "LAT"),
                                crs = "+proj=longlat +datum=WGS84 +no_defs")
   } else if ("character" %in% class(ref_points) &
-             any(stringi::stri_endswith_fixed(ref_points, c(".txt", ".csv")))) {
+             any(stringr::str_ends(ref_points, c(".txt", ".csv")))) {
     tbl_ref <- data.table::fread(ref_points)
     ref_points <- sf::st_as_sf(tbl_ref,
                                coords = c("LONG", "LAT"), #TODO: rename LONG to LON
@@ -358,6 +360,524 @@ tbl_from_references <- function(raster_file,
 
   df_extracted
 }
+
+
+
+
+
+
+
+#' Create a daily aggregation from an hourly dataset
+#'
+#' @param folder_in Path of the input files
+#' @param folder_out Path where to save the transformed files
+#' @param pattern an optional \code{\link[base:regex]{regular expression}}. Only
+#'   file names which match the regular expression will be returned.
+#' @param col_name The column name for the tables on the output. Usually, the
+#'   first date of the time series.
+#' @param from The first date of the series, including the hour part.
+#' @param to The last date of the series, including the hour part.
+#' @param aggregation_function The function to use on the hourly groups.
+#' @param na.rm a logical value indicating whether NA values should be stripped
+#'   before the computation proceeds
+#'
+#' @return Files with a daily resolution
+#' @export
+#'
+
+daily_aggregation <- function(folder_in,
+                              folder_out,
+                              pattern = ".txt$",
+                              col_name = "20020101",
+                              from = '2002-01-01 00',
+                              to = '2021-05-31 23',
+                              aggregation_function = mean,
+                              na.rm = FALSE){
+
+  hourly_files <- list.files(folder_in,
+                             full.names = TRUE,
+                             pattern = pattern)
+
+  file_name <- function(x){
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+  # date
+  my_ymdh <- seq(from = lubridate::ymd_h(from),
+                 to = lubridate::ymd_h(to),
+                 by = 'hours')
+
+  by_ydm <- lubridate::as_date(my_ymdh)
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(hourly_files), style = 3)
+
+  for (i in seq_along(hourly_files)) {
+
+    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1] #TODO: make this optional!
+    temp_tbl <- dplyr::mutate(temp_tbl, date = my_ymdh,
+                              day = by_ydm)
+    temp_tbl <- dplyr::group_by(temp_tbl, day)
+    temp_tbl <- dplyr::summarise(temp_tbl,
+                                 daily_mean = aggregation_function(.data[[col_name]],
+                                                                   na.rm = na.rm))
+    names(temp_tbl)[2] <- col_name
+
+    #saving to file
+    data.table::fwrite(temp_tbl[, 2],
+                       file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
+                       row.names = FALSE,
+                       dec = ".",
+                       sep = ",",
+                       quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+
+  }
+
+  close(pb)
+
+}
+
+
+
+
+#' Create a daily dataset with the last observed hourly value
+#'
+#' @param folder_in Path of the input files
+#' @param folder_out Path where to save the transformed files
+#' @param col_name The column name for the tables on the output. Usually, the
+#'   first date of the time series.
+#' @param from The first date of the series, including the hour part.
+#' @param to The last date of the series, including the hour part.
+#' @param pattern an optional regular expression. Only file names which match
+#'   the regular expression will be returned.
+#'
+#' @return Files with a daily resolution
+#' @export
+#'
+
+daily_last_value <- function(folder_in,
+                             folder_out,
+                             col_name = "20020101",
+                             from = '2002-01-01 00',
+                             to = '2021-05-31 23',
+                             pattern = ".txt$"
+                             ){
+
+  hourly_files <- list.files(folder_in,
+                             full.names = TRUE,
+                             pattern = pattern)
+
+  file_name <- function(x){
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+  # date
+  my_ymdh <- seq(from = lubridate::ymd_h(from),
+                 to = lubridate::ymd_h(to),
+                 by = 'hours')
+
+  by_ydm <- lubridate::as_date(my_ymdh)
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(hourly_files), style = 3)
+
+  for (i in seq_along(hourly_files)) {
+
+    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1]
+    temp_tbl <- dplyr::filter(dplyr::mutate(temp_tbl,
+                                            date = my_ymdh,
+                                            day = by_ydm,
+                                            hours = as.factor(lubridate::hour(date))),
+                              hours == 23)
+
+
+    #saving to file
+    data.table::fwrite(temp_tbl[, 1],
+                       file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
+                       row.names = FALSE,
+                       dec = ".",
+                       sep = ",",
+                       quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+
+  }
+
+  close(pb)
+
+}
+
+
+
+#' Create Relative humidity values from 2m dewpoint temperature and Near-Surface
+#' Air Temperature input
+#'
+#'
+#' @param folder_dpt Path of the input 2m dewpoint temperature files
+#' @param folder_tas Path of the input Near-Surface Air Temperature files
+#' @param folder_out Path where to save the transformed files
+#' @param col_name The column name for the tables on the output. Usually, the
+#'   first date of the time series.
+#' @param file_name_output Character string for the Relative humidity files on
+#'   output.
+#' @param m_value The value for m. Please see \cite{reference}
+#' @param Tn_value The value for Tn. Please see \cite{reference}
+#' @param pattern an optional regular expression. Only file names which match
+#'   the regular expression will be returned.
+#'
+#' @return Files with the same temporal resolution as the input
+#' @export
+#'
+
+rh_creator <- function(folder_dpt,
+                       folder_tas,
+                       folder_out,
+                       col_name = "20020101",
+                       file_name_output = "rh",
+                       m_value = 7.591386,
+                       Tn_value = 240.7263,
+                       pattern = ".txt$"
+){
+
+  dpt_files <- list.files(folder_dpt,
+                          full.names = TRUE,
+                          pattern = pattern)
+
+  tas_files <- list.files(folder_tas,
+                          full.names = TRUE,
+                          pattern = pattern)
+
+  file_name <- function(x){
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(dpt_files), style = 3)
+
+  for (i in seq_along(dpt_files)) {
+
+    temp_dpt <- data.table::fread(dpt_files[i], header = TRUE)
+
+    temp_tas <- data.table::fread(tas_files[i], header = TRUE)
+
+    temp_DT <- data.table::data.table(dpt = temp_dpt,
+                                      tas = temp_tas,
+                                      m = m_value,
+                                      Tn = Tn_value)
+
+    names(temp_DT) <- c("dpt", "tas", "m", "Tn")
+
+    rh_tbl <- temp_DT[, .(rh_values = 100*10^(m*((dpt/(dpt+Tn))-(tas/(tas+Tn)))))]
+
+    names(rh_tbl) <- col_name
+
+    #saving to file
+    data.table::fwrite(rh_tbl,
+                       file.path(folder_out, glue::glue('{sub("[^0-9]+", file_name_output, file_name(dpt_files[i]))}.txt')),
+                       row.names = FALSE,
+                       dec = ".",
+                       sep = ",",
+                       quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+
+  }
+
+  close(pb)
+
+}
+
+
+
+#' Create wind speed values from Eastward Near-Surface Wind and Northward
+#' Near-Surface Wind input
+#'
+#' @param folder_uas Path of the input Eastward Near-Surface Wind files
+#' @param folder_vas Path of the input Northward Near-Surface Wind files
+#' @param folder_out Path where to save the transformed files
+#' @param col_name The column name for the tables on the output. Usually, the
+#'   first date of the time series.
+#' @param file_name_output Character string for the Wind speed files on
+#'   output.
+#' @param pattern an optional regular expression. Only file names which match
+#'   the regular expression will be returned.
+#'
+#' @return Files with the same temporal resolution as the input
+#' @export
+#'
+
+windspeed_creator <- function(folder_uas,
+                              folder_vas,
+                              folder_out,
+                              col_name = "20020101",
+                              file_name_output = "ws",
+                              pattern = ".txt$"
+){
+
+  uas_files <- list.files(folder_uas,
+                          full.names = TRUE,
+                          pattern = pattern)
+
+  vas_files <- list.files(folder_vas,
+                          full.names = TRUE,
+                          pattern = pattern)
+
+  file_name <- function(x){
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(uas_files), style = 3)
+
+  for (i in seq_along(uas_files)) {
+
+    temp_uas <- data.table::fread(uas_files[i], header = TRUE)
+
+    temp_vas <- data.table::fread(vas_files[i], header = TRUE)
+
+    ws_tbl <- data.table::data.table(windspeed_values = sqrt((temp_uas)^2 + (temp_vas)^2))
+
+    names(ws_tbl) <- col_name
+
+
+    #saving to file
+    data.table::fwrite(ws_tbl,
+                       file.path(folder_out, glue::glue('{sub("[^0-9]+", file_name_output, file_name(dpt_files[i]))}.txt')),
+                       row.names = FALSE,
+                       dec = ".",
+                       sep = ",",
+                       quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+
+  }
+
+  close(pb)
+
+}
+
+
+
+#' Create a daily maximum and minimum from hourly observations
+#'
+#' @param folder_in Path of the input files
+#' @param folder_out Path where to save the transformed files
+#' @param col_name The column name for the tables on the output. Usually, the
+#'   first date of the time series.
+#' @param from The first date of the series, including the hour part.
+#' @param to The last date of the series, including the hour part.
+#' @param pattern an optional regular expression. Only file names which match
+#'   the regular expression will be returned.
+#'
+#' @return Files with a daily resolution
+#' @export
+#'
+
+daily_max_min <- function(folder_in,
+                          folder_out,
+                          col_name = "20020101",
+                          from = '2002-01-01 00',
+                          to = '2021-05-31 23',
+                          pattern = ".txt$"
+                          ){
+
+  hourly_files <- list.files(folder_in,
+                             full.names = TRUE,
+                             pattern = pattern)
+
+  file_name <- function(x){
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+  # date
+  my_ymdh <- seq(from = lubridate::ymd_h(from),
+                 to = lubridate::ymd_h(to),
+                 by = 'hours')
+
+  by_ydm <- lubridate::as_date(my_ymdh)
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(hourly_files), style = 3)
+
+  for (i in seq_along(hourly_files)) {
+
+    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1]
+
+    names(temp_tbl) <- "temperature"
+
+    temp_tbl <- dplyr::mutate(temp_tbl,
+                              date = my_ymdh,
+                              day = by_ydm)
+
+    temp_tbl <- dplyr::group_by(temp_tbl, day)
+
+    temp_tbl <- dplyr::summarise(temp_tbl,
+                                 max = max(temperature),
+                                 min = min(temperature))
+
+    temp_tbl <- dplyr::mutate(temp_tbl,
+                              max_min = paste(round(max, 3), round(min, 3), sep = ","))
+
+    temp_tbl <- dplyr::select(temp_tbl, max_min)
+
+    names(temp_tbl) <- col_name
+
+
+    #saving to file
+    data.table::fwrite(temp_tbl,
+                       file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
+                       row.names = FALSE,
+                       dec = ".",
+                       sep = ",",
+                       quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+
+  }
+
+  close(pb)
+
+}
+
+
+#' Unit Converter
+#'
+#' @param folder_in Path of the input files
+#' @param folder_out Path where to save the transformed files
+#' @param col_name The column name for the tables on the output. Usually, the
+#'   first date of the time series.
+#' @param pattern an optional regular expression. Only file names which match
+#'   the regular expression will be returned.
+#' @param FUN The function to use for transforming the unit of the variable on
+#'   input.
+#'
+#' @return Files with the same temporal resolution as the input
+#' @export
+#'
+
+unit_converter <- function(folder_in,
+                           folder_out,
+                           col_name = "20020101",
+                           pattern = ".txt$",
+                           FUN = \(x) (x-273.15)
+){
+
+  files_list <- list.files(folder_in,
+                           full.names = TRUE,
+                           pattern = pattern)
+
+  file_name <- function(x){
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(files_list), style = 3)
+
+  for (i in seq_along(files_list)) {
+
+    temp_tbl <- data.table::fread(files_list[i], header = TRUE)
+
+    names(temp_tbl) <- "values"
+
+    temp_tbl <- temp_tbl[, .(converted = FUN(values))]
+
+    names(temp_tbl) <- col_name
+
+    #saving to file
+    data.table::fwrite(temp_tbl,
+                       file.path(folder_out, glue::glue("{file_name(files_list[i])}.txt")),
+                       row.names = FALSE,
+                       dec = ".",
+                       sep = ",",
+                       quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+
+  }
+
+  close(pb)
+
+}
+
+
+
+#' Plot a summary of the data
+#'
+#' @param var_folder Path of the input files
+#' @param sample Numeric value, informing the number of files to be used.
+#' @param percent When TRUE, the values passed on \code{sample} is use as as a
+#'   percentage.
+#' @param from The first date of the series.
+#' @param to The last date of the series.
+#' @param x_lab Character. Title for the x, see \code{\link[ggplot2]{labs}}.
+#' @param y_lab Character. Title for the y, see
+#'   \code{\link[ggplot2:labs]{labs}}.
+#' @param pattern an optional regular expression. Only file names which match
+#'   the regular expression will be returned.
+#'
+#' @return A summary plot
+#' @export
+#'
+
+summary_plot <- function(var_folder,
+                         sample = 5,
+                         percent = FALSE,
+                         from = '2002-01-01',
+                         to = '2021-05-31',
+                         x_lab = "Months of observation",
+                         y_lab = "Vriable name and unit",
+                         pattern = ".txt$"
+){
+
+  daily_files <- list.files(var_folder,
+                            full.names = TRUE,
+                            pattern = pattern)
+
+  total_files <- length(daily_files)
+
+
+  file_name <- function(x){ #TODO: transform to extern function
+    stringr::str_extract(x, "[a-z_]+[0-9]+")
+  }
+
+  # date
+  my_ymd <- seq(from = lubridate::ymd(from),
+                to = lubridate::ymd(to),
+                by = 'day')
+
+  one_file <- function(file){
+    temp_file <- daily_files[file]
+    temp_tbl <- dplyr::mutate(data.table::fread(temp_file, header = TRUE),
+                              date = my_ymd,
+                              month_val = as.factor(lubridate::month(date,
+                                                                     label = TRUE)),
+                              var_file = file_name(temp_file))
+    names(temp_tbl)[1] <- "all_values"
+    temp_tbl
+  }
+
+  if (percent){
+    sample_val <- round(total_files * sample / 100)
+  } else {
+    sample_val <- sample
+  }
+
+  cat(glue::glue("Ok, {sample_val} will be processed!"))
+
+  # dataset preparation
+  data_set <- do.call(rbind,
+                      lapply(sample(seq_len(total_files),
+                                    sample_val),
+                             one_file))
+  # ploting
+  ggplot2::ggplot(data = data_set,
+                  ggplot2::aes(month_val, all_values)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::labs(x = x_lab,
+                  y = y_lab)
+}
+
 
 
 

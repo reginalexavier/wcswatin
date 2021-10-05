@@ -40,7 +40,7 @@ Imports:
     rgdal,
     hyfo,
     ncdf4.helpers,
-    stringi
+    ggplot2
 URL: https://github.com/swatufmt/cwswatinput
 BugReports: https://github.com/swatufmt/cwswatinput/issues
 VignetteBuilder: knitr
