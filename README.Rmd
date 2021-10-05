@@ -148,7 +148,7 @@ knitr::kable(tbls[1:10, ])
 ```
 
 
-A tabela pode ser valva com essas linhas:
+A tabela pode ser salva com essas linhas:
 ```{r
 # este arquivo pode ser salvo como tabelas individuais como:
 data.table::fwrite(tbls,
