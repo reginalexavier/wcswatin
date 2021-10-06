@@ -39,5 +39,9 @@ before the computation proceeds}
 Files with a daily resolution
 }
 \description{
-Create a daily aggregation from an hourly dataset
+This function allows to make the aggregation of hourly observations to daily
+ones of a time series. The function for aggregation can be informed in the
+\code{aggregation_function} parameter, this parameter takes a function as
+argument. The default function is \code{\link[base]{mean}}, so a daily
+average is returned.
 }

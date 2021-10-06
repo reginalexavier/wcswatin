@@ -32,5 +32,8 @@ the regular expression will be returned.}
 Files with a daily resolution
 }
 \description{
-Create a daily dataset with the last observed hourly value
+This function allows to transform an hourly observed time series to a daily
+one. Here the returned value is the last observed. This functionality serves
+to series with hourly frequency where the value of each hour represents the
+sum accumulated so far, thus, the last value represents the daily sum.
 }

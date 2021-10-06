@@ -32,5 +32,7 @@ the regular expression will be returned.}
 Files with a daily resolution
 }
 \description{
-Create a daily maximum and minimum from hourly observations
+This function allows to make the aggregation of hourly observations to daily
+ones of a time series. Here the aggregation performed returns the highest
+\emph{(maximum)} and lowest \emph{(minimum)} observed value for the day.
 }

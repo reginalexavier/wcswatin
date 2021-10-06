@@ -18,7 +18,9 @@ summary_plot(
 \arguments{
 \item{var_folder}{Path of the input files}
 
-\item{sample}{Numeric value, informing the number of files to be used.}
+\item{sample}{Numeric value, informing the number of files to be used. Until
+the total amount is informed, the choice of points to be computed is
+random.}
 
 \item{percent}{When TRUE, the values passed on \code{sample} is use as as a
 percentage.}
@@ -39,5 +41,7 @@ the regular expression will be returned.}
 A summary plot
 }
 \description{
-Plot a summary of the data
+This function creates a graph of daily values observed from several points on
+a monthly basis, using a boxplot. You can choose the amount of points to be
+randomly computed in the total point set.
 }

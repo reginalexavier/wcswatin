@@ -30,5 +30,9 @@ input.}
 Files with the same temporal resolution as the input
 }
 \description{
-Unit Converter
+This function performs the same calculation on each observation of a time
+series, the time resolution is the same on input as on output. This feature
+allows you to convert one unit to another. Just inform the conversion
+function in the \code{FUN} parameter. The standard function performs the
+conversion from Kelvin temperatures to degrees Celsius.
 }
