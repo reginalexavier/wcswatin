@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{table_to_files}
 \alias{table_to_files}
-\title{Title}
+\title{Export tables to \code{txt} or \code{csv} files}
 \usage{
 table_to_files(table, folder_path, first_date, file_extention = "txt")
 }
@@ -20,5 +20,5 @@ saving. The actual name is used as the file names. The suggested format is
 \item{file_extention}{Character. \code{txt} or \code{csv}.}
 }
 \description{
-Title
+Export tables to \code{txt} or \code{csv} files
 }

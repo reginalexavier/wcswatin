@@ -1,6 +1,7 @@
-utils::globalVariables(c("day", "hours", "temperature", "max_min",
-                         "m", "dpt", "Tn", "tas", "month_val", "all_values",
-                         "values", ".", "data", "sd"))
+utils::globalVariables(c(".", "all_values", "data", "day",
+                         "dpt", "hours", "max_min", "month_val",
+                         "sd", "tas", "temperature", "value"))
+
 
 #' Turns multiple time series files into a single table
 #'
@@ -68,7 +69,7 @@ files_to_table <- function(files_path,
 
 
 
-#' Title
+#' Export tables to `txt` or `csv` files
 #'
 #' @param table A table `data.frame` containing all the observations
 #' @param folder_path Character string of the folder where the file must be
@@ -419,17 +420,25 @@ daily_aggregation <- function(folder_in,
 
   for (i in seq_along(hourly_files)) {
 
-    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1] #TODO: make this optional!
-    temp_tbl <- dplyr::mutate(temp_tbl, date = my_ymdh,
-                              day = by_ydm)
-    temp_tbl <- dplyr::group_by(temp_tbl, day)
-    temp_tbl <- dplyr::summarise(temp_tbl,
-                                 daily_mean = aggregation_function(.data[[col_name]],
-                                                                   na.rm = na.rm))
-    names(temp_tbl)[2] <- col_name
+    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ] #TODO: make this optional!
+
+
+    temp_tbl[, `:=`(date = my_ymdh,
+                    day = by_ydm)]
+
+    names(temp_tbl)[1] <- "value"
+
+
+    temp_tbl <- temp_tbl[, .(daily_agg = aggregation_function(value,
+                                                              na.rm = na.rm)),
+                         by = day]
+
+    daily_agg <- temp_tbl[ , list(daily_agg)]
+
+    names(daily_agg) <- col_name
 
     #saving to file
-    data.table::fwrite(temp_tbl[, 2],
+    data.table::fwrite(daily_agg,
                        file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
                        row.names = FALSE,
                        dec = ".",
@@ -496,16 +505,18 @@ daily_last_value <- function(folder_in,
 
   for (i in seq_along(hourly_files)) {
 
-    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1]
-    temp_tbl <- dplyr::filter(dplyr::mutate(temp_tbl,
-                                            date = my_ymdh,
-                                            day = by_ydm,
-                                            hours = as.factor(lubridate::hour(date))),
-                              hours == 23)
+    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
+    #temp_tbl <- data.table::fread(hourly_files[1], header = TRUE)[-1, ]
 
+    temp_tbl[, `:=`(date = my_ymdh,
+                    day = by_ydm)][, hours := as.factor(lubridate::hour(date))]
+
+    temp_tbl <- temp_tbl[hours == 23, 1]
+
+    names(temp_tbl) <- col_name
 
     #saving to file
-    data.table::fwrite(temp_tbl[, 1],
+    data.table::fwrite(temp_tbl,
                        file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
                        row.names = FALSE,
                        dec = ".",
@@ -583,15 +594,20 @@ rh_calculator <- function(folder_dpt,
     temp_dpt <- data.table::fread(dpt_files[i], header = TRUE)
 
     temp_tas <- data.table::fread(tas_files[i], header = TRUE)
+    #############################################
 
-    temp_DT <- data.table::data.table(dpt = temp_dpt,
-                                      tas = temp_tas,
-                                      m = m_value,
-                                      Tn = Tn_value)
+    #vaisala formula
+    rh_fun <- function(m, td, Tambient, Tn){
+      100*10^(m*((td/(td + Tn)) - (Tambient/(Tambient + Tn))))
+    }
 
-    names(temp_DT) <- c("dpt", "tas", "m", "Tn")
+    names(temp_dpt) <- "dpt"
+    names(temp_tas) <- "tas"
 
-    rh_tbl <- temp_DT[, .(rh_values = 100*10^(m*((dpt/(dpt+Tn))-(tas/(tas+Tn)))))]
+    rh_tbl <- dplyr::mutate(dplyr::tibble(dpt = temp_dpt$dpt,
+                                          tas = temp_tas$tas),
+                            rh = rh_fun(m_value, dpt, tas, Tn_value),
+                            .keep = "none")
 
     names(rh_tbl) <- col_name
 
@@ -675,7 +691,7 @@ windspeed_calculator <- function(folder_uas,
 
     #saving to file
     data.table::fwrite(ws_tbl,
-                       file.path(folder_out, glue::glue('{sub("[^0-9]+", file_name_output, file_name(dpt_files[i]))}.txt')),
+                       file.path(folder_out, glue::glue('{sub("[^0-9]+", file_name_output, file_name(uas_files[i]))}.txt')),
                        row.names = FALSE,
                        dec = ".",
                        sep = ",",
@@ -705,6 +721,8 @@ windspeed_calculator <- function(folder_uas,
 #' @param to The last date of the series, including the hour part.
 #' @param pattern an optional regular expression. Only file names which match
 #'   the regular expression will be returned.
+#'
+#' @importFrom data.table :=
 #'
 #' @return Files with a daily resolution
 #' @export
@@ -737,30 +755,27 @@ daily_max_min <- function(folder_in,
 
   for (i in seq_along(hourly_files)) {
 
-    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1]
+    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
+    #temp_tbl <- data.table::fread(hourly_files[1], header = TRUE)[-1, ]
 
-    names(temp_tbl) <- "temperature"
+    temp_tbl[ , `:=`(date = my_ymdh,
+                     day = by_ydm)]
 
-    temp_tbl <- dplyr::mutate(temp_tbl,
-                              date = my_ymdh,
-                              day = by_ydm)
+    names(temp_tbl)[1] <- "temperature"
 
-    temp_tbl <- dplyr::group_by(temp_tbl, day)
 
-    temp_tbl <- dplyr::summarise(temp_tbl,
-                                 max = max(temperature),
-                                 min = min(temperature))
+    temp_tbl <- temp_tbl[, .(max_min = paste(round(max(temperature), 3),
+                                             round(min(temperature), 3),
+                                             sep = ",")),
+                         by = day]
 
-    temp_tbl <- dplyr::mutate(temp_tbl,
-                              max_min = paste(round(max, 3), round(min, 3), sep = ","))
+    max_min_col <- temp_tbl[ , list(max_min)]
 
-    temp_tbl <- dplyr::select(temp_tbl, max_min)
-
-    names(temp_tbl) <- col_name
+    names(max_min_col) <- col_name
 
 
     #saving to file
-    data.table::fwrite(temp_tbl,
+    data.table::fwrite(max_min_col,
                        file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
                        row.names = FALSE,
                        dec = ".",
@@ -819,9 +834,7 @@ unit_converter <- function(folder_in,
 
     temp_tbl <- data.table::fread(files_list[i], header = TRUE)
 
-    names(temp_tbl) <- "values"
-
-    temp_tbl <- temp_tbl[, .(converted = FUN(values))]
+    temp_tbl <- data.table::data.table(FUN(temp_tbl))
 
     names(temp_tbl) <- col_name
 
@@ -878,7 +891,7 @@ unit_converter <- function(folder_in,
 #'
 #' @export
 #'
-#' @examples
+
 summary_table <- function(var_folder,
                           sample = 5,
                           percent = FALSE,
@@ -915,15 +928,16 @@ summary_table <- function(var_folder,
                                       sample_val),
                                function(x) {
                                  temp_file <- daily_files[x]
-                                 temp_tbl <- data.table::fread(temp_file, header = TRUE)
+                                 temp_tbl <-
+                                   data.table::fread(temp_file, header = TRUE)
 
                                  names(temp_tbl) <- "month_values"
 
                                  temp_tbl <- dplyr::mutate(temp_tbl,
                                                            date = my_ymd,
                                                            month_val = as.factor(lubridate::month(date,
-                                                                                                  label = TRUE))
-                                 )}))
+                                                                                                  label = TRUE)))
+                               }))
 
     unique_tbl <- bind_tbl %>%
       dplyr::group_nest(Month = month_val) %>%
