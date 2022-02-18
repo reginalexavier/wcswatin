@@ -22,9 +22,3 @@ This function make an interpolation whith the trend surface method where the use
 have to inform the polynome degree. The interpolation is made over the tageded points
 for all the serie on the input.
 }
-\examples{
-ts_to_point(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-          targeted_points_path = system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
-           package = "cwswatinput"),
-          poly_degree = 2)
-}

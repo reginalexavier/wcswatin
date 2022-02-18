@@ -17,13 +17,13 @@
 #' @importFrom stats as.formula lm predict
 #'
 #' @examples
-#' ts_to_point(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-#'           targeted_points_path = system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
-#'            package = "cwswatinput"),
-#'           poly_degree = 2)
+# ts_to_point(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
+#           targeted_points_path = system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
+#            package = "cwswatinput"),
+#           poly_degree = 2)
 ts_to_point <- function(my_folder,
-                       targeted_points_path,
-                       poly_degree = 2){
+                        targeted_points_path,
+                        poly_degree = 2){
 
   var_files <- list.files(my_folder,
                           full.names = TRUE,

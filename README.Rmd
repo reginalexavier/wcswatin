@@ -1,5 +1,7 @@
 ---
 output: github_document
+always_allow_html: true
+fig_caption: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -21,6 +23,13 @@ knitr::opts_chunk$set(
 
 cwswatinput (Climate & Weather SWAT input) is an open-source R package for preparing weather and climate data from different sources for input in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded by the Critical Ecosystem Partnership Fund ([CEPF](https://www.cepf.net/)). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordinates using WGS 84 as datum. 
 
+### Conceptual overview of the `cwswatinput` package
+
+```{r, echo=FALSE, out.width="100%", fig.cap="Conceptual overview of the `cwswatinput` package"}
+knitr::include_graphics("man/figures/cwswatinput_flowchart150222.png")
+```
+
+
 ## Installation
 
 You can install the development version from GitHub with:
@@ -40,8 +49,10 @@ library(cwswatinput)
 
 ```{r include=FALSE}
 # o caminho dos arquivos
-#base_path <- "/media/reginal/Dados/transition/SWAT_UFMT/raw_data_cwswatinput_test"
-base_path <- "D:/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+base_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+ncdf_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/data_raw/new_gpm201703"
+#base_path <- "D:/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+#ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
 
 era5land_2018 <- file.path(base_path, "ERA5-Land_data/Y2018.nc")
 amSul_path <- file.path(base_path, "ERA5-Land_data/2019OneVariableAmSul.nc")
@@ -191,7 +202,11 @@ cell_tables <-  layerValues2pixel(layer_values = tbls,
 
 Resultado:
 ```{r}
-knitr::kable(cell_tables)
+# uma lista nomeada de tabelas por pixel
+names(cell_tables[1:10])
+# visualizando as 5 primeiras tabelas
+knitr::kable(cell_tables[1:10], format = "html")
+
 ```
 
 
@@ -333,6 +348,7 @@ bassin_path <- system.file("extdata/sl_bassin/sl_bassin_limit.shp",
 ```
 
 
+
 Segue a leitura dos centroides das estações utilizadas nas interpolações:
 
 ```{r}
@@ -343,11 +359,12 @@ sf::read_sf(centroides_path)
 A função `ts_to_point` faz a interpolação, no exemplo, utilizando o método "Trend surface" com polinómio de segundo grau para os pontos indicados por meio de um shapefile contendo os pontos desejados. Para uso dos dados interpolados no SWAT recomenda-se por exemplo um shape dos centroides de cada subbacia parametrizada. É gerado um arquivo txt com a série temporal de cada ponto interpolado.
 
 ```{r}
+#list.files(pasta_dados_diarios)
 serie_pontos <- ts_to_point(my_folder = pasta_dados_diarios,
                             targeted_points_path = centroides_path,
                             poly_degree = 2)
 
-serie_pontos[1] 
+serie_pontos[[1]] 
 ```
 
 
@@ -425,7 +442,7 @@ pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
 estacoes <- list.files(pasta_estacoes,
                        full.names = TRUE)
 
-ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
+# ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
 ```
 
 A validação consiste em criar uma tabela unica contendo os dados de campo e os dados "simulados" de precipitação. Tendo isso, pode-se utilizar as funções `ggof()` _(Graphical Goodness of Fit)_ ou `gof` _(Numerical Goodness-of-fit measures)_ do pacote `hydroGOF` para comparar os dados observados e os dados simulados.
@@ -441,7 +458,7 @@ Como exemplo, pegamos dados de precipitação coletados de 14 estações da ANA 
 - Rodar a função `hydroGOF::ggof()`
 
 
-Dados das estções:
+Dados das estações:
 ```{r}
 list.files(pasta_estacoes,
                        full.names = FALSE)
@@ -499,6 +516,15 @@ Juntando as duas tabelas:
 all_tabl <- cbind(tbl_ref, tbl_sim)
 ```
 
+
+```{r eval=FALSE, include=FALSE}
+library(gt)
+#knitr::kable(all_tabl, format = "html", padding = 10)
+gt(all_tabl, auto_align = TRUE) %>%  
+  fmt_number(columns = 2:29, decimals = 2)
+```
+
+
 Comparando os dados da primeira estação:
 
 ```{r}
@@ -507,12 +533,12 @@ hydroGOF::gof(sim = all_tabl$`p-1553003`,
 ```
 
 
-```{r}
+```{r eval=FALSE, warning=FALSE, include=FALSE}
 hydroGOF::ggof(sim = all_tabl$`p-1553003`,
                obs = all_tabl$`sim_p-1553003`,
                dates = all_tabl$date,
                ftype = "o",
                FUN = mean
-)
+               )
 ```
 
