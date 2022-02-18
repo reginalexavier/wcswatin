@@ -231,7 +231,7 @@ point_to_daily <- function(my_folder,
 save_daily_tbl <- function(tbl_list, path){
   for (i in seq_along(tbl_list)) {
     data.table::fwrite(tbl_list[[i]], # excluindo a coluna de data
-                       file = glue::glue("{path}/{names(tbl_list[i])}.csv "))
+                       file = glue::glue("{path}/{names(tbl_list[i])}.csv"))
 
   }
 }
