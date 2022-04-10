@@ -82,12 +82,17 @@ raster2vec <- function(rasterbrick, study_area){
   # cell values by day for all the serie
   tbl_list <- vector(mode = "list", length = raster::nlayers(rasterbrick))
 
+  pb <- txtProgressBar(min = 0, max = raster::nlayers(rasterbrick), style = 3) # including a progress bar
+
   for (i in seq_len(raster::nlayers(rasterbrick))) {
     cell.values <- as.vector(rasterbrick[[i]])[study_area$ID]
     cell.values[is.na(cell.values)] <- '-99.0' #filling missing data with -99
     tbl_list[[i]] <- dplyr::tibble(values = as.numeric(cell.values),
                                    layer_name = names(rasterbrick[[i]]))
+    setTxtProgressBar(pb, i) # the progressbar
   }
+
+  close(pb) # end of the progress bar
 
   names(tbl_list) <- names(rasterbrick)
 
