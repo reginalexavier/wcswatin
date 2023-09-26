@@ -370,8 +370,8 @@ tbl_from_references <- function(raster_file,
 
 #' Create a daily aggregation from an hourly dataset
 #'
-#' This function allows to make the aggregation of hourly observations to daily
-#' ones of a time series. The function for aggregation can be informed in the
+#' This function allows to aggregate hourly observations to daily
+#' time series. The function for aggregation can be informed in the
 #' \code{aggregation_function} parameter, this parameter takes a function as
 #' argument. The default function is \code{\link[base]{mean}}, so a daily
 #' average is returned.
