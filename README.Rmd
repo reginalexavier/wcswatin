@@ -1,5 +1,7 @@
 ---
 output: github_document
+always_allow_html: true
+fig_caption: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -18,7 +20,15 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-cwswatinput (Climate & Weater SWAT input) is an open-source R package for preparing weather and climate data for the Soil & Water Assessment Tool (SWAT) input format.
+
+cwswatinput (Climate & Weather SWAT input) is an open-source R package for preparing weather and climate data from different sources for input in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded by the Critical Ecosystem Partnership Fund ([CEPF](https://www.cepf.net/)). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordinates using WGS 84 as datum. 
+
+### Conceptual overview of the `cwswatinput` package
+
+```{r, echo=FALSE, out.width="100%", fig.cap="Conceptual overview of the `cwswatinput` package"}
+knitr::include_graphics("man/figures/cwswatinput_flowchart150222.png")
+```
+
 
 ## Installation
 
@@ -26,14 +36,509 @@ You can install the development version from GitHub with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("reginalexavier/cwswatinput")
+devtools::install_github("swatufmt/cwswatinput")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-#library(cwswatinput)
+library(cwswatinput)
 ## basic example code
 ```
+
+
+
+```{r include=FALSE}
+# o caminho dos arquivos
+base_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+ncdf_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/data_raw/new_gpm201703"
+#base_path <- "D:/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+#ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
+
+era5land_2018 <- file.path(base_path, "ERA5-Land_data/Y2018.nc")
+amSul_path <- file.path(base_path, "ERA5-Land_data/2019OneVariableAmSul.nc")
+global_path <- file.path(base_path, "ERA5-Land_data/2019OneVariableGlobal.nc")
+imerg_path <- file.path(base_path, "imerg_data/imerg_20000601.nc4")
+dem_path <- file.path(base_path, "topodata/CBSL_mosaico_wgs84.tif")
+bassin_path <- file.path(base_path, "shapefiles/cba_slc.shp")
+```
+
+# Rotinas para dados NetCDF ou raster(TIF)
+
+As rotinas permitem a extração espacial e temporal de conjuntos de dados de variáveis climatológicos e meteorológicos de grades globais como disponibilizados em sites como [Climate Change Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview), [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final"), [PERSIANN-CCS](https://chrsdata.eng.uci.edu/) entre outros. Esses dados são disponibilizados em formato de raster(.tif) ou em formato de NetCDF _(um formato binário muito utilizado para disponibilizar séries espaço-temporais de dados multiparamétricos)_. Para aumentar a eficiencia computacional no processamento, os respectivos produtos devem ser inicialmente baixados e armazenados localmente. As caracteristicas específicas de cada produto (parametros disponibilizados, resolução temporal e espacial) são detalhadas nos respectivos portais, mas são extraídas também pelas rotinas desenvolvidas. Para serem utilizados como entradas no SWAT, os dados meteorológicos e climatológicos são transformados em conjuntos de tabelas em formato txt demandados pelo modelo. Testados para conjuntos de dados de reanalise (ERA5_Land) e as grades de precipitação PERSIANN e GPM, o pacote `cwswatinput` disponibiliza porém, por meio de funções, rotinas gerais e universais para extração de grades provenientes de outras instituições.
+
+
+## Passo a passo:
+
+###### 1. Informar o caminho onde o arquivo se encontra(NetCDF)
+```{r}
+era5land_2017 <- file.path(base_path, "ERA5-Land_data/Y2017.nc")
+```
+
+###### 2. Verificar as variaveis presentes no arquivo(NetCDF)
+
+```{r}
+#verificar as variáveis presentes nos arquivos ncdf baixados
+
+var_names(era5land_2017)
+
+```
+
+> Este arquivo por exemplo contem 6 variáveis
+
+###### 3. Criar um raster multilayer com o arquivo, escolhendo uma variavel desejada entre as mostradas em `var_name` (NetCDF + TIF)
+
+```{r}
+# NetCDF: carregando um arquivo NetCDF e transformar em raster
+
+one_brick <- raster::brick(era5land_2018,
+                           varname = "uas")[[1:3]]
+one_brick
+```
+
+> Alguns arquivos NetCDF invertem a sequencia entre latitude com longitude, causando erros na transformação para raster. Neste caso `cwswatinput` tem a função `ncdf2raster()` que faz essa transformação.
+
+# TIF
+
+> Os mesmos passos são válidos para dados de entrada como raster(.tif), uma vez que a partir deste passo estão sendo manipulados rasters vindo da transformação dos NetCDF. Os rasters podem ser importados e juntados para arquivos multilayer por meio das funções (`raster::brick` ou `raster::stack`).
+
+
+###### 3.1 Caso forem varios arquivos, pode se criar uma lista raster multilayer (NetCDF)
+
+```{r}
+# para carregar vários arquivos de ncdf para uma lista
+# quando for vários arquivos ao mesmo tempo
+list_brick <- lapply(list(era5land_2017, era5land_2018),
+                     raster::brick,
+                     varname = "uas") |> lapply(\(x) (x[[1:3]]))
+list_brick
+```
+
+
+###### 4. Criar um arquivo contendo as coordenadas centrais dos pixels da grade dentro de uma área de estudo (necessita de um arquivo SHAPE poligonal) e sua elevação corespondente a partir de um MNT (.tif).
+
+```{r}
+study_area <- study_area_records(raster = one_brick[[1]], # raster de exemplo, dos mesmos que serão extraídos os dados
+                                 watershed = bassin_path, # shapefile poligonal que delimita a área de estudo
+                                 DEM = dem_path) # raster do MNT para extrair a elevação de dado ponto central da grade
+```
+
+Resultado:
+```{r}
+knitr::kable(study_area[1:10, ])
+```
+
+###### 5. Com a tabela dos pontos da grade da area de estudo, esta função cria a tabela master para cada variavel contida nos arquivos NetCDF, basta informa o nome da variavel. No caso de arquivos TIF de uma variável (principalmente utilizados para grades de precipitação) essa operação precisa ser realizada somente uma única vez.
+
+```{r}
+mainFile <- mainInput_var(study_area = study_area,
+                          var_name = "uas")
+
+```
+
+Resultado:
+```{r}
+knitr::kable(mainFile[1:10, ])
+```
+
+> De acordo com as padronizações das entradas climatológicas no SWAT, é preciso ciar uma tabela master para cada uma das variaveis (NetCDF de múltiplas variaveis).
+
+
+###### 6. Extrair os dados do parametro climatológico e guardar em uma tabela
+
+Esta função faz a extração dos dados de um raster multilayer e guarda em uma tabela. A tabela criada contem duas colunas (values) que guardam os valores extraídos na mesma ordem dos IDs e (layer_name) guardando o nome de cada layer extraído (geralmente é a data).
+
+
+```{r}
+tbls <- raster2vec(rasterbrick = one_brick,
+                   study_area = study_area)
+```
+
+Resultado:
+```{r}
+knitr::kable(tbls[1:10, ])
+```
+
+
+A tabela pode ser salva com essas linhas:
+```{r
+# este arquivo pode ser salvo como tabelas individuais como:
+data.table::fwrite(tbls,
+                   "o_caminho/minha_tabela.csv",
+                   row.names = TRUE)
+```
+
+
+###### 6.1 Quando varios NetCDFs constituem uma única série temporal é preciso criar um lista de rasters. A função `raster2vec` precisa ser iterada sobre cada um deles. O resultado é uma lista de tabela, cuja cada uma representa um arquivo.
+
+
+```{r}
+tbls1 <- lapply(list_brick, raster2vec, study_area)
+
+```
+
+
+As tabelas podem ser valvas com essas linhas:
+```{r
+# este arquivo pode ser salvo como tabelas individuais como:
+data.table::fwrite(do.call(rbind, tbls1),
+                   "o_caminho/minha_tabela.csv",
+                   row.names = TRUE)
+```
+
+
+
+###### 7. Tendo uma tabela por arquivo, esta funcão transforma essa tabela em uma lista nomeada de séries por pixel. Ele recebe um vetor com os nomes para cada arquivo. Este vetor deve conter o mesmo tamanho que a quantidade pixel com valor. O nome da coluna deve ser a primeira data da série.
+
+
+```{r message=FALSE, warning=FALSE}
+cell_tables <-  layerValues2pixel(layer_values = tbls,
+                                  tb_name = mainFile$NAME,
+                                  col_name = "20170101")
+# cell_tables1 <-  layerValues2pixel(layer_values = do.call(rbind, tbls1),
+#                                   tb_name = mainFile$NAME,
+#                                   col_name = "20170101")
+```
+
+
+Resultado:
+```{r}
+# uma lista nomeada de tabelas por pixel
+names(cell_tables[1:10])
+# visualizando as 5 primeiras tabelas
+knitr::kable(cell_tables[1:10], format = "html")
+
+```
+
+
+
+
+## Rotinas para interpolação de dados de estações físicas em uma área especifica
+
+```{r include=FALSE}
+pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
+
+estacoes <- list.files(pasta_estacoes, 
+                       full.names = TRUE)
+
+```
+
+
+Os arquivos de entrada devem possuir a formatação utilizada pelo SWAT e se encontrar em uma única pasta:
+```{r}
+list.files(pasta_estacoes)
+```
+
+> Essa amostra de dados comtem observaçoes de dados de chuva de 14 estações no periodo de 01/03/2017 a 31/03/2017. Os valores -99 são uma codificação para dados faltantes(falhas).
+
+Assim, a pasta deve incluir um arquivo dos dados da série para cada estação e um arquivo master das coordenadas etc. das estações (no exemplo: pcp.txt):
+
+Numa série temporal é uma tabela txt de coluna única, onde o nome da coluna é a primeira data, seguidos pelos dados do parametro de acordo com a resolução temporal (geralmente diária). Exemplo da série `p-1553003.txt`
+
+
+```{r echo=FALSE}
+read.csv(estacoes[1])
+```
+
+Arquivo master contendo IDs sequenciais, os nomes das estações, suas coordenadas e sua elevação `pcp.txt`
+
+```{r echo=FALSE}
+read.csv(estacoes[15])
+```
+
+## Preenchimento de falhas
+Antes de proseguir para as transformações, pode se efetuar uma verificação dos dados no quesito de dados faltantes. Para isso temos duas funções:
+
+- `files_to_table()`: importa todas as series em uma unica tabela;
+- `count_na()`: verifica a quantidade de dados faltantes em cada coluna de dados, i. e., para cada estção.
+- `fill_gap()`: permite preencher as falhas de dados presentes.
+- `table_to_files()`: exporta cada coluna da tabela pós-preenchimento em um arquivo separado.
+
+
+Importando os dados:
+
+```{r}
+unique_table <- files_to_table(files_path = pasta_estacoes,
+                              files_pattern = "p-",
+                              start_date = "2017-03-01",
+                              end_date = "2017-03-31",
+                              na_value = -99,
+                              neg_to_zero = FALSE
+)
+
+```
+
+#### Visão geral de dados das 14 estações:
+```{r echo=FALSE}
+#unique_table[2:8]
+knitr::kable(unique_table[-1])
+```
+
+
+#### Calculo das porcentagens de NA em cada coluna:
+
+```{r}
+cwswatinput::count_na(unique_table[-1], percent = TRUE)
+```
+
+
+#### Executando o preenchimento das falhas:
+
+```{r
+gap_filled <- cwswatinput::fill_gap(dataset = unique_table,
+                                    corPeriod = "daily")
+```
+
+```{r include=FALSE}
+gap_filled <- cwswatinput::fill_gap(dataset = unique_table,
+                                    corPeriod = "daily")
+```
+
+#### Após o preenchimento de falhas:
+```{r echo=FALSE}
+knitr::kable(gap_filled[-1])
+```
+
+
+> Após desses passos, é preciso salvar os dados com as falhas corrigidas com a função `table_to_files()` em uma pasta local, e passam a ser os dados de entrada para o restante do processamento.
+
+
+```{r include=FALSE}
+pasta_estacoes1 <- tempdir()
+
+table_to_files(table = gap_filled[-1],
+               folder_path = pasta_estacoes1,
+               first_date = "20170301",
+               file_extention = "txt")
+file.copy(from = file.path(pasta_estacoes, "pcp.txt"), 
+            to = file.path(pasta_estacoes1, "pcp.txt"))
+```
+
+Para preparar a interpolação entre as estações com ajuste individual para cada passo de tempo, a função `point_to_daily` capta as séries de todos os pontos/estações e cria uma tabela única para cada dia
+
+```{r}
+dados_diarios <- point_to_daily(my_folder = pasta_estacoes1,
+                                var_pattern = "p-",
+                                main_pattern = "pcp",
+                                start_date = "20170301",
+                                end_date = "20170331",
+                                interval = "day",
+                                na_value = -99,
+                                negatif_number = TRUE,
+                                prefix = "day_")
+dados_diarios[18] # exemplo de uma tabela
+```
+
+
+As tabelas diárias podem ser salvas com a função `save_daily_tbl` do pacote `cwswatinput` (por favor consultar a documentação da função).
+
+```{r include=FALSE}
+#pasta_dados_diarios <- system.file("extdata/ts_input", package = "cwswatinput")
+
+dir.create(file.path(pasta_estacoes1, "test"))
+save_daily_tbl(dados_diarios,
+               path = file.path(pasta_estacoes1, "test"))
+pasta_dados_diarios <- file.path(pasta_estacoes1, "test")
+
+centroides_path <- system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
+                          package = "cwswatinput")
+
+bassin_path <- system.file("extdata/sl_bassin/sl_bassin_limit.shp",
+                           package = "cwswatinput")
+
+```
+
+
+
+Segue a leitura dos centroides das estações utilizadas nas interpolações:
+
+```{r}
+sf::read_sf(centroides_path)
+```
+
+
+A função `ts_to_point` faz a interpolação, no exemplo, utilizando o método "Trend surface" com polinómio de segundo grau para os pontos indicados por meio de um shapefile contendo os pontos desejados. Para uso dos dados interpolados no SWAT recomenda-se por exemplo um shape dos centroides de cada subbacia parametrizada. É gerado um arquivo txt com a série temporal de cada ponto interpolado.
+
+```{r}
+#list.files(pasta_dados_diarios)
+serie_pontos <- ts_to_point(my_folder = pasta_dados_diarios,
+                            targeted_points_path = centroides_path,
+                            poly_degree = 2)
+
+serie_pontos[[1]] 
+```
+
+
+A função `varMain_creator` cria uma tabela master para entrada no SWAT para os dados da grade regular ou irregular interpolada
+
+```{r}
+varMain_creator(targeted_points_path = centroides_path,
+                var_name = "pcp",
+                col_elev = "Elev")
+```
+
+
+
+A função `ts_to_area` ainda permite interpolar os pontos de entrada para uma área de estudo inteiro e cria um raster para cada dia em uma resolução espacial a ser definida (no exemplo 0.01°)
+
+```{r}
+raster_interpolated <- ts_to_area(my_folder = pasta_dados_diarios,
+           bassin_limit_path = bassin_path,
+           poly_degree = 2,
+           resolution = 0.01)
+
+raster_interpolated[[18]]
+```
+
+
+Para visualização de uma camada interpolada e sua validação é utilizado o pacote `tmap` que combina o raster interpolado com as estações utilizadas na interpolação.
+
+```{r}
+dia <- 18
+tmap::tm_shape(raster_interpolated[[dia]]) +
+  tmap::tm_raster(title = "Precipitação Estimada \n Trend Surface (mm)",
+                  midpoint = NA,
+                  n = 15, palette = "-RdBu",
+                  style = c("cat", "fixed", "sd", "equal", "pretty", "quantile",
+                            "kmeans", "hclust", "bclust", "fisher",
+                            "dpih", "headtails")[7]) +
+  tmap::tm_shape(sf::read_sf(bassin_path)) +
+  tmap::tm_borders(col = "red") +
+  tmap::tm_shape(sf::st_as_sf(as.data.frame(dados_diarios[[dia]]), coords = c("LONG", "LAT"),
+                              crs = "+proj=longlat +datum=WGS84 +no_defs")) +
+  tmap::tm_text(text = "pcp", 
+                auto.placement = 1,
+                size = .8) +
+  tmap::tm_dots(shape = 1,
+                col = "blue",
+                size = "pcp",
+                title.size = "Precipitação Observada em Campo") +
+  tmap::tm_legend(legend.outside = TRUE) +
+  tmap::tm_compass(type = "arrow", position = c(0.08,0.1), size = 2) +
+  tmap::tm_scale_bar(text.size = .5,
+                     position = c(0.01, 0),
+  )
+
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+map_ts_poly2
+```
+
+<br><br>
+
+
+```{r include=FALSE}
+unlink(pasta_estacoes1, recursive = TRUE)
+```
+
+
+# Validação de dados simulados com dados coletados em campo
+
+```{r include=FALSE}
+pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
+
+estacoes <- list.files(pasta_estacoes,
+                       full.names = TRUE)
+
+# ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
+```
+
+A validação consiste em criar uma tabela unica contendo os dados de campo e os dados "simulados" de precipitação. Tendo isso, pode-se utilizar as funções `ggof()` _(Graphical Goodness of Fit)_ ou `gof` _(Numerical Goodness-of-fit measures)_ do pacote `hydroGOF` para comparar os dados observados e os dados simulados.
+
+Como exemplo, pegamos dados de precipitação coletados de 14 estações da ANA e INMET para o periodo de 01/03/2017 a 31/03/2017 como dados observados e dados provenientes do produto [GPM IMERG Final Precipitation L3](https://gpm.nasa.gov/data/directory) da plataforma [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final") de precipitação para o mesmo periodo.
+
+## Os passos:
+
+- Criar uma tabela unica com os dados de campo com ajuda da função `cwswatinput::files_to_table()`;
+- Transformar os arquivos NetCDF para dados em formato Raster com ajuda da função `cwswatinput::ncdf_to_raster()`;
+- Extrair os dados de precipitação nos dados em formato Raster com ajuda da função `cwswatinput::tbl_from_references()`;
+- Juntar as duas tabelas em uma unica tabela;
+- Rodar a função `hydroGOF::ggof()`
+
+
+Dados das estações:
+```{r}
+list.files(pasta_estacoes,
+                       full.names = FALSE)
+```
+
+O arquivo `pcp.txt` contem as localizações dos 14 estações:
+```{r echo=FALSE}
+read.csv(file.path(pasta_estacoes, "pcp.txt"))
+```
+
+
+Os arquivos baixados:
+```{r}
+# lista dos arquivos
+list.files(ncdf_path,
+           pattern = "nc4*",
+           full.names = FALSE)
+```
+
+
+Transformar os arquivos NetCDF para raster:
+```{r}
+gpm_raster_list <- lapply(list.files(ncdf_path,
+                                     pattern = "nc4*",
+                                     full.names = TRUE),
+                          ncdf_to_raster,
+                          "precipitationCal")
+
+
+gpm_stack <- raster::stack(gpm_raster_list)
+```
+
+
+Criação das duas tabelas, de referencia e sinulado:
+```{r}
+tbl_ref <- files_to_table(files_path = pasta_estacoes,
+                          files_pattern = "p-",
+                          start_date = "2017-03-01",
+                          end_date = "2017-03-31",
+                          na_value = -99,
+                          neg_to_zero = FALSE
+                          )
+
+tbl_sim <- tbl_from_references(raster_file = gpm_stack,
+                               ref_points = file.path(pasta_estacoes, "pcp.txt"),
+                               prefix_colname = "sim",
+                               buffer = 1,
+                               fun = mean)
+```
+
+
+Juntando as duas tabelas:
+
+```{r}
+all_tabl <- cbind(tbl_ref, tbl_sim)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+library(gt)
+#knitr::kable(all_tabl, format = "html", padding = 10)
+gt(all_tabl, auto_align = TRUE) %>%  
+  fmt_number(columns = 2:29, decimals = 2)
+```
+
+
+Comparando os dados da primeira estação:
+
+```{r}
+hydroGOF::gof(sim = all_tabl$`p-1553003`,
+               obs = all_tabl$`sim_p-1553003`)
+```
+
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+hydroGOF::ggof(sim = all_tabl$`p-1553003`,
+               obs = all_tabl$`sim_p-1553003`,
+               dates = all_tabl$date,
+               ftype = "o",
+               FUN = mean
+               )
+```
+
