@@ -16,7 +16,7 @@
 #'
 #' @importFrom stats as.formula lm predict
 #'
-#' @examples
+# @examples
 # ts_to_point(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
 #           targeted_points_path = system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
 #            package = "cwswatinput"),

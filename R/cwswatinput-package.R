@@ -1,3 +1,5 @@
+"_PACKAGE"
+
 #' cwswatinput: Climate & Weather SWAT Input.
 #'
 #' cwswatinput (Climate & Weather SWAT input) is an open-source R package for
@@ -13,7 +15,6 @@
 #'
 #'
 #' @author Reginal Exavier \email{reginalexavier@@rocketmail.com}, Peter Zeilhofer \email{zeilhoferpeter@@gmail.com}
-#' @docType package
 #' @name cwswatinput-package
 #' @aliases cwswatinput
 #'
