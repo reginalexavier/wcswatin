@@ -4,14 +4,14 @@
 \alias{study_area_records}
 \title{Study Area Records}
 \usage{
-study_area_records(raster, watershed, DEM)
+study_area_records(raster_model, roi, dem)
 }
 \arguments{
-\item{raster}{One layer representing where the data wile be extracted}
+\item{raster_model}{One layer representing where the data wile be extracted}
 
-\item{watershed}{A shapefile delimiting the study area}
+\item{roi}{A shapefile delimiting the study area}
 
-\item{DEM}{An elevation raster for the study area}
+\item{dem}{An elevation raster for the study area}
 }
 \value{
 A table

@@ -9,6 +9,8 @@
 #'
 #' @importClassesFrom terra SpatRaster
 #'
+#' @importFrom methods setGeneric setMethod
+#'
 #' @seealso \code{terra::rast}
 #'
 #'

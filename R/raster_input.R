@@ -1,42 +1,50 @@
-utils::globalVariables(c("study_area"))
+utils::globalVariables(c("study_area", "..cols", "ID", "nome"))
 
 #' Study Area Records
 #'
 #' This function extracts the records position grid for the study area combining
 #' with the DEM for every point
 #'
-#' @param raster One layer representing where the data wile be extracted
-#' @param watershed A shapefile delimiting the study area
-#' @param DEM An elevation raster for the study area
+#' @param raster_model One layer representing where the data wile be extracted
+#' @param roi A shapefile delimiting the study area
+#' @param dem An elevation raster for the study area
 #'
 #' @return A table
 #' @export
 #'
-study_area_records <- function(raster, watershed, DEM){
-  #obtain cell numbers within the raster raster
-  cell.no <- raster::cellFromPolygon(raster,
-                                     rgdal::readOGR(dsn = watershed, verbose = FALSE))
+study_area_records <- function(raster_model,
+                               roi,
+                               dem){
+
+  raster_model <- input_raster(raster_model, lyrs = 1)
+  roi <- input_vector(roi)
+  dem <- input_raster(dem)
+  #obtain cell numbers within the raster_model
+  roi_cell <- raster_model |>
+    terra::mask(roi |>
+                  terra::project(terra::crs(raster_model))) |>
+    terra::values(mat = FALSE)
+
+
+  roi_cell <- which(!is.na(roi_cell))
+
   #obtain lat/long values corresponding to watershed cells
-  cell.longlat <- raster::xyFromCell(raster, unlist(cell.no))
-  cell.rowCol <- raster::rowColFromCell(raster, unlist(cell.no))
-  points_elevation <- raster::extract(x = raster::raster(DEM),
-                                      y = cell.longlat,
-                                      method = 'simple')
+  cell_longlat <- terra::xyFromCell(raster_model, roi_cell)
+  cell_rowCol <- terra::rowColFromCell(raster_model, roi_cell)
+  points_elevation <- terra::extract(x = dem,
+                                     y = cell_longlat,
+                                     method = 'simple')$elevation
 
-  study_area_records <- data.frame(ID = unlist(cell.no),
-                                   cell.longlat,
-                                   cell.rowCol,
-                                   Elevation = points_elevation
+  study_area_records <- data.table::data.table(cell_longlat,
+                                               ID = roi_cell,
+                                               cell_rowCol,
+                                               Elevation = points_elevation
   )
 
-  sp::coordinates(study_area_records) <- ~x+y
+  names(study_area_records) <- c("x", "y", "ID", "row", "col", "Elevation")
 
-  data.frame(sp::coordinates(study_area_records),
-             ID = study_area_records$ID,
-             row = study_area_records$row,
-             col = study_area_records$col,
-             Elevation = study_area_records$Elevation
-  )
+  study_area_records
+
 }
 
 
@@ -51,58 +59,94 @@ study_area_records <- function(raster, watershed, DEM){
 #' @return A table
 #' @export
 #'
-mainInput_var <- function(study_area, var_name = "uas"){
-  filenameSWAT <- vapply(study_area$ID, function(x){
-    paste(var_name, x, sep = '')}, character(1)
-  )
-  #### Write out the SWAT grid information master table
-  outSWAT <- data.frame(ID = study_area$ID,
-                        NAME = filenameSWAT,
-                        LAT = study_area$y,
-                        LONG = study_area$x,
-                        ELEVATION = study_area$Elevation
-  )
-  outSWAT
+mainInput_var <- function(study_area, var_name = "temp"){
+
+  main_tbl <- data.table::copy(study_area)
+
+  cols <- c("ID", "NAME", "LAT", "LONG", "ELEVATION")
+
+  main_tbl[, nome := paste0(var_name,"_", ID)]
+  data.table::setnames(main_tbl, c("ID", "nome", "y", "x", "Elevation"), cols)
+
+  main_tbl[ , ..cols]
+
 }
 
+# os valores da camada raster são extraídos e guardado em uma tabela com as colunas
+# values e layer_name. O pixel extraido é identificado pelo ID (row e col), o layer_name
+# representa a data da coleta do dado.
+# Todas as camadas são empilhadas em uma tabela unica, cada camada é diferenciada pela coluna
+# layer_name contendo a data da coleta do dado.
+
+
 
 #' Convert a Raster Layer to a Vector
 #'
-#' Convert a Raster Layer to a Vector
+#' The function extracts the values of a NetCDF/raster layer and converts it to a table format
+#' containing the values of the pixels and the layer name as two columns. The pixel is identified
+#' by the ID (row and col), and the layer name represents the date/hour of the data collected.
+#' All layers are stacked in a single table, each layer is differentiated by the column layer_name
+#' containing the date of the data collected.
+#' The function, due to the large amount of data, counts with the structure of parallel processing
+#' based on the future package to speed up the process. By default, the computation is done in
+#' sequential mode (future::plan(future::sequential)), for parallel processing, the user must
+#' change to the desired mode (ex: future::plan(future::multisession, workers = 6)).
 #'
-#' @param rasterbrick The raster where the values have to be extracted
-#' @param study_area The object from 'study_area_records'
 #'
-#' @return A named list
+#'
+#' @param raster_path Raster file or path to a raster/ncdf file
+#' @param var The variable to be extracted
+#' @param n_layers Number of layers in the raster file to be extracted
+#' @param study_area The table from 'study_area_records'
+#' @param future_scheduling Controling how the future will be scheduled and distributed
+#'  between the workers. The default is 1, which means that the future will be scheduled
+#'  by core. See the documentation of future package for more details \code{future.apply::future_lapply}
+#' @param missing_value The value to be used when the data is missing
+#'
+#' @return A table
 #' @export
-#'
-# obtain daily climate values at cells bounded with the study watershed (extract values from a raster)
-# extração de dados em um raster e salvando em um vetor(lista nomeada)
-raster2vec <- function(rasterbrick, study_area){
-  # cell values by day for all the serie
-  tbl_list <- vector(mode = "list", length = raster::nlayers(rasterbrick))
 
-  pb <- txtProgressBar(min = 0, max = raster::nlayers(rasterbrick), style = 3) # including a progress bar
+raster2vec <- function(raster_path,
+                       var = NA,
+                       n_layers,
+                       study_area,
+                       future_scheduling = 1,
+                       missing_value = -99){
 
-  for (i in seq_len(raster::nlayers(rasterbrick))) {
-    cell.values <- as.vector(rasterbrick[[i]])[study_area$ID]
-    cell.values[is.na(cell.values)] <- '-99.0' #filling missing data with -99
-    tbl_list[[i]] <- dplyr::tibble(values = as.numeric(cell.values),
-                                   layer_name = names(rasterbrick[[i]]))
-    setTxtProgressBar(pb, i) # the progressbar
-  }
+  p <- progressr::progressor(steps = n_layers) # steps = n_layers
 
-  close(pb) # end of the progress bar
+  roi_id <- input_table(study_area)$ID
 
-  names(tbl_list) <- names(rasterbrick)
+  tbl_list <- future.apply::future_lapply(
+
+    X = seq_len(n_layers),
+    FUN = function(x){
+      p()
+      raster_i <- input_raster(raster_path,
+                               subds = var,
+                               lyrs = x)
+      raster_name_i <- names(raster_i)
+
+      cell.values <- terra::values(raster_i)[roi_id]
+      cell.values[is.na(cell.values)] <- missing_value #filling missing data with -99
+
+      data.table::data.table(ID = roi_id,
+                             values = cell.values,
+                             layer_name = raster_name_i)
+    },
+
+    # SIMPLIFY = FALSE,
+    future.scheduling = future_scheduling,
+    # future.seed = NULL,
+    future.packages = c("terra", "dplyr")
+  )
 
   do.call(rbind, tbl_list)
-
 }
 
 
 
-#' Series of Pixel Values
+#' Series of Pixel Values (table format)
 #'
 #' With the extracted values by raster layer from the (raster2vec) function, this function
 #' organize these values in the format of swat input, i.e, a time serie for every pixel
@@ -119,176 +163,73 @@ raster2vec <- function(rasterbrick, study_area){
 #'
 layerValues2pixel <- function(layer_values,
                               tb_name,
-                              col_name = "20170101000000"){
-  tbl_list <- split(layer_values[, 1], layer_values[,2])
-  layer_list <- vector(mode = "list", length = length(tbl_list))
-  px_list <- vector(mode = "list", length = nrow(tbl_list[[1]])) #length(tbl_list[[1]]))
+                              col_name = "20020101"){
 
-  pb <- txtProgressBar(min = 0, max = nrow(tbl_list[[1]]), style = 3)
-  for (p in seq_len(nrow(tbl_list[[1]]))) { # n pixels
-    #pb1 <- txtProgressBar(min = 0, max = length(tbl_list), style = 3)
-    for (d in seq_len(length(tbl_list))) { # n days/layers
-      layer_list[[d]] <- as.numeric(tbl_list[[d]][p, 1])
-      #setTxtProgressBar(pb1, d)
-    }
-    #close(pb1)
-    px_list[[p]] <- data.frame(unlist(layer_list))
+  input_tbl <- input_table(layer_values)
 
-    colnames(px_list[[p]]) <- col_name
-    setTxtProgressBar(pb, p)
-  }
+  tbl_list <- split(input_tbl[, c("values", "layer_name")], by = "layer_name", keep.by = F)
 
-  names(px_list) <-  tb_name # name for every table
+  transposed_tbl <- data.table::transpose(data.table::as.data.table(tbl_list))
 
-  close(pb)
+  final_list <- lapply(as.list(transposed_tbl),
+                       \(x) {
+                         df <- data.table::data.table(x)
+                         colnames(df) <- col_name
+                         df
+                       }
+  )
 
-  px_list
+  names(final_list) <- tb_name
+
+  final_list
+
 }
 
 
 
 
-#' NetCDF to Raster
+#' Series of Pixel Values (Array Format)
 #'
-#' Transformation/convertion of a NetCDF file into a Raster file.
+#' With the extracted values by raster layer from the (raster2vec) function, this function
+#' organize these values in the format of swat input, i.e, a time serie for every pixel
+#' of the study area.
 #'
-#' @param ncdf_file Character string of the path of the NetCDF file to be
-#'   transformed into raster.
-#' @param var_name Character string of the variable name to be extracted.
-#' @param time_step_end If not NULL, a numeric value for the final time step. When NULL,
-#' all the time steps are read if exist in the raw NetCDF file.
-#' @param coordinate_rs Character string of the coordinate reference system, see
-#'   \code{\link[sp]{CRS}}.
+#' @param layer_values List. Values extracted by raster
+#' @param tb_name A vector contain the names for every table created. These names are
+#' in the mainTable
+#' @param col_name A name for the column of everery swatinput table created. Commonly this
+#' name is the first date of time serie beeing analysed.
 #'
-#'
-#' @return A raster
+#' @return A list of table
 #' @export
-
-ncdf_to_raster <- function(ncdf_file,
-                           var_name,
-                           time_step_end = NULL,
-                           coordinate_rs = sp::CRS('+proj=longlat +datum=WGS84')) {
-  nc_file <- ncdf4::nc_open(ncdf_file)
-  ###getting the x values (longitudes in degrees)
-  nc_long <- ncdf4::ncvar_get(nc_file,
-                              c("lon", "longitude")[c("lon", "longitude") %in%
-                                                      names(nc_file$dim)])
-  ####getting the y values (latitudes in degrees)
-  nc_lat <- ncdf4::ncvar_get(nc_file,
-                             c("lat", "latitude")[c("lat", "latitude") %in%
-                                                    names(nc_file$dim)])
-  # setting the datetime for the ncdf file
-  datetime <-
-    as.character(ncdf4.helpers::nc.get.time.series(nc_file,
-                                                   v = var_name,
-                                                   time.dim.name = "time"))
-  if (!is.null(time_step_end)) {
-    datetime <- datetime[1:time_step_end]
-  }
-  # extract values
-  var_values <- ncdf4::ncvar_get(nc = nc_file,
-                                 varid = var_name)
-
-  if (length(datetime) == 1) {
-    # ncdf with one timestep
-    if (length(dim(var_values)) == 3) {
-      var_values <- var_values[, , 1]
-    }
-    # latitude needs reorder????
-    if (nc_lat[1] == max(nc_lat) &
-        nc_lat[nrow(nc_lat)] == min(nc_lat)) {
-      var_values
-    } else {
-      var_values <- var_values[nrow(var_values):1, ]
-    }
-
-    # need to reverse rows and columns for consistency???
-    if (nrow(var_values) != length(nc_lat) &
-        ncol(var_values) != length(nc_long)) {
-      var_values <- t(var_values)
-    } else {
-      var_values
-    }
-
-    #save the daily climate var_values values in a raster
-    ncdf_raster <- raster::raster(
-      x = as.matrix(var_values),
-      xmn = min(nc_long),
-      xmx = max(nc_long),
-      ymn = min(nc_lat),
-      ymx = max(nc_lat),
-      crs = coordinate_rs
-    )
+#'
+layerValues2pixelA <- function(layer_values,
+                               tb_name,
+                               col_name = "20020101"){
 
 
-    names(ncdf_raster) <- datetime
+  input_tbl <- input_table(layer_values)
 
-    ncdf_raster <- ncdf_raster
+  n_row <- length(tb_name)
+  n_col <- nrow(input_tbl)/n_row
+  n_layers <- 1
 
+  m_array <- input_tbl$values |>
+    array(dim = c(n_row, n_col, n_layers)) # row col layer
 
+  final_list <- lapply(seq_along(tb_name),
+         \(x) {
+           df <- data.table::data.table(m_array[ x, , 1]) # row col layer
+           colnames(df) <- col_name
+           df
+         }
+  )
 
-  } else {
-    # ncdf with multiple timestep
+  names(final_list) <- tb_name
 
-    #transformando o array tridimencional para uma lista de array bidimencional
-    val_list <- vector(mode = "list", length = length(datetime))
+  final_list
 
-    for (i in seq_along(datetime)) {
-      val_list[[i]] <- var_values[, , i]
-    }
-
-    for (i in seq_along(val_list)) {
-      # latitude needs reorder????
-      if (nc_lat[1] == max(nc_lat) &
-          nc_lat[nrow(nc_lat)] == min(nc_lat)) {
-        val_list[[i]]
-      } else {
-        val_list[[i]] <- val_list[[i]][nrow(val_list[[i]]):1, ]
-      }
-
-      # need to reverse rows and columns for consistency???
-      if (nrow(val_list[[i]]) != length(nc_lat) &
-          ncol(val_list[[i]]) != length(nc_long)) {
-        val_list[[i]] <- t(val_list[[i]])
-      } else {
-        val_list[[i]]
-      }
-    }
-
-    generic_layer <- raster::raster(
-      nrows = length(nc_lat),
-      ncols = length(nc_long),
-      xmn = min(nc_long),
-      xmx = max(nc_long),
-      ymn = min(nc_lat),
-      ymx = max(nc_lat),
-      crs = coordinate_rs
-    )
-
-    raster_list <- vector(mode = "list", length = length(val_list))
-
-    cat(glue::glue(
-      "Transforming {length(val_list)} timesteps into raster layer"
-    ))
-
-    # iterate with progress bar
-    pb <- txtProgressBar(min = 0,
-                         max = length(val_list),
-                         style = 3)
-    for (i in seq_along(val_list)) {
-      raster_list[[i]] <- raster::setValues(generic_layer,
-                                            values = val_list[[i]])
-      names(raster_list[[i]]) <- datetime[i]
-      setTxtProgressBar(pb, i)
-    }
-
-    ncdf_raster <- raster::brick(raster_list)
-
-  }
-
-  ncdf4::nc_close(nc_file)
-
-  ncdf_raster
 }
+
 
 

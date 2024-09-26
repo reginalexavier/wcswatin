@@ -4,7 +4,7 @@
 \alias{mainInput_var}
 \title{Main table contructor by Variable}
 \usage{
-mainInput_var(study_area, var_name = "uas")
+mainInput_var(study_area, var_name = "temp")
 }
 \arguments{
 \item{study_area}{The object from 'study_area_records'}

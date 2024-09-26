@@ -4,16 +4,41 @@
 \alias{raster2vec}
 \title{Convert a Raster Layer to a Vector}
 \usage{
-raster2vec(rasterbrick, study_area)
+raster2vec(
+  raster_path,
+  var = NA,
+  n_layers,
+  study_area,
+  future_scheduling = 1,
+  missing_value = -99
+)
 }
 \arguments{
-\item{rasterbrick}{The raster where the values have to be extracted}
+\item{raster_path}{Raster file or path to a raster/ncdf file}
 
-\item{study_area}{The object from 'study_area_records'}
+\item{var}{The variable to be extracted}
+
+\item{n_layers}{Number of layers in the raster file to be extracted}
+
+\item{study_area}{The table from 'study_area_records'}
+
+\item{future_scheduling}{Controling how the future will be scheduled and distributed
+between the workers. The default is 1, which means that the future will be scheduled
+by core. See the documentation of future package for more details \code{future.apply::future_lapply}}
+
+\item{missing_value}{The value to be used when the data is missing}
 }
 \value{
-A named list
+A table
 }
 \description{
-Convert a Raster Layer to a Vector
+The function extracts the values of a NetCDF/raster layer and converts it to a table format
+containing the values of the pixels and the layer name as two columns. The pixel is identified
+by the ID (row and col), and the layer name represents the date/hour of the data collected.
+All layers are stacked in a single table, each layer is differentiated by the column layer_name
+containing the date of the data collected.
+The function, due to the large amount of data, counts with the structure of parallel processing
+based on the future package to speed up the process. By default, the computation is done in
+sequential mode (future::plan(future::sequential)), for parallel processing, the user must
+change to the desired mode (ex: future::plan(future::multisession, workers = 6)).
 }
