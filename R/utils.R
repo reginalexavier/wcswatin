@@ -369,6 +369,40 @@ tbl_from_references <- function(raster_file,
 }
 
 
+#' Extract the file name
+#'
+#' This function extracts the file name without the extension from a file path.
+#' It is an internal function used in the \code{unit_converter} function.
+#'
+#' @param path A character string with the file path.
+#'
+#' @return A character string with the file name without the extension.
+#'
+#' @keywords internal
+#'
+file_name <- function(path){
+  stringr::str_extract(path, "[a-z0-9]+_[0-9]+")
+}
+
+
+#' Create a directory if it does not exist
+#'
+#' This function creates a directory if it does not exist.
+#' It is an internal function used in the \code{unit_converter} function.
+#'
+#' @param folder_path A character string with the path of the directory to be created.
+#'
+#' @keywords internal
+#'
+#' @return NULL. Only for side effects.
+#'
+touch_dir <- function(folder_path) {
+  if (!dir.exists(folder_path)) {
+    dir.create(folder_path, recursive = TRUE)
+  }
+}
+
+
 #' Unit Converter
 #'
 #' This function performs the same calculation on each observation of a time
@@ -392,18 +426,16 @@ tbl_from_references <- function(raster_file,
 
 unit_converter <- function(folder_in,
                            folder_out,
-                           col_name = "20020101",
                            pattern = ".txt$",
                            FUN = \(x) (x-273.15)
 ){
+
+  touch_dir(folder_out)
 
   files_list <- list.files(folder_in,
                            full.names = TRUE,
                            pattern = pattern)
 
-  file_name <- function(x){
-    stringr::str_extract(x, "[a-z_]+[0-9]+")
-  }
 
   # transformation
   pb <- txtProgressBar(min = 0, max = length(files_list), style = 3)
@@ -414,7 +446,6 @@ unit_converter <- function(folder_in,
 
     temp_tbl <- data.table::data.table(FUN(temp_tbl))
 
-    names(temp_tbl) <- col_name
 
     #saving to file
     data.table::fwrite(temp_tbl,
@@ -595,10 +626,6 @@ summary_plot <- function(var_folder,
 
   total_files <- length(daily_files)
 
-
-  file_name <- function(x){ #TODO: transform to extern function
-    stringr::str_extract(x, "[a-z_]+[0-9]+")
-  }
 
   # date
   my_ymd <- seq(from = lubridate::ymd(from),

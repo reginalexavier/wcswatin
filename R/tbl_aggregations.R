@@ -17,9 +17,13 @@
 #'   first date of the time series.
 #' @param from The first date of the series, including the hour part.
 #' @param to The last date of the series, including the hour part.
+#' @param take_out_first_record Logical. If TRUE, the first record of the input
+#'  file will be removed. This is useful when the first record is the hour 00:00, that
+#'  corresponds to the previous day. The length in hour between the from and to must be
+#'  the same as the length of the hours in the input files.
 #' @param aggregation_function The function to use on the hourly groups.
-#' @param na.rm a logical value indicating whether NA values should be stripped
-#'   before the computation proceeds
+#' @param na.rm a logical value indicating whether NA values should be removed
+#'  before the computation proceeds.
 #'
 #' @return Files with a daily resolution
 #' @export
@@ -28,19 +32,20 @@
 daily_aggregation <- function(folder_in,
                               folder_out,
                               pattern = ".txt$",
-                              col_name = "20020101",
                               from = '2002-01-01 00',
                               to = '2021-05-31 23',
+                              take_out_first_record = TRUE,
                               aggregation_function = mean,
                               na.rm = FALSE){
+
+
+  touch_dir(folder_out)
 
   hourly_files <- list.files(folder_in,
                              full.names = TRUE,
                              pattern = pattern)
 
-  file_name <- function(x){
-    stringr::str_extract(x, "[a-z_]+[0-9]+")
-  }
+
   # date
   my_ymdh <- seq(from = lubridate::ymd_h(from),
                  to = lubridate::ymd_h(to),
@@ -53,22 +58,27 @@ daily_aggregation <- function(folder_in,
 
   for (i in seq_along(hourly_files)) {
 
-    temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ] #TODO: make this optional!
+    if (take_out_first_record) {
+      temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
+    } else {
+      temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)
+    }
 
+    col_name <- data.table::copy(colnames(temp_tbl))
 
     temp_tbl[, `:=`(date = my_ymdh,
                     day = by_ydm)]
 
-    names(temp_tbl)[1] <- "value"
+    data.table::setnames(temp_tbl, 1, "value")
 
 
     temp_tbl <- temp_tbl[, .(daily_agg = aggregation_function(value,
                                                               na.rm = na.rm)),
                          by = day]
 
-    daily_agg <- temp_tbl[ , list(daily_agg)]
+    daily_agg <- temp_tbl[ , "daily_agg"]
 
-    names(daily_agg) <- col_name
+    data.table::setnames(daily_agg, 1, col_name)
 
     #saving to file
     data.table::fwrite(daily_agg,

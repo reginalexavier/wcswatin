@@ -2,24 +2,41 @@
 % Please edit documentation in R/raster_input.R
 \name{layerValues2pixel}
 \alias{layerValues2pixel}
-\title{Series of Pixel Values (table format)}
+\title{Series of Pixel Values}
 \usage{
-layerValues2pixel(layer_values, tb_name, col_name = "20020101")
+layerValues2pixel(
+  layer_values,
+  main_tbl,
+  col_name = "20220101",
+  inline_output = TRUE,
+  path_output = NULL,
+  append = FALSE
+)
 }
 \arguments{
 \item{layer_values}{List. Values extracted by raster}
 
-\item{tb_name}{A vector contain the names for every table created. These names are
-in the mainTable}
+\item{main_tbl}{A vector contain the names for every table created. These
+names are in the mainTable}
 
-\item{col_name}{A name for the column of everery swatinput table created. Commonly this
-name is the first date of time serie beeing analysed.}
+\item{col_name}{A name for the column of everery swatinput table created.
+Commonly this name is the first date of time serie beeing analysed.}
+
+\item{inline_output}{Logical. If TRUE, the output will be an inline table.}
+
+\item{path_output}{Path to save the individual tables. One of these
+parameters (inline_output or path_output) must be provided.}
+
+\item{append}{Logical. If TRUE, the output will be appended to the existing
+file. If FALSE, the output will be overwritten. Choose TRUE if you want to
+append the output to an existing file, very useful when you are running
+different time periods and want to append the output to the same file.}
 }
 \value{
-A list of table
+A list of table or a set of files in the path_output
 }
 \description{
-With the extracted values by raster layer from the (raster2vec) function, this function
-organize these values in the format of swat input, i.e, a time serie for every pixel
-of the study area.
+With the extracted values by raster layer from the (raster2vec) function,
+this function organize these values in the format of swat input, i.e, a time
+serie for every pixel of the study area.
 }

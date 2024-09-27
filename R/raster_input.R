@@ -61,7 +61,7 @@ study_area_records <- function(raster_model,
 #'
 mainInput_var <- function(study_area, var_name = "temp"){
 
-  main_tbl <- data.table::copy(study_area)
+  main_tbl <- data.table::copy(input_table(study_area))
 
   cols <- c("ID", "NAME", "LAT", "LONG", "ELEVATION")
 
@@ -146,69 +146,48 @@ raster2vec <- function(raster_path,
 
 
 
-#' Series of Pixel Values (table format)
+#' Series of Pixel Values
 #'
-#' With the extracted values by raster layer from the (raster2vec) function, this function
-#' organize these values in the format of swat input, i.e, a time serie for every pixel
-#' of the study area.
+#' With the extracted values by raster layer from the (raster2vec) function,
+#' this function organize these values in the format of swat input, i.e, a time
+#' serie for every pixel of the study area.
 #'
 #' @param layer_values List. Values extracted by raster
-#' @param tb_name A vector contain the names for every table created. These names are
-#' in the mainTable
-#' @param col_name A name for the column of everery swatinput table created. Commonly this
-#' name is the first date of time serie beeing analysed.
+#' @param main_tbl A vector contain the names for every table created. These
+#'   names are in the mainTable
+#' @param col_name A name for the column of everery swatinput table created.
+#'   Commonly this name is the first date of time serie beeing analysed.
+#' @param inline_output Logical. If TRUE, the output will be an inline table.
+#' @param path_output Path to save the individual tables. One of these
+#'   parameters (inline_output or path_output) must be provided.
+#' @param append Logical. If TRUE, the output will be appended to the existing
+#'   file. If FALSE, the output will be overwritten. Choose TRUE if you want to
+#'   append the output to an existing file, very useful when you are running
+#'   different time periods and want to append the output to the same file.
 #'
-#' @return A list of table
+#'
+#' @return A list of table or a set of files in the path_output
 #' @export
 #'
 layerValues2pixel <- function(layer_values,
-                              tb_name,
-                              col_name = "20020101"){
+                               main_tbl,
+                               col_name = "20220101",
+                               inline_output = TRUE,
+                               path_output = NULL,
+                               append = FALSE){
+
+  if (is.null(path_output) & !inline_output){
+    stop("The argument 'inline_output' is FALSE, so the argument 'path_output' must be provided.")
+  }
+
+  if (!is.null(path_output)) {
+    if (!dir.exists(path_output)) {
+      dir.create(path_output, recursive = TRUE)
+    }
+  }
 
   input_tbl <- input_table(layer_values)
-
-  tbl_list <- split(input_tbl[, c("values", "layer_name")], by = "layer_name", keep.by = F)
-
-  transposed_tbl <- data.table::transpose(data.table::as.data.table(tbl_list))
-
-  final_list <- lapply(as.list(transposed_tbl),
-                       \(x) {
-                         df <- data.table::data.table(x)
-                         colnames(df) <- col_name
-                         df
-                       }
-  )
-
-  names(final_list) <- tb_name
-
-  final_list
-
-}
-
-
-
-
-#' Series of Pixel Values (Array Format)
-#'
-#' With the extracted values by raster layer from the (raster2vec) function, this function
-#' organize these values in the format of swat input, i.e, a time serie for every pixel
-#' of the study area.
-#'
-#' @param layer_values List. Values extracted by raster
-#' @param tb_name A vector contain the names for every table created. These names are
-#' in the mainTable
-#' @param col_name A name for the column of everery swatinput table created. Commonly this
-#' name is the first date of time serie beeing analysed.
-#'
-#' @return A list of table
-#' @export
-#'
-layerValues2pixelA <- function(layer_values,
-                               tb_name,
-                               col_name = "20020101"){
-
-
-  input_tbl <- input_table(layer_values)
+  tb_name <- input_table(main_tbl)$NAME
 
   n_row <- length(tb_name)
   n_col <- nrow(input_tbl)/n_row
@@ -217,17 +196,36 @@ layerValues2pixelA <- function(layer_values,
   m_array <- input_tbl$values |>
     array(dim = c(n_row, n_col, n_layers)) # row col layer
 
-  final_list <- lapply(seq_along(tb_name),
-         \(x) {
-           df <- data.table::data.table(m_array[ x, , 1]) # row col layer
-           colnames(df) <- col_name
-           df
-         }
-  )
+  final_list <- lapply(seq_along(tb_name), \(x) {
+    df <- data.table::data.table(m_array[x, , 1]) # row col layer
+    colnames(df) <- col_name
+    df
+  })
 
   names(final_list) <- tb_name
 
-  final_list
+
+
+  if (!is.null(path_output)) {
+    for (i in tb_name) {
+      data.table::fwrite(
+        final_list[[i]],
+        stringr::str_glue("{path_output}/{i}.txt"),
+        row.names = FALSE,
+        dec = ".",
+        sep = ",",
+        quote = FALSE,
+        append = append
+      )
+    }
+
+    if (inline_output) {
+      return(final_list)
+    }
+
+  } else {
+    return(final_list)
+  }
 
 }
 

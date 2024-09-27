@@ -8,9 +8,9 @@ daily_aggregation(
   folder_in,
   folder_out,
   pattern = ".txt$",
-  col_name = "20020101",
   from = "2002-01-01 00",
   to = "2021-05-31 23",
+  take_out_first_record = TRUE,
   aggregation_function = mean,
   na.rm = FALSE
 )
@@ -23,17 +23,22 @@ daily_aggregation(
 \item{pattern}{an optional \code{\link[base:regex]{regular expression}}. Only
 file names which match the regular expression will be returned.}
 
-\item{col_name}{The column name for the tables on the output. Usually, the
-first date of the time series.}
-
 \item{from}{The first date of the series, including the hour part.}
 
 \item{to}{The last date of the series, including the hour part.}
 
+\item{take_out_first_record}{Logical. If TRUE, the first record of the input
+file will be removed. This is useful when the first record is the hour 00:00, that
+corresponds to the previous day. The length in hour between the from and to must be
+the same as the length of the hours in the input files.}
+
 \item{aggregation_function}{The function to use on the hourly groups.}
 
-\item{na.rm}{a logical value indicating whether NA values should be stripped
-before the computation proceeds}
+\item{na.rm}{a logical value indicating whether NA values should be removed
+before the computation proceeds.}
+
+\item{col_name}{The column name for the tables on the output. Usually, the
+first date of the time series.}
 }
 \value{
 Files with a daily resolution

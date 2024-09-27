@@ -7,7 +7,6 @@
 unit_converter(
   folder_in,
   folder_out,
-  col_name = "20020101",
   pattern = ".txt$",
   FUN = function(x) (x - 273.15)
 )
@@ -17,14 +16,14 @@ unit_converter(
 
 \item{folder_out}{Path where to save the transformed files}
 
-\item{col_name}{The column name for the tables on the output. Usually, the
-first date of the time series.}
-
 \item{pattern}{an optional regular expression. Only file names which match
 the regular expression will be returned.}
 
 \item{FUN}{The function to use for transforming the unit of the variable on
 input.}
+
+\item{col_name}{The column name for the tables on the output. Usually, the
+first date of the time series.}
 }
 \value{
 Files with the same temporal resolution as the input
