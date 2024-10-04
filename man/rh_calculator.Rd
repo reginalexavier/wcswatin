@@ -8,7 +8,6 @@ rh_calculator(
   folder_dpt,
   folder_tas,
   folder_out,
-  col_name = "20020101",
   file_name_output = "rh",
   m_value = 7.591386,
   Tn_value = 240.7263,
@@ -23,9 +22,6 @@ rh_calculator(
 \code{Tambient}.}
 
 \item{folder_out}{Path where to save the transformed files}
-
-\item{col_name}{The column name for the tables on the output. Usually, the
-first date of the time series.}
 
 \item{file_name_output}{Character string for the Relative humidity files on
 output.}

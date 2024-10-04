@@ -1,5 +1,4 @@
 
-
 #' Trend Surface Interpolation into Targeded Points
 #'
 #' This function make an interpolation whith the trend surface method where the user

@@ -21,9 +21,6 @@ the regular expression will be returned.}
 
 \item{FUN}{The function to use for transforming the unit of the variable on
 input.}
-
-\item{col_name}{The column name for the tables on the output. Usually, the
-first date of the time series.}
 }
 \value{
 Files with the same temporal resolution as the input

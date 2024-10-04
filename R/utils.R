@@ -413,8 +413,6 @@ touch_dir <- function(folder_path) {
 #'
 #' @param folder_in Path of the input files
 #' @param folder_out Path where to save the transformed files
-#' @param col_name The column name for the tables on the output. Usually, the
-#'   first date of the time series.
 #' @param pattern an optional regular expression. Only file names which match
 #'   the regular expression will be returned.
 #' @param FUN The function to use for transforming the unit of the variable on
