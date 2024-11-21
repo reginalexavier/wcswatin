@@ -1,4 +1,4 @@
-utils::globalVariables(c("study_area", "..cols", "ID", "nome"))
+utils::globalVariables(c("study_area", "..cols", "ID", "NAME"))
 
 #' Study Area Records
 #'
@@ -14,37 +14,37 @@ utils::globalVariables(c("study_area", "..cols", "ID", "nome"))
 #'
 study_area_records <- function(raster_model,
                                roi,
-                               dem){
-
+                               dem) {
   raster_model <- input_raster(raster_model, lyrs = 1)
   roi <- input_vector(roi)
   dem <- input_raster(dem)
-  #obtain cell numbers within the raster_model
+  # obtain cell numbers within the raster_model
   roi_cell <- raster_model |>
     terra::mask(roi |>
-                  terra::project(terra::crs(raster_model))) |>
+      terra::project(terra::crs(raster_model))) |>
     terra::values(mat = FALSE)
 
 
   roi_cell <- which(!is.na(roi_cell))
 
-  #obtain lat/long values corresponding to watershed cells
+  # obtain lat/long values corresponding to watershed cells
   cell_longlat <- terra::xyFromCell(raster_model, roi_cell)
   cell_rowCol <- terra::rowColFromCell(raster_model, roi_cell)
-  points_elevation <- terra::extract(x = dem,
-                                     y = cell_longlat,
-                                     method = 'simple')$elevation
+  points_elevation <- terra::extract(
+    x = dem,
+    y = cell_longlat,
+    method = "simple"
+  )$elevation
 
   study_area_records <- data.table::data.table(cell_longlat,
-                                               ID = roi_cell,
-                                               cell_rowCol,
-                                               Elevation = points_elevation
+    ID = roi_cell,
+    cell_rowCol,
+    Elevation = points_elevation
   )
 
-  names(study_area_records) <- c("x", "y", "ID", "row", "col", "Elevation")
+  names(study_area_records) <- c("LON", "LAT", "ID", "ROW", "COL", "ELEVATION")
 
   study_area_records
-
 }
 
 
@@ -59,17 +59,14 @@ study_area_records <- function(raster_model,
 #' @return A table
 #' @export
 #'
-mainInput_var <- function(study_area, var_name = "temp"){
-
+mainInput_var <- function(study_area, var_name = "temp") {
   main_tbl <- data.table::copy(input_table(study_area))
 
-  cols <- c("ID", "NAME", "LAT", "LONG", "ELEVATION")
+  cols <- c("ID", "NAME", "LAT", "LON", "ELEVATION")
 
-  main_tbl[, nome := paste0(var_name,"_", ID)]
-  data.table::setnames(main_tbl, c("ID", "nome", "y", "x", "Elevation"), cols)
+  main_tbl[, NAME := paste0(var_name, "_", ID)]
 
-  main_tbl[ , ..cols]
-
+  main_tbl[, ..cols]
 }
 
 # os valores da camada raster são extraídos e guardado em uma tabela com as colunas
@@ -80,7 +77,7 @@ mainInput_var <- function(study_area, var_name = "temp"){
 
 
 
-#' Convert a Raster Layer to a Vector
+#' Convert a Cube format data into a Table format
 #'
 #' The function extracts the values of a NetCDF/raster layer and converts it to a table format
 #' containing the values of the pixels and the layer name as two columns. The pixel is identified
@@ -94,45 +91,102 @@ mainInput_var <- function(study_area, var_name = "temp"){
 #'
 #'
 #'
-#' @param raster_path Raster file or path to a raster/ncdf file
-#' @param var The variable to be extracted
+#' @param input_path Path to the NetCDF or raster file.
+#' @param var The variable to be extracted. The default is NA. For NetCDF files containing
+#'  multiple variables, the user must provide the name of the variable to be extracted. If
+#'  the file contains only one variable, the user can leave this argument as NA.
 #' @param n_layers Number of layers in the raster file to be extracted
 #' @param study_area The table from 'study_area_records'
 #' @param future_scheduling Controling how the future will be scheduled and distributed
 #'  between the workers. The default is 1, which means that the future will be scheduled
 #'  by core. See the documentation of future package for more details \code{future.apply::future_lapply}
 #' @param missing_value The value to be used when the data is missing
+#' @param final_dir The directory to save the final table. If NULL, the final table will not be saved.
+#' @param side_effect The side effect of the function. The default is "only", which means that the
+#'  function will only save the final table in disk (if final_dir is provided). The other options
+#'  are "both" and "none". If "both", the function will save the final table in disk and return it within
+#'  the R environment. If "none", the function will only return the final table whithin the R environment.
+#' @param temp_dir The directory to save the intermediate tables. If NULL, the tables will be saved
+#'  in a temporary directory. If the directory already exists, the tables will be saved in the
+#'  existing directory. If the directory does not exist, it will be created.
+#' @param clean_after Logical. If TRUE, the directory with the intermediate tables will be deleted
+#'  after the process is finished. If FALSE, the directory will be kept. The default is FALSE.
+#'  And when the temp_dir is NULL, the clean_after will be allways TRUE.
 #'
 #' @return A table
 #' @export
-
-raster2vec <- function(raster_path,
+#'
+cube2table <- function(input_path,
                        var = NA,
                        n_layers,
                        study_area,
                        future_scheduling = 1,
-                       missing_value = -99){
+                       missing_value = -99,
+                       final_dir = NULL,
+                       side_effect = "only",
+                       temp_dir = NULL,
+                       clean_after = FALSE) {
+  roi_id <- input_table(study_area)$ID
+
+  side_effect <- match.arg(side_effect, c("only", "both", "none"))
+
+  if (is.null(temp_dir)) {
+    temp_dir <- file.path(tempdir(), "raster2vec2")
+    clean_after <- TRUE
+  }
+
+  touch_dir(temp_dir)
+
+  if (!is.null(final_dir)) {
+    touch_dir(final_dir)
+  }
+  # error if side_effect is only or both and final_dir is NULL
+  if (side_effect != "none" && is.null(final_dir)) {
+    stop("The argument 'final_dir' must be provided when 'side_effect' is 'only' or 'both'.")
+  }
+
+  message("The intermediate tables will be saved in: ", temp_dir, "\n")
+  if (!is.null(final_dir)) {
+    message("The final table will be saved in: ", final_dir, "\n")
+  }
+
+
+  message(
+    "Step: Extraction - started at: ",
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  )
 
   p <- progressr::progressor(steps = n_layers) # steps = n_layers
 
-  roi_id <- input_table(study_area)$ID
-
-  tbl_list <- future.apply::future_lapply(
-
+  future.apply::future_lapply(
     X = seq_len(n_layers),
-    FUN = function(x){
+    FUN = function(x) {
       p()
-      raster_i <- input_raster(raster_path,
-                               subds = var,
-                               lyrs = x)
+      raster_i <- input_raster(input_path,
+        subds = var,
+        lyrs = x
+      )
       raster_name_i <- names(raster_i)
 
       cell.values <- terra::values(raster_i)[roi_id]
-      cell.values[is.na(cell.values)] <- missing_value #filling missing data with -99
+      cell.values[is.na(cell.values)] <- missing_value # filling missing data with -99
 
-      data.table::data.table(ID = roi_id,
-                             values = cell.values,
-                             layer_name = raster_name_i)
+      tbl_i <- data.table::data.table(
+        ID = roi_id,
+        values = cell.values,
+        layer_name = raster_name_i
+      )
+
+      # save the table
+      data.table::fwrite(tbl_i,
+        file.path(temp_dir, paste0("tbl_", x, ".csv")),
+        row.names = FALSE
+      )
+
+      # remove the table from memory
+      rm(tbl_i)
+
+      tbl_i <- NULL
     },
 
     # SIMPLIFY = FALSE,
@@ -141,7 +195,40 @@ raster2vec <- function(raster_path,
     future.packages = c("terra", "dplyr")
   )
 
-  do.call(rbind, tbl_list)
+  # read the tables
+  message(
+    "Step: Reading and joining tables at ",
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n"
+  )
+
+  tbl_list <- lapply(list.files(temp_dir, full.names = TRUE), data.table::fread)
+
+  if (clean_after) {
+    unlink(temp_dir, recursive = TRUE)
+  }
+
+  binded_tbl <- do.call(rbind, tbl_list)
+
+  if (side_effect == "none") {
+    return(binded_tbl)
+  } else if (side_effect == "both") {
+    data.table::fwrite(
+      binded_tbl,
+      file.path(final_dir, "tbls.csv"),
+      row.names = FALSE
+    )
+    return(binded_tbl)
+  } else if (side_effect == "only") {
+    data.table::fwrite(
+      binded_tbl,
+      file.path(final_dir, "tbls.csv"),
+      row.names = FALSE
+    )
+  }
+  message(
+    "Step: Finished at ",
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n"
+  )
 }
 
 
@@ -170,17 +257,16 @@ raster2vec <- function(raster_path,
 #' @export
 #'
 layerValues2pixel <- function(layer_values,
-                               main_tbl,
-                               col_name = "20220101",
-                               inline_output = TRUE,
-                               path_output = NULL,
-                               append = FALSE){
-
-  if (is.null(path_output) & !inline_output){
+                              main_tbl,
+                              col_name = "20220101",
+                              inline_output = TRUE,
+                              path_output = NULL,
+                              append = FALSE) {
+  if (is.null(path_output) & !inline_output) {
     stop("The argument 'inline_output' is FALSE, so the argument 'path_output' must be provided.")
   }
 
-  if (!is.null(path_output)) {
+  if (!is.null(path_output)) { # TODO: uso de dir.create??
     if (!dir.exists(path_output)) {
       dir.create(path_output, recursive = TRUE)
     }
@@ -190,7 +276,7 @@ layerValues2pixel <- function(layer_values,
   tb_name <- input_table(main_tbl)$NAME
 
   n_row <- length(tb_name)
-  n_col <- nrow(input_tbl)/n_row
+  n_col <- nrow(input_tbl) / n_row
   n_layers <- 1
 
   m_array <- input_tbl$values |>
@@ -222,12 +308,7 @@ layerValues2pixel <- function(layer_values,
     if (inline_output) {
       return(final_list)
     }
-
   } else {
     return(final_list)
   }
-
 }
-
-
-

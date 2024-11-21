@@ -1,6 +1,8 @@
-utils::globalVariables(c(".", "all_values", "data", "day",
-                         "dpt", "hours", "max_min", "month_val",
-                         "sd", "tas", "temperature", "value"))
+utils::globalVariables(c(
+  ".", "all_values", "data", "day",
+  "dpt", "hours", "max_min", "month_val",
+  "sd", "tas", "temperature", "value"
+))
 
 
 #' Turns multiple time series files into a single table
@@ -28,19 +30,22 @@ files_to_table <- function(files_path,
                            neg_to_zero = FALSE) {
   files_name <- list.files(files_path, full.names = FALSE)
 
-  point_list <- lapply(glue::glue(
-    "{files_path}/{grep(files_pattern,
+  point_list <- lapply(
+    glue::glue(
+      "{files_path}/{grep(files_pattern,
                                 files_name, value = TRUE)}"
-  ),
-  function(x) {
-    data.table::fread(x, header = TRUE)
-  })
+    ),
+    function(x) {
+      data.table::fread(x, header = TRUE)
+    }
+  )
 
   points_tbl <- do.call(cbind, point_list)
 
   names(points_tbl) <- grep(files_pattern,
-                            tools::file_path_sans_ext(files_name),
-                            value = TRUE)
+    tools::file_path_sans_ext(files_name),
+    value = TRUE
+  )
   # atribuir um valor a NA
   if (!is.na(na_value)) {
     points_tbl <- apply(points_tbl, 2, function(x) {
@@ -59,12 +64,13 @@ files_to_table <- function(files_path,
     points_tbl
   }
 
-  date <- seq.Date(from = as.Date(start_date, format = "%Y-%m-%d"),
-                   to = as.Date(end_date, format = "%Y-%m-%d"),
-                   by = interval)
+  date <- seq.Date(
+    from = as.Date(start_date, format = "%Y-%m-%d"),
+    to = as.Date(end_date, format = "%Y-%m-%d"),
+    by = interval
+  )
 
   cbind.data.frame(date, points_tbl)
-
 }
 
 
@@ -90,17 +96,18 @@ table_to_files <- function(table,
                            first_date,
                            file_extention = "txt") {
   for (i in seq_len(ncol(table))) {
-    col_i <- table[ , i, drop = FALSE]
+    col_i <- table[, i, drop = FALSE]
     f_name_i <- colnames(col_i)
-    #print(my_col)
+    # print(my_col)
     colnames(col_i) <- first_date
-    #print(my_col)
+    # print(my_col)
     data.table::fwrite(col_i,
-                       file = file.path(folder_path,
-                                        paste0(f_name_i, ".", file_extention))
+      file = file.path(
+        folder_path,
+        paste0(f_name_i, ".", file_extention)
+      )
     )
   }
-
 }
 
 #' Transforms the raw value from point perspective to a daily perspective
@@ -138,15 +145,15 @@ table_to_files <- function(table,
 point_to_daily <- function(my_folder,
                            var_pattern = "p-",
                            main_pattern = "pcp",
-                           start_date = "20170301", #TODO: transformar o formato
+                           start_date = "20170301", # TODO: transformar o formato
                            end_date = "20170331",
                            interval = "day",
                            na_value = -99,
                            negatif_number = TRUE,
-                           prefix = "day_"
-                           ){
+                           prefix = "day_") {
   files_name <- list.files(my_folder,
-                           full.names = FALSE)
+    full.names = FALSE
+  )
 
   pcp <- data.table::fread(glue::glue("{my_folder}/{grep(main_pattern,
                                                 files_name,
@@ -154,18 +161,20 @@ point_to_daily <- function(my_folder,
 
   point_list <- lapply(glue::glue("{my_folder}/{grep(var_pattern,
                                                 files_name,
-                                                value = TRUE)}"), function(x){
-                                                  data.table::fread(x, header = TRUE)
-                                                })
+                                                value = TRUE)}"), function(x) {
+    data.table::fread(x, header = TRUE)
+  })
 
   names_sans_ext <- na.omit(stringr::str_extract(files_name, paste0(var_pattern, ".*[^.txt]")))
 
   names(point_list) <- names_sans_ext
 
   # criando uma sequencia de datas igual ao tamanho da série
-  datas <- seq.Date(from = as.Date(start_date, format = "%Y%m%d"), #FIXME
-                    to = as.Date(end_date, format = "%Y%m%d"), #FIXME colocar no padrão igual a primeira função
-                    by = interval)
+  datas <- seq.Date(
+    from = as.Date(start_date, format = "%Y%m%d"), # FIXME
+    to = as.Date(end_date, format = "%Y%m%d"), # FIXME colocar no padrão igual a primeira função
+    by = interval
+  )
 
   # juntando as precipitaçoes em uma tabela só
   cplt_tbl <- do.call(cbind, point_list)
@@ -173,7 +182,7 @@ point_to_daily <- function(my_folder,
   cplt_tbl <- dplyr::as_tibble(cplt_tbl) %>% dplyr::mutate(ymd = datas)
 
   # setar valores inferios a -99 para Nan
-  if(!is.na(na_value)){
+  if (!is.na(na_value)) {
     cplt_tbl <- dplyr::mutate_if(cplt_tbl, is.numeric, function(x) {
       ifelse(x == na_value, NaN, x)
     })
@@ -182,7 +191,7 @@ point_to_daily <- function(my_folder,
   }
 
   # setar valores inferios a 0 para zero
-  if(negatif_number){
+  if (negatif_number) {
     cplt_tbl <- dplyr::mutate_if(cplt_tbl, is.numeric, function(x) {
       ifelse(x < 0, 0.0, x)
     })
@@ -207,7 +216,6 @@ point_to_daily <- function(my_folder,
   names(tbl_list) <- paste0(prefix, datas)
 
   tbl_list
-
 }
 
 
@@ -225,14 +233,16 @@ point_to_daily <- function(my_folder,
 #' temp <- tempdir()
 #' folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
 #' test01 <- point_to_daily(my_folder = folder)
-#' save_daily_tbl(tbl_list = test01,
-#' path = temp)
+#' save_daily_tbl(
+#'   tbl_list = test01,
+#'   path = temp
+#' )
 #' unlink(temp, recursive = TRUE)
-save_daily_tbl <- function(tbl_list, path){
+save_daily_tbl <- function(tbl_list, path) {
   for (i in seq_along(tbl_list)) {
     data.table::fwrite(tbl_list[[i]], # excluindo a coluna de data
-                       file = glue::glue("{path}/{names(tbl_list[i])}.csv"))
-
+      file = glue::glue("{path}/{names(tbl_list[i])}.csv")
+    )
   }
 }
 
@@ -245,14 +255,10 @@ save_daily_tbl <- function(tbl_list, path){
 #' @return List of variable names
 #' @export
 #'
-var_names <- function(path){
-
+var_names <- function(path) {
   lapply(path, function(x) {
-
     names(ncdf4::nc_open(x)$var)
-
   }) |> unlist()
-
 }
 
 
@@ -276,11 +282,13 @@ var_names <- function(path){
 #'   see \code{\link[hyfo]{fillGap}}.
 #'
 
-fill_gap <- function(dataset, corPeriod = "daily"){
+fill_gap <- function(dataset, corPeriod = "daily") {
   dataset <- as.data.frame(dataset)
   col_names_original <- colnames(dataset)
-  tbl_filled <- hyfo::fillGap(dataset = dataset,
-                              corPeriod = corPeriod)
+  tbl_filled <- hyfo::fillGap(
+    dataset = dataset,
+    corPeriod = corPeriod
+  )
   colnames(tbl_filled) <- col_names_original
   tbl_filled
 }
@@ -334,32 +342,35 @@ tbl_from_references <- function(raster_file,
                                 ref_points,
                                 prefix_colname = NULL,
                                 ...) {
-
-  if ("sf"  %in% class(ref_points)) {
+  if ("sf" %in% class(ref_points)) {
     ref_points <- ref_points
-  } else if  ("data.frame" %in% class(ref_points)) {
+  } else if ("data.frame" %in% class(ref_points)) {
     ref_points <- sf::st_as_sf(ref_points,
-                               coords = c("LONG", "LAT"),
-                               crs = "+proj=longlat +datum=WGS84 +no_defs")
+      coords = c("LONG", "LAT"),
+      crs = "+proj=longlat +datum=WGS84 +no_defs"
+    )
   } else if ("character" %in% class(ref_points) &
-             any(stringr::str_ends(ref_points, c(".txt", ".csv")))) {
+    any(stringr::str_ends(ref_points, c(".txt", ".csv")))) {
     tbl_ref <- data.table::fread(ref_points)
     ref_points <- sf::st_as_sf(tbl_ref,
-                               coords = c("LONG", "LAT"), #TODO: rename LONG to LON
-                               crs = "+proj=longlat +datum=WGS84 +no_defs")
+      coords = c("LONG", "LAT"), # TODO: rename LONG to LON
+      crs = "+proj=longlat +datum=WGS84 +no_defs"
+    )
   } else {
     stop("The ref_points must be an object of class `sf`, `data.frame` or a string character of the path of a file with extention `.csv` or `.txt`!")
   }
   # extração dos  valores nos rasters
-  values_extracted <- raster::extract(raster_file,
-                                      ref_points,
-                                      ...)
+  values_extracted <- raster::extract(
+    raster_file,
+    ref_points,
+    ...
+  )
 
   df_extracted <- as.data.frame(t(values_extracted),
-                                row.names = F)
+    row.names = F
+  )
 
   if (is.null(prefix_colname)) {
-
     colnames(df_extracted) <- ref_points$NAME
   } else {
     colnames(df_extracted) <- glue::glue("{prefix_colname}_{ref_points$NAME}")
@@ -380,7 +391,7 @@ tbl_from_references <- function(raster_file,
 #'
 #' @keywords internal
 #'
-file_name <- function(path){
+file_name <- function(path) {
   stringr::str_extract(path, "[a-z0-9]+_[0-9]+")
 }
 
@@ -391,16 +402,59 @@ file_name <- function(path){
 #' It is an internal function used in the \code{unit_converter} function.
 #'
 #' @param folder_path A character string with the path of the directory to be created.
+#' @param return_path logical. If \code{TRUE}, the function returns the path
 #'
 #' @keywords internal
 #'
 #' @return NULL. Only for side effects.
 #'
-touch_dir <- function(folder_path) {
+touch_dir <- function(folder_path, return_path = FALSE) {
   if (!dir.exists(folder_path)) {
     dir.create(folder_path, recursive = TRUE)
   }
+  if (return_path) {
+    return(folder_path)
+  }
 }
+
+#' Clean a directory if it exists
+#' This function removes files and/or sub-directory within the
+#' directory if exists.
+#'
+#' @param folder_path A character string with the path of the directory to be cleaned.
+#'
+#' @keywords internal
+#'
+#' @return NULL. Only for side effects.
+#'
+clean_dir <- function(folder_path) {
+  if (dir.exists(folder_path)) {
+    unlink(folder_path, recursive = TRUE)
+  }
+}
+
+
+#' Extract the date from the layer names
+#' This function extracts the date from the layer names of a raster object.
+#'
+#' @param raster_cube A raster object.
+#' @param origin A character string with the origin date. The default is "1970-01-01".
+#' @param tz A character string with the time zone. The default is "UTC".
+#' @param regex A character string with the regular expression to extract the date.
+#'
+#' @keywords internal
+#'
+#' @return A POSIXct object.
+#'
+names_to_date <- function(
+    raster_cube, origin = "1970-01-01",
+    tz = "UTC",
+    regex = ".*=(\\d+)") {
+  layer_names <- names(raster_cube)
+  timestamp <- as.numeric(sub(regex, "\\1", layer_names))
+  return(as.POSIXct(timestamp, origin = origin, tz = tz))
+}
+
 
 
 #' Unit Converter
@@ -425,40 +479,36 @@ touch_dir <- function(folder_path) {
 unit_converter <- function(folder_in,
                            folder_out,
                            pattern = ".txt$",
-                           FUN = \(x) (x-273.15)
-){
-
+                           FUN = \(x) (x - 273.15)) {
   touch_dir(folder_out)
 
   files_list <- list.files(folder_in,
-                           full.names = TRUE,
-                           pattern = pattern)
+    full.names = TRUE,
+    pattern = pattern
+  )
 
 
   # transformation
   pb <- txtProgressBar(min = 0, max = length(files_list), style = 3)
 
   for (i in seq_along(files_list)) {
-
     temp_tbl <- data.table::fread(files_list[i], header = TRUE)
 
     temp_tbl <- data.table::data.table(FUN(temp_tbl))
 
 
-    #saving to file
+    # saving to file
     data.table::fwrite(temp_tbl,
-                       file.path(folder_out, glue::glue("{file_name(files_list[i])}.txt")),
-                       row.names = FALSE,
-                       dec = ".",
-                       sep = ",",
-                       quote = FALSE
+      file.path(folder_out, glue::glue("{file_name(files_list[i])}.txt")),
+      row.names = FALSE,
+      dec = ".",
+      sep = ",",
+      quote = FALSE
     )
     setTxtProgressBar(pb, i)
-
   }
 
   close(pb)
-
 }
 
 
@@ -503,14 +553,13 @@ summary_table <- function(var_folder,
                           sample = 5,
                           percent = FALSE,
                           by_month = TRUE,
-                          from = '2002-01-01',
-                          to = '2021-05-31',
-                          pattern = ".txt$"
-){
-
+                          from = "2002-01-01",
+                          to = "2021-05-31",
+                          pattern = ".txt$") {
   daily_files <- list.files(var_folder,
-                            full.names = TRUE,
-                            pattern = pattern)
+    full.names = TRUE,
+    pattern = pattern
+  )
 
   total_files <- length(daily_files)
 
@@ -524,61 +573,78 @@ summary_table <- function(var_folder,
   print(glue::glue("Ok, {sample_val} files will be processed!\n\n"))
 
   if (by_month) {
-
     # date
-    my_ymd <- seq(from = lubridate::ymd(from),
-                  to = lubridate::ymd(to),
-                  by = 'day')
+    my_ymd <- seq(
+      from = lubridate::ymd(from),
+      to = lubridate::ymd(to),
+      by = "day"
+    )
 
-    bind_tbl <- do.call(rbind,
-                        lapply(sample(seq_len(total_files),
-                                      sample_val),
-                               function(x) {
-                                 temp_file <- daily_files[x]
-                                 temp_tbl <-
-                                   data.table::fread(temp_file, header = TRUE)
+    bind_tbl <- do.call(
+      rbind,
+      lapply(
+        sample(
+          seq_len(total_files),
+          sample_val
+        ),
+        function(x) {
+          temp_file <- daily_files[x]
+          temp_tbl <-
+            data.table::fread(temp_file, header = TRUE)
 
-                                 names(temp_tbl) <- "month_values"
+          names(temp_tbl) <- "month_values"
 
-                                 temp_tbl <- dplyr::mutate(temp_tbl,
-                                                           date = my_ymd,
-                                                           month_val = as.factor(lubridate::month(date,
-                                                                                                  label = TRUE)))
-                               }))
+          temp_tbl <- dplyr::mutate(temp_tbl,
+            date = my_ymd,
+            month_val = as.factor(lubridate::month(date,
+              label = TRUE
+            ))
+          )
+        }
+      )
+    )
 
     unique_tbl <- bind_tbl %>%
       dplyr::group_nest(Month = month_val) %>%
-      dplyr::mutate(min = lapply(data, \(x)(min(x$month_values))),
-                    max = lapply(data, \(x)(max(x$month_values))),
-                    mean = lapply(data, \(x)(mean(x$month_values))),
-                    sd = lapply(data, \(x)(sd(x$month_values))),
-                    n = lapply(data, \(x)(length(x$month_values)))
+      dplyr::mutate(
+        min = lapply(data, \(x)(min(x$month_values))),
+        max = lapply(data, \(x)(max(x$month_values))),
+        mean = lapply(data, \(x)(mean(x$month_values))),
+        sd = lapply(data, \(x)(sd(x$month_values))),
+        n = lapply(data, \(x)(length(x$month_values)))
       ) %>%
       dplyr::select(-data) %>%
       tidyr::unnest(c(min, max, mean, sd, n))
 
     return(unique_tbl)
-
   } else {
-    temp_tbl <- do.call(rbind,
-                        lapply(sample(seq_len(total_files),
-                                      sample_val),
-                               function(x) {
-                                 temp_file <- daily_files[x]
-                                 data.table::fread(temp_file, header = TRUE)}))
+    temp_tbl <- do.call(
+      rbind,
+      lapply(
+        sample(
+          seq_len(total_files),
+          sample_val
+        ),
+        function(x) {
+          temp_file <- daily_files[x]
+          data.table::fread(temp_file, header = TRUE)
+        }
+      )
+    )
 
     names(temp_tbl) <- "all_values"
 
     unique_tbl <- temp_tbl %>%
-      summarise(min = min(all_values),
-                max = max(all_values),
-                mean = mean(all_values),
-                sd = sd(all_values),
-                n = length(all_values))
+      summarise(
+        min = min(all_values),
+        max = max(all_values),
+        mean = mean(all_values),
+        sd = sd(all_values),
+        n = length(all_values)
+      )
 
     return(unique_tbl)
   }
-
 }
 
 
@@ -611,37 +677,40 @@ summary_table <- function(var_folder,
 summary_plot <- function(var_folder,
                          sample = 5,
                          percent = FALSE,
-                         from = '2002-01-01',
-                         to = '2021-05-31',
+                         from = "2002-01-01",
+                         to = "2021-05-31",
                          x_lab = "Months of observation",
                          y_lab = "Vriable name and unit",
-                         pattern = ".txt$"
-){
-
+                         pattern = ".txt$") {
   daily_files <- list.files(var_folder,
-                            full.names = TRUE,
-                            pattern = pattern)
+    full.names = TRUE,
+    pattern = pattern
+  )
 
   total_files <- length(daily_files)
 
 
   # date
-  my_ymd <- seq(from = lubridate::ymd(from),
-                to = lubridate::ymd(to),
-                by = 'day')
+  my_ymd <- seq(
+    from = lubridate::ymd(from),
+    to = lubridate::ymd(to),
+    by = "day"
+  )
 
-  one_file <- function(file){
+  one_file <- function(file) {
     temp_file <- daily_files[file]
     temp_tbl <- dplyr::mutate(data.table::fread(temp_file, header = TRUE),
-                              date = my_ymd,
-                              month_val = as.factor(lubridate::month(date,
-                                                                     label = TRUE)),
-                              var_file = file_name(temp_file))
+      date = my_ymd,
+      month_val = as.factor(lubridate::month(date,
+        label = TRUE
+      )),
+      var_file = file_name(temp_file)
+    )
     names(temp_tbl)[1] <- "all_values"
     temp_tbl
   }
 
-  if (percent){
+  if (percent) {
     sample_val <- round(total_files * sample / 100)
   } else {
     sample_val <- sample
@@ -650,18 +719,24 @@ summary_plot <- function(var_folder,
   print(glue::glue("Ok, {sample_val} files will be processed!\n\n"))
 
   # dataset preparation
-  data_set <- do.call(rbind,
-                      lapply(sample(seq_len(total_files),
-                                    sample_val),
-                             one_file))
+  data_set <- do.call(
+    rbind,
+    lapply(
+      sample(
+        seq_len(total_files),
+        sample_val
+      ),
+      one_file
+    )
+  )
   # ploting
-  ggplot2::ggplot(data = data_set,
-                  ggplot2::aes(month_val, all_values)) +
+  ggplot2::ggplot(
+    data = data_set,
+    ggplot2::aes(month_val, all_values)
+  ) +
     ggplot2::geom_boxplot() +
-    ggplot2::labs(x = x_lab,
-                  y = y_lab)
+    ggplot2::labs(
+      x = x_lab,
+      y = y_lab
+    )
 }
-
-
-
-

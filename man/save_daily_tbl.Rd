@@ -18,7 +18,9 @@ Save the csv files after transformation to daily form
 temp <- tempdir()
 folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
 test01 <- point_to_daily(my_folder = folder)
-save_daily_tbl(tbl_list = test01,
-path = temp)
+save_daily_tbl(
+  tbl_list = test01,
+  path = temp
+)
 unlink(temp, recursive = TRUE)
 }

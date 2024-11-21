@@ -4,10 +4,12 @@
 \alias{touch_dir}
 \title{Create a directory if it does not exist}
 \usage{
-touch_dir(folder_path)
+touch_dir(folder_path, return_path = FALSE)
 }
 \arguments{
 \item{folder_path}{A character string with the path of the directory to be created.}
+
+\item{return_path}{logical. If \code{TRUE}, the function returns the path}
 }
 \value{
 NULL. Only for side effects.
