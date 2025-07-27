@@ -20,11 +20,12 @@
 #' @seealso [terra::tapp()], [names_to_date()]
 #'
 
-datacube_aggregation <- function(input_path,
-                                 output_filename = "",
-                                 fun = sum,
-                                 cores = 1,
-                                 ...) {
+datacube_aggregation <- function(
+    input_path,
+    output_filename = "",
+    fun = sum,
+    cores = 1,
+    ...) {
   cube_i <- input_raster(input_path)
 
   timestamp <- names_to_date(cube_i, ...)

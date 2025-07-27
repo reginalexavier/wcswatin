@@ -25,9 +25,12 @@ have to inform the polynome degree. The interpolation is made over the tageded p
 for all the serie on the input.
 }
 \examples{
-ts_to_area(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-          bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
-          package = "cwswatinput"),
-          poly_degree = 2,
-          resolution = 0.5)
+ts_to_area(
+  my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
+  bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
+    package = "cwswatinput"
+  ),
+  poly_degree = 2,
+  resolution = 0.5
+)
 }

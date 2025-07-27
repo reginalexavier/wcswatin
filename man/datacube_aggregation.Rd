@@ -31,6 +31,9 @@ See \code{\link[terra:tapp]{terra::tapp()}} for more information.}
 A raster object with the aggregated data
 }
 \description{
+https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation
+}
+\details{
 \code{datacube_aggregation()} aggregates a datacube by a given function. The function will be applied to each
 day of the datacube.
 }

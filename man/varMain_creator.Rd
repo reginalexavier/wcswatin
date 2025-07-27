@@ -21,6 +21,7 @@ This function is to create the main table for the input table for SWAT.
 }
 \examples{
 varMain_creator(targeted_points_path = system.file("extdata/sl_centroides",
-               "Centroide_watershed_grau.shp",
-               package = "cwswatinput"))
+  "Centroide_watershed_grau.shp",
+  package = "cwswatinput"
+))
 }

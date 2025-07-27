@@ -42,29 +42,28 @@ utils::globalVariables(c(":=", "rh"))
 #' @export
 #'
 
-daily_aggregation <- function(folder_in,
-                              folder_out,
-                              pattern = ".txt$",
-                              from = '2002-01-01 00',
-                              to = '2021-05-31 23',
-                              take_out_first_record = TRUE,
-                              aggregation_function = mean,
-                              mode = c("agg_fun", "max_min", "last_value")[1],
-                              na.rm = FALSE){
-
+daily_aggregation <- function(
+    folder_in,
+    folder_out,
+    pattern = ".txt$",
+    from = "2002-01-01 00",
+    to = "2021-05-31 23",
+    take_out_first_record = TRUE,
+    aggregation_function = mean,
+    mode = c("agg_fun", "max_min", "last_value")[1],
+    na.rm = FALSE) {
   mode <- match.arg(mode, c("agg_fun", "max_min", "last_value"))
 
   touch_dir(folder_out)
 
-  hourly_files <- list.files(folder_in,
-                             full.names = TRUE,
-                             pattern = pattern)
-
+  hourly_files <- list.files(folder_in, full.names = TRUE, pattern = pattern)
 
   # date
-  my_ymdh <- seq(from = lubridate::ymd_h(from),
-                 to = lubridate::ymd_h(to),
-                 by = 'hours')
+  my_ymdh <- seq(
+    from = lubridate::ymd_h(from),
+    to = lubridate::ymd_h(to),
+    by = "hours"
+  )
 
   by_ydm <- lubridate::as_date(my_ymdh)
 
@@ -72,7 +71,6 @@ daily_aggregation <- function(folder_in,
   pb <- txtProgressBar(min = 0, max = length(hourly_files), style = 3)
 
   for (i in seq_along(hourly_files)) {
-
     if (take_out_first_record) {
       temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
     } else {
@@ -84,53 +82,51 @@ daily_aggregation <- function(folder_in,
       col_name <- data.table::copy(colnames(temp_tbl))
     }
 
-
-    temp_tbl[, `:=`(date = my_ymdh,
-                    day = by_ydm)]
+    temp_tbl[, `:=`(
+      date = my_ymdh,
+      day = by_ydm
+    )]
 
     data.table::setnames(temp_tbl, 1, "value")
 
     if (mode == "agg_fun") {
-      temp_tbl <- temp_tbl[, .(daily_agg = aggregation_function(value,
-                                                                na.rm = na.rm)),
-                           by = day]
+      temp_tbl <- temp_tbl[,
+        .(daily_agg = aggregation_function(value, na.rm = na.rm)),
+        by = day
+      ]
 
-      daily_agg <- temp_tbl[ , "daily_agg"]
-
+      daily_agg <- temp_tbl[, "daily_agg"]
     } else if (mode == "max_min") {
-      temp_tbl <- temp_tbl[, .(max_min = paste(round(max(value), 3),
-                                               round(min(value), 3),
-                                               sep = ",")),
-                           by = day]
+      temp_tbl <- temp_tbl[,
+        .(
+          max_min = paste(round(max(value), 3), round(min(value), 3), sep = ",")
+        ),
+        by = day
+      ]
 
-      daily_agg <- temp_tbl[ , list(max_min)]
-
+      daily_agg <- temp_tbl[, list(max_min)]
     } else if (mode == "last_value") {
       temp_tbl[, hours := as.factor(lubridate::hour(date))]
 
-      daily_agg <- temp_tbl[hours == 23, 1] #TODO: last value of the day is 23 or 0?
+      daily_agg <- temp_tbl[hours == 23, 1] # TODO: last value of the day is 23 or 0?
     }
-
 
     data.table::setnames(daily_agg, 1, col_name)
 
-    #saving to file
-    data.table::fwrite(daily_agg,
-                       file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
-                       row.names = FALSE,
-                       dec = ".",
-                       sep = ",",
-                       quote = FALSE
+    # saving to file
+    data.table::fwrite(
+      daily_agg,
+      file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
+      row.names = FALSE,
+      dec = ".",
+      sep = ",",
+      quote = FALSE
     )
     setTxtProgressBar(pb, i)
-
   }
 
   close(pb)
-
 }
-
-
 
 
 #' Calculate the Relative Humidity from dewpoint and ambient temperature
@@ -161,28 +157,22 @@ daily_aggregation <- function(folder_in,
 #'   CONVERSION FORMULAS, Calculation formulas for humidity.
 #'
 
-rh_calculator <- function(folder_dpt,
-                          folder_tas,
-                          folder_out,
-                          file_name_output = "rh",
-                          m_value = 7.591386,
-                          Tn_value = 240.7263,
-                          pattern = ".txt$"
-){
+rh_calculator <- function(
+    folder_dpt,
+    folder_tas,
+    folder_out,
+    file_name_output = "rh",
+    m_value = 7.591386,
+    Tn_value = 240.7263,
+    pattern = ".txt$") {
+  dpt_files <- list.files(folder_dpt, full.names = TRUE, pattern = pattern)
 
-  dpt_files <- list.files(folder_dpt,
-                          full.names = TRUE,
-                          pattern = pattern)
-
-  tas_files <- list.files(folder_tas,
-                          full.names = TRUE,
-                          pattern = pattern)
+  tas_files <- list.files(folder_tas, full.names = TRUE, pattern = pattern)
 
   # transformation
   pb <- txtProgressBar(min = 0, max = length(dpt_files), style = 3)
 
   for (i in seq_along(dpt_files)) {
-
     temp_dpt <- data.table::fread(dpt_files[i], header = TRUE)
 
     temp_tas <- data.table::fread(tas_files[i], header = TRUE)
@@ -192,17 +182,18 @@ rh_calculator <- function(folder_dpt,
       col_name <- data.table::copy(colnames(temp_dpt))
     }
 
-
-    #vaisala formula 2013 formula
-    rh_fun <- function(m, td, Tambient, Tn){
-      100*10^(m*((td/(td + Tn)) - (Tambient/(Tambient + Tn))))
+    # vaisala formula 2013 formula
+    rh_fun <- function(m, td, Tambient, Tn) {
+      100 * 10^(m * ((td / (td + Tn)) - (Tambient / (Tambient + Tn))))
     }
 
     data.table::setnames(temp_dpt, "dpt")
     data.table::setnames(temp_tas, "tas")
 
-    rh_tbl <- data.table::data.table(dpt = temp_dpt$dpt,
-                                     tas = temp_tas$tas)
+    rh_tbl <- data.table::data.table(
+      dpt = temp_dpt$dpt,
+      tas = temp_tas$tas
+    )
 
     rh_tbl[, rh := rh_fun(m_value, dpt, tas, Tn_value)]
 
@@ -210,22 +201,25 @@ rh_calculator <- function(folder_dpt,
 
     data.table::setnames(rh_tbl, col_name)
 
-    #saving to file
-    data.table::fwrite(rh_tbl,
-                       file.path(folder_out, glue::glue('{sub("[^0-9]+", file_name_output, file_name(dpt_files[i]))}.txt')),
-                       row.names = FALSE,
-                       dec = ".",
-                       sep = ",",
-                       quote = FALSE
+    # saving to file
+    data.table::fwrite(
+      rh_tbl,
+      file.path(
+        folder_out,
+        glue::glue(
+          '{sub("[^0-9]+", file_name_output, file_name(dpt_files[i]))}.txt'
+        )
+      ),
+      row.names = FALSE,
+      dec = ".",
+      sep = ",",
+      quote = FALSE
     )
     setTxtProgressBar(pb, i)
-
   }
 
   close(pb)
-
 }
-
 
 
 #' Calculate the wind speed from Eastward and Northward Near-Surface Wind
@@ -253,32 +247,25 @@ rh_calculator <- function(folder_dpt,
 #' @export
 #'
 
-windspeed_calculator <- function(folder_uas,
-                                 folder_vas,
-                                 folder_out,
-                                 col_name = "20020101",
-                                 file_name_output = "ws",
-                                 pattern = ".txt$"
-){
+windspeed_calculator <- function(
+    folder_uas,
+    folder_vas,
+    folder_out,
+    col_name = "20020101",
+    file_name_output = "ws",
+    pattern = ".txt$") {
+  uas_files <- list.files(folder_uas, full.names = TRUE, pattern = pattern)
 
-  uas_files <- list.files(folder_uas,
-                          full.names = TRUE,
-                          pattern = pattern)
+  vas_files <- list.files(folder_vas, full.names = TRUE, pattern = pattern)
 
-  vas_files <- list.files(folder_vas,
-                          full.names = TRUE,
-                          pattern = pattern)
-
-  file_name <- function(x){
+  file_name <- function(x) {
     stringr::str_extract(x, "[a-z_]+[0-9]+")
   }
-
 
   # transformation
   pb <- txtProgressBar(min = 0, max = length(uas_files), style = 3)
 
   for (i in seq_along(uas_files)) {
-
     temp_uas <- data.table::fread(uas_files[i], header = TRUE)
 
     temp_vas <- data.table::fread(vas_files[i], header = TRUE)
@@ -288,27 +275,28 @@ windspeed_calculator <- function(folder_uas,
       col_name <- data.table::copy(colnames(temp_uas))
     }
 
-    ws_tbl <- data.table::data.table(windspeed_values = sqrt((temp_uas)^2 + (temp_vas)^2))
+    ws_tbl <- data.table::data.table(
+      windspeed_values = sqrt((temp_uas)^2 + (temp_vas)^2)
+    )
 
     data.table::setnames(ws_tbl, col_name)
 
-
-    #saving to file
-    data.table::fwrite(ws_tbl,
-                       file.path(folder_out, glue::glue('{sub("[^0-9]+", file_name_output, file_name(uas_files[i]))}.txt')),
-                       row.names = FALSE,
-                       dec = ".",
-                       sep = ",",
-                       quote = FALSE
+    # saving to file
+    data.table::fwrite(
+      ws_tbl,
+      file.path(
+        folder_out,
+        glue::glue(
+          '{sub("[^0-9]+", file_name_output, file_name(uas_files[i]))}.txt'
+        )
+      ),
+      row.names = FALSE,
+      dec = ".",
+      sep = ",",
+      quote = FALSE
     )
     setTxtProgressBar(pb, i)
-
   }
 
   close(pb)
-
 }
-
-
-
-

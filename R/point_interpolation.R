@@ -1,4 +1,3 @@
-
 #' Trend Surface Interpolation into Targeded Points
 #'
 #' This function make an interpolation whith the trend surface method where the user
@@ -22,29 +21,32 @@
 #           poly_degree = 2)
 ts_to_point <- function(my_folder,
                         targeted_points_path,
-                        poly_degree = 2){
-
+                        poly_degree = 2) {
   var_files <- list.files(my_folder,
-                          full.names = TRUE,
-                          pattern = ".csv$")
+    full.names = TRUE,
+    pattern = ".csv$"
+  )
 
   temp_name <- list.files(my_folder,
-                          full.names = FALSE)
+    full.names = FALSE
+  )
 
   names_sans_ext <- tools::file_path_sans_ext(temp_name)
 
   targeted_points <- sf::read_sf(targeted_points_path)
 
-  pcpList <- vector(mode = "list", length = length(var_files)) #blank list for future alocation
-  non_zero <- function(x){ifelse(x < 0, 0, x)}
+  pcpList <- vector(mode = "list", length = length(var_files)) # blank list for future alocation
+  non_zero <- function(x) {
+    ifelse(x < 0, 0, x)
+  }
 
-  # iteração com progress bar
+  # iteration with progress bar
   pb <- txtProgressBar(min = 0, max = length(pcpList), style = 3)
   for (i in seq_along(var_files)) {
-
     pcp_temp <- vroom::vroom((var_files[i]),
-                             delim = ",",
-                             col_types = "dcdddd")
+      delim = ",",
+      col_types = "dcdddd"
+    )
 
     # o polynomio do modelo
     my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))
@@ -53,14 +55,19 @@ ts_to_point <- function(my_folder,
     fit_lm <- lm(my_formula, data = pcp_temp)
 
     # estimando para os pontos de referencia
-    target_temp <- dplyr::tibble(LONG = targeted_points$Lon_dec,
-                                 LAT = targeted_points$Lat_dec)
+    target_temp <- dplyr::tibble(
+      LONG = targeted_points$Lon_dec,
+      LAT = targeted_points$Lat_dec
+    )
     interpolation <- dplyr::mutate(target_temp,
-                                   Z = non_zero(predict(fit_lm,
-                                                        target_temp)))
+      Z = non_zero(predict(
+        fit_lm,
+        target_temp
+      ))
+    )
 
     names(interpolation)[3] <- names_sans_ext[i]
-    #rename(precipitation, "layer" = substr(var_files[i], 62, 75))
+    # rename(precipitation, "layer" = substr(var_files[i], 62, 75))
 
     pcpList[[i]] <- interpolation[3]
 
@@ -77,15 +84,15 @@ ts_to_point <- function(my_folder,
   toCentroide <- function(x) {
     all_pcp <- dplyr::mutate(do.call(cbind, x), ID = 1:dplyr::n())
 
-    long_table <- tidyr::pivot_longer(all_pcp, cols = seq_along(all_pcp[-1]),
-                                      names_to = "date", values_to = "value")
+    long_table <- tidyr::pivot_longer(all_pcp,
+      cols = seq_along(all_pcp[-1]),
+      names_to = "date", values_to = "value"
+    )
     split(long_table, long_table$ID)
-
   }
 
   ## tabela final ----
   toCentroide(pcpList)
-
 }
 
 
@@ -105,32 +112,38 @@ ts_to_point <- function(my_folder,
 #' @export
 #'
 #' @examples
-#' ts_to_area(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-#'           bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
-#'           package = "cwswatinput"),
-#'           poly_degree = 2,
-#'           resolution = 0.5)
+#' ts_to_area(
+#'   my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
+#'   bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
+#'     package = "cwswatinput"
+#'   ),
+#'   poly_degree = 2,
+#'   resolution = 0.5
+#' )
 ts_to_area <- function(my_folder,
-                      bassin_limit_path,
-                      poly_degree = 2,
-                      resolution = 0.01){
-
+                       bassin_limit_path,
+                       poly_degree = 2,
+                       resolution = 0.01) {
   bassin_limit <- sf::read_sf(bassin_limit_path)
 
   var_files <- list.files(my_folder,
-                          full.names = TRUE,
-                          pattern = ".csv$")
+    full.names = TRUE,
+    pattern = ".csv$"
+  )
 
 
   # temp_name <- list.files(my_folder,
   #                         full.names = FALSE)
 
   names_sans_ext <- tools::file_path_sans_ext(list.files(my_folder,
-                                                         full.names = FALSE))
+    full.names = FALSE
+  ))
 
 
   raster_list <- vector(mode = "list", length = length(var_files)) # blank list for future alocation
-  non_zero <- function(x){ifelse(x < 0, 0, x)}
+  non_zero <- function(x) {
+    ifelse(x < 0, 0, x)
+  }
 
   # template grid
   bbox <- c(
@@ -145,13 +158,13 @@ ts_to_area <- function(my_folder,
     LAT = seq(from = bbox["ymin"], to = bbox["ymax"], by = resolution)
   )
 
-  # iteração com progress bar
+  # iteration with progress bar
   pb <- txtProgressBar(min = 0, max = length(raster_list), style = 3)
   for (i in seq_along(var_files)) {
-
     pcp_temp <- vroom::vroom((var_files[i]),
-                             delim = ",",
-                             col_types = "dcdddd")
+      delim = ",",
+      col_types = "dcdddd"
+    )
 
     # o polynomio do modelo
     my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))
@@ -161,10 +174,14 @@ ts_to_area <- function(my_folder,
 
     # estimando para os grids
     interpolation <- dplyr::mutate(grd_template_sl,
-                                   Z = non_zero(predict(fit_lm,
-                                                        grd_template_sl)))
+      Z = non_zero(predict(
+        fit_lm,
+        grd_template_sl
+      ))
+    )
     point_2_raster <- raster::rasterFromXYZ(interpolation,
-                                            crs = "+proj=longlat +datum=WGS84 +no_defs")
+      crs = "+proj=longlat +datum=WGS84 +no_defs"
+    )
 
     raster_list[[i]] <- point_2_raster
 
@@ -178,7 +195,6 @@ ts_to_area <- function(my_folder,
 
   # creating a raster brick
   raster::brick(raster_list)
-
 }
 
 
@@ -195,20 +211,19 @@ ts_to_area <- function(my_folder,
 #'
 #' @examples
 #' varMain_creator(targeted_points_path = system.file("extdata/sl_centroides",
-#'                "Centroide_watershed_grau.shp",
-#'                package = "cwswatinput"))
+#'   "Centroide_watershed_grau.shp",
+#'   package = "cwswatinput"
+#' ))
 varMain_creator <- function(targeted_points_path,
                             var_name = "pcp",
-                            col_elev = "Elev"){
+                            col_elev = "Elev") {
   targeted_points <- sf::read_sf(targeted_points_path)
-  points <- as.data.frame( sf::st_coordinates(targeted_points))
-  dplyr::tibble(ID = targeted_points$OBJECTID,
-                NAME = paste0(var_name, 1:nrow(targeted_points)),
-                LAT = points$Y,
-                LONG = points$X,
-                ELEVATION = targeted_points[[col_elev]])
+  points <- as.data.frame(sf::st_coordinates(targeted_points))
+  dplyr::tibble(
+    ID = targeted_points$OBJECTID,
+    NAME = paste0(var_name, 1:nrow(targeted_points)),
+    LAT = points$Y,
+    LONG = points$X,
+    ELEVATION = targeted_points[[col_elev]]
+  )
 }
-
-
-
-

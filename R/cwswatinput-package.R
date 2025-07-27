@@ -14,7 +14,8 @@
 #'
 #'
 #'
-#' @author Reginal Exavier \email{reginalexavier@@rocketmail.com}, Peter Zeilhofer \email{zeilhoferpeter@@gmail.com}
+#' @author Reginal Exavier \email{reginalexavier@@rocketmail.com}, Peter
+#'   Zeilhofer \email{zeilhoferpeter@@gmail.com}
 #' @name cwswatinput-package
 #' @aliases cwswatinput
 #'
