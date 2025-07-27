@@ -1,5 +1,7 @@
 #' Create a daily aggregation from an hourly datacube
 #'
+#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation
+#'
 #' `datacube_aggregation()` aggregates a datacube by a given function. The function will be applied to each
 #' day of the datacube.
 #'
@@ -27,7 +29,10 @@ datacube_aggregation <- function(input_path,
 
   timestamp <- names_to_date(cube_i, ...)
 
-  index <- as.Date(timestamp)
+  # index <- as.Date(timestamp)
+  index <- "days"
+
+  terra::time(cube_i, tstep = "") <- timestamp
 
   agg_raster <- terra::tapp(
     x = cube_i,

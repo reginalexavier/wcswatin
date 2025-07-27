@@ -2,6 +2,8 @@ utils::globalVariables(c(":=", "rh"))
 
 #' Create a daily aggregation from an hourly dataset
 #'
+#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation
+#'
 #' This function allows to aggregate hourly observations to daily time series.
 #' The function for aggregation can be informed in the
 #' \code{aggregation_function} parameter, this parameter takes a function as
