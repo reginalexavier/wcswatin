@@ -7,3 +7,5 @@
 ^\.pre-commit-config\.yaml$
 ^cwswatinput\.Rproj$
 ^doc$
+^renv$
+^renv\.lock$
