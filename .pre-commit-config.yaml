@@ -2,31 +2,31 @@
 # R specific hooks: https://github.com/lorenzwalthert/precommit
 repos:
 -   repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3.9012
+    rev: v0.4.3.9017
     hooks:
     -   id: style-files
         args: [--style_pkg=styler, --style_fun=tidyverse_style]
     -   id: roxygenize
     # roxygen requires loading pkg -> add dependencies from DESCRIPTION
-    additional_dependencies:
-    -    dplyr
-    -    tidyr
-    -    raster
-    -    ncdf4
-    -    data.table
-    -    glue
-    -    stringr
-    -    vroom
-    -    sf
-    -    lubridate
-    -    hyfo
-    -    ggplot2
-    -    terra
-    -    future.apply
-    -    progressr
-    -    methods
+        additional_dependencies:
+        -    dplyr
+        -    tidyr
+        -    raster
+        -    ncdf4
+        -    data.table
+        -    glue
+        -    stringr
+        -    vroom
+        -    sf
+        -    lubridate
+        -    hyfo
+        -    ggplot2
+        -    terra
+        -    future.apply
+        -    progressr
+        -    methods
     # codemeta must be above use-tidy-description when both are used
-    # -   id: codemeta-description-updated
+    -   id: codemeta-description-updated
     -   id: use-tidy-description
     -   id: spell-check
         exclude: >
@@ -67,14 +67,18 @@ repos:
     -   id: deps-in-desc
     -   id: pkgdown
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
     -   id: check-added-large-files
         args: ['--maxkb=200']
     -   id: file-contents-sorter
         files: '^\.Rbuildignore$'
     -   id: end-of-file-fixer
-        exclude: '\.Rd'
+        exclude: >
+          (?x)^(
+          \.Rd |
+          inst/extdata/.*|
+          )$
 -   repo: https://github.com/pre-commit-ci/pre-commit-ci-config
     rev: v1.6.1
     hooks:
