@@ -585,4 +585,3 @@ hydroGOF::ggof(
   FUN = mean
 )
 ```
-
