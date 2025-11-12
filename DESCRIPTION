@@ -12,21 +12,21 @@ Authors@R: c(
            role = "aut",
            email = "zeilhoferpeter@gmail.com"))
 Description: cwswatinput (Climate & Weather SWAT input) is an open-source R package
-    for preparing weather and climate data from different sources for input in the 
-    Soil & Water Assessment Tool (SWAT), funded by the Critical Ecosystem 
+    for preparing weather and climate data from different sources for input in the
+    Soil & Water Assessment Tool (SWAT), funded by the Critical Ecosystem
     Partnership Fund (CEPF).
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-Suggests: 
+RoxygenNote: 7.3.3
+Suggests:
     future,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-Imports: 
+Imports:
     dplyr,
     tidyr,
     raster,
@@ -43,6 +43,6 @@ Imports:
     future.apply,
     progressr,
     methods
-URL: https://github.com/swatufmt/cwswatinput
-BugReports: https://github.com/swatufmt/cwswatinput/issues
+URL: https://github.com/reginalexavier/cwswatinput
+BugReports: https://github.com/reginalexavier/cwswatinput/issues
 VignetteBuilder: knitr
