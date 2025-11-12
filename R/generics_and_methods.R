@@ -15,6 +15,7 @@
 #'
 #'
 #' @name input_raster
+#' @rdname input_raster
 #' @exportMethod input_raster
 #'
 
@@ -33,10 +34,18 @@ methods::setMethod(
   "input_raster",
   methods::signature(x = "character"),
   function(x, ...) {
+    if (!file.exists(x)) {
+      stop(
+        "File does not exist: ",
+        x
+      )
+    }
     if (tools::file_ext(x) %in% c("nc", "nc4", "tif")) {
-      return(terra::rast(x, ...))
+      terra::rast(x, ...)
     } else {
-      stop("The file extension is not supported. Please, use a nc or tif file.")
+      stop(
+        "The file extension is not supported. Please, use a nc or tif file."
+      )
     }
   }
 )
@@ -49,7 +58,7 @@ methods::setMethod(
   "input_raster",
   methods::signature(x = "SpatRaster"),
   function(x, ...) {
-    return(x)
+    x
   }
 )
 
@@ -60,7 +69,7 @@ methods::setMethod(
   "input_raster",
   methods::signature(x = "RasterLayer"),
   function(x, ...) {
-    return(terra::rast(x, ...))
+    terra::rast(x, ...)
   }
 )
 
@@ -72,7 +81,7 @@ methods::setMethod(
   "input_raster",
   methods::signature(x = "RasterBrick"),
   function(x, ...) {
-    return(terra::rast(x, ...))
+    terra::rast(x, ...)
   }
 )
 
@@ -84,7 +93,7 @@ methods::setMethod(
   "input_raster",
   methods::signature(x = "RasterStack"),
   function(x, ...) {
-    return(terra::rast(x, ...))
+    terra::rast(x, ...)
   }
 )
 
@@ -121,8 +130,14 @@ methods::setMethod(
   "input_vector",
   methods::signature(x = "character"),
   function(x, ...) {
+    if (!file.exists(x)) {
+      stop(
+        "File does not exist: ",
+        x
+      )
+    }
     if (tools::file_ext(x) %in% c("shp", "gpkg")) {
-      return(terra::vect(x, ...))
+      terra::vect(x, ...)
     } else {
       stop(
         "The file extension is not supported. Please, use a shp or gpkg file."
@@ -138,7 +153,7 @@ methods::setMethod(
   "input_vector",
   methods::signature(x = "SpatVector"),
   function(x, ...) {
-    return(x)
+    x
   }
 )
 
@@ -149,7 +164,7 @@ methods::setMethod(
   "input_vector",
   methods::signature(x = "sf"),
   function(x, ...) {
-    return(terra::vect(x, ...))
+    terra::vect(x, ...)
   }
 )
 
@@ -189,8 +204,14 @@ methods::setMethod(
   "input_table",
   methods::signature(x = "character"),
   function(x, ...) {
+    if (!file.exists(x)) {
+      stop(
+        "File does not exist: ",
+        x
+      )
+    }
     if (tools::file_ext(x) %in% c("csv", "txt")) {
-      return(data.table::fread(x, ...))
+      data.table::fread(x, ...)
     } else {
       stop(
         "The file extension is not supported. Please, use a csv or txt file."
@@ -207,7 +228,7 @@ methods::setMethod(
   "input_table",
   methods::signature(x = "data.table"),
   function(x, ...) {
-    return(x)
+    x
   }
 )
 
@@ -219,6 +240,6 @@ methods::setMethod(
   "input_table",
   methods::signature(x = "data.frame"),
   function(x, ...) {
-    return(data.table::as.data.table(x))
+    data.table::as.data.table(x)
   }
 )
