@@ -1,78 +1,86 @@
-.PHONY: all lint format load check doc install test clean build coverage vignettes deps deps-dev ci release help
+.PHONY: all lint format load check doc install test clean build coverage vignettes deps deps-dev ci release pcr pci pcc knit-readme help
 
-# Default target
-all: deps doc check test
+BLUE := \033[0;34m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+RED := \033[0;31m
+NC := \033[0m # No Color
 
-# Dependencies management
-deps:
+help: ## Show this help
+	@echo "$(GREEN)CWSWATINPUT - Available commands:$(NC)"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(BLUE)%-15s$(NC) %s\n", $$1, $$2}'
+	@echo ""
+
+
+all: ## Run deps, doc, check, and test
+		deps doc check test
+
+
+deps: ## Install package dependencies
 		Rscript -e "if (!require('devtools')) install.packages('devtools'); devtools::install_deps(dependencies = TRUE)"
 
-deps-dev:
+deps-dev: ## Install development dependencies
 		Rscript -e "if (!require('devtools')) install.packages('devtools'); devtools::install_dev_deps()"
 
-# Code quality
-lint:
+
+lint: ## Run code linting
 		Rscript -e "if (!require('lintr')) install.packages('lintr'); lintr::lint_package()"
 
-format:
+format: ## Format code with styler
 		Rscript -e "if (!require('styler')) install.packages('styler'); styler::style_pkg()"
+		air format .
 
-# Development
-load:
+
+load: ## Load package for development
 		Rscript -e "devtools::load_all()"
 
-doc:
+doc: ## Generate documentation
 		Rscript -e "devtools::document()"
+		Rscript -e "codemetar::write_codemeta()"
 
-# Testing and checking
-test:
+
+test: ## Run tests
 		Rscript -e "devtools::test(reporter = 'summary')"
 
-check:
+check: ## Run R CMD check
 		Rscript -e "devtools::check(error_on = 'warning')"
 
-coverage:
+coverage: ## Generate test coverage report
 		Rscript -e "if (!require('covr')) install.packages('covr'); covr::package_coverage()"
 
-# Building and installation
-build:
+
+build: ## Build package
 		Rscript -e "devtools::build()"
 
 install:
 		Rscript -e "devtools::install()"
 
-vignettes:
+vignettes: ## Build vignettes
 		Rscript -e "devtools::build_vignettes()"
 
-# Cleanup
-clean:
+
+clean: ## Clean build artifacts
 		Rscript -e "devtools::clean_dll()"
 		rm -rf *.tar.gz
 		rm -rf man/*.Rd~
 
-# CI/CD targets
-ci: deps lint check test coverage
+ci: deps lint check test coverage ## Run CI pipeline (deps, lint, check, test, coverage)
 
-release: clean deps doc build check
+release: clean deps doc build check test ## Prepare package for release
 		@echo "Package ready for release"
 
-# Help
-help:
-		@echo "Available targets:"
-		@echo "  all       - Run deps, doc, check, and test"
-		@echo "  deps      - Install package dependencies"
-		@echo "  deps-dev  - Install development dependencies"
-		@echo "  lint      - Run code linting"
-		@echo "  format    - Format code with styler"
-		@echo "  load      - Load package for development"
-		@echo "  check     - Run R CMD check"
-		@echo "  doc       - Generate documentation"
-		@echo "  install   - Install package"
-		@echo "  test      - Run tests"
-		@echo "  coverage  - Generate test coverage report"
-		@echo "  build     - Build package"
-		@echo "  vignettes - Build vignettes"
-		@echo "  clean     - Clean build artifacts"
-		@echo "  ci        - Run CI pipeline (deps, lint, check, test, coverage)"
-		@echo "  release   - Prepare package for release"
-		@echo "  help      - Show this help"
+pci: ## Install pre-commit hooks
+		pre-commit install
+
+pcr: ## Run pre-commit hooks on all files
+		pre-commit run --all-files
+
+pcu: ## Update pre-commit hooks to the latest versions
+		pre-commit autoupdate
+
+pcc: ## Clean pre-commit cache
+		pre-commit clean
+
+knit-readme: ## Render README.Rmd to markdown
+		Rscript -e "rmarkdown::render('README.Rmd', output_format = 'github_document')"
