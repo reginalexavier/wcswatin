@@ -1,14 +1,17 @@
 #' Create a daily aggregation from an hourly datacube
 #'
-#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation
+#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation # nolint: line_length_linter
 #'
-#' `datacube_aggregation()` aggregates a datacube by a given function. The function will be applied to each
-#' day of the datacube.
+#' `datacube_aggregation()` aggregates a datacube by a given function. The
+#' function will be applied to each day of the datacube.
 #'
 #' @param input_path Path to the datasetcube
 #' @param output_filename Path to the output file
-#' @param fun Function to apply to the datasetcube (default is sum). The function
-#'  must be a function that takes a vector as input and returns a single value.
+#' @param fun Function to be applied to the datasetcube (default is sum). The
+#'  function must be a function that takes a vector as input and returns a
+#'  single value. The main functions to be used are: Sum, Mean, Min, Max, First
+#'  and Last. For last, use `dplyr::last`. To use customized function say, for
+#'  example "min", you could use use the format fun = \(x) min(x).
 #'  See [terra::tapp()] for more information.
 #' @param cores Number of cores to use for the aggregation. Default is 1. See
 #'  [terra::tapp()] for more information.
@@ -21,16 +24,16 @@
 #'
 
 datacube_aggregation <- function(
-    input_path,
-    output_filename = "",
-    fun = sum,
-    cores = 1,
-    ...) {
+  input_path,
+  output_filename = "",
+  fun = sum,
+  cores = 1,
+  ...
+) {
   cube_i <- input_raster(input_path)
 
   timestamp <- names_to_date(cube_i, ...)
 
-  # index <- as.Date(timestamp)
   index <- "days"
 
   terra::time(cube_i, tstep = "") <- timestamp
