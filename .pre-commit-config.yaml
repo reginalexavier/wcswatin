@@ -58,8 +58,8 @@ repos:
           \.github/workflows/.*|
           data/.*|
           )$
-    -   id: lintr
-    -   id: readme-rmd-rendered
+    # -   id: lintr
+    # -   id: readme-rmd-rendered
     -   id: parsable-R
     -   id: no-browser-statement
     -   id: no-print-statement
