@@ -38,10 +38,10 @@ the regular expression will be returned.}
 Files with the same temporal resolution as the input
 }
 \description{
-This function performs the calculation of a relative humidity with dewpoint and
-ambient temperature as input applying the formula: \eqn{RH =
-100*10^(m*[(Td/(Td+Tn)) - (Tambient/(Tambient+Tn)]))}. Where \eqn{m} and
-\eqn{Tn} are constants \cite{(Vaisala, 2013)}.
+This function performs the calculation of a relative humidity with dewpoint
+and ambient temperature as input applying the formula:
+\eqn{RH = 100*10^(m*[(Td/(Td+Tn)) - (Tambient/(Tambient+Tn)]))}. Where
+\eqn{m} and \eqn{Tn} are constants \cite{(Vaisala, 2013)}.
 }
 \references{
 \href{https://www.vaisala.com/en}{VAISALA} (2013) HUMIDITY

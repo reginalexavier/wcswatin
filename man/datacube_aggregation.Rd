@@ -17,8 +17,11 @@ datacube_aggregation(
 
 \item{output_filename}{Path to the output file}
 
-\item{fun}{Function to apply to the datasetcube (default is sum). The function
-must be a function that takes a vector as input and returns a single value.
+\item{fun}{Function to be applied to the datasetcube (default is sum). The
+function must be a function that takes a vector as input and returns a
+single value. The main functions to be used are: Sum, Mean, Min, Max, First
+and Last. For last, use \code{dplyr::last}. To use customized function say, for
+example "min", you could use use the format fun = \(x) min(x).
 See \code{\link[terra:tapp]{terra::tapp()}} for more information.}
 
 \item{cores}{Number of cores to use for the aggregation. Default is 1. See
@@ -31,11 +34,11 @@ See \code{\link[terra:tapp]{terra::tapp()}} for more information.}
 A raster object with the aggregated data
 }
 \description{
-https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation
+https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation # nolint: line_length_linter
 }
 \details{
-\code{datacube_aggregation()} aggregates a datacube by a given function. The function will be applied to each
-day of the datacube.
+\code{datacube_aggregation()} aggregates a datacube by a given function. The
+function will be applied to each day of the datacube.
 }
 \seealso{
 \code{\link[terra:tapp]{terra::tapp()}}, \code{\link[=names_to_date]{names_to_date()}}

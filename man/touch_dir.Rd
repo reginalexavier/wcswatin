@@ -7,7 +7,8 @@
 touch_dir(folder_path, return_path = FALSE)
 }
 \arguments{
-\item{folder_path}{A character string with the path of the directory to be created.}
+\item{folder_path}{A character string with the path of the directory to be
+created.}
 
 \item{return_path}{logical. If \code{TRUE}, the function returns the path}
 }

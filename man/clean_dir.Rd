@@ -9,7 +9,8 @@ directory if exists.}
 clean_dir(folder_path)
 }
 \arguments{
-\item{folder_path}{A character string with the path of the directory to be cleaned.}
+\item{folder_path}{A character string with the path of the directory to be
+cleaned.}
 }
 \value{
 NULL. Only for side effects.

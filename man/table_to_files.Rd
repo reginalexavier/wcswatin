@@ -4,7 +4,7 @@
 \alias{table_to_files}
 \title{Export tables to \code{txt} or \code{csv} files}
 \usage{
-table_to_files(table, folder_path, first_date, file_extention = "txt")
+table_to_files(table, folder_path, first_date, file_extension = "txt")
 }
 \arguments{
 \item{table}{A table \code{data.frame} containing all the observations}
@@ -17,7 +17,7 @@ This value is used to renaming the columns on every single file while
 saving. The actual name is used as the file names. The suggested format is
 \code{\%y\%m\%d}}
 
-\item{file_extention}{Character. \code{txt} or \code{csv}.}
+\item{file_extension}{Character. \code{txt} or \code{csv}.}
 }
 \description{
 Export tables to \code{txt} or \code{csv} files

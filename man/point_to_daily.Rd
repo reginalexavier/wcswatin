@@ -19,10 +19,11 @@ point_to_daily(
 \arguments{
 \item{my_folder}{character. The path to the raw files.}
 
-\item{var_pattern}{character. A pattern for the observation/station points name.}
+\item{var_pattern}{character. A pattern for the observation/station points
+name.}
 
-\item{main_pattern}{character. A pattern for the main file  containing all the
-points with ID, NAME, LAT, LONG and ELEVATION.}
+\item{main_pattern}{character. A pattern for the main file  containing all
+the points with ID, NAME, LAT, LONG and ELEVATION.}
 
 \item{start_date}{character. Inform the start date of the serie in the format
 yyyymmdd.}
@@ -45,8 +46,8 @@ NA.}
 A list of table
 }
 \description{
-Having the collected observation from a point perspective, this function transform the
-input to a vertical perspective, like a a daily perspective.
+Having the collected observation from a point perspective, this function
+transform the input to a vertical perspective, like a a daily perspective.
 }
 \examples{
 folder <- system.file("extdata/pcp_stations", package = "cwswatinput")

@@ -9,16 +9,17 @@ ts_to_point(my_folder, targeted_points_path, poly_degree = 2)
 \arguments{
 \item{my_folder}{Folder containing the ts input files.}
 
-\item{targeted_points_path}{A shapefile containing the targeted points where the
-trend suface function have to predict values.}
+\item{targeted_points_path}{A shapefile containing the targeted points where
+the trend suface function have to predict values.}
 
-\item{poly_degree}{The degree to be used in the polynomial function for the trend surface.}
+\item{poly_degree}{The degree to be used in the polynomial function for the
+trend surface.}
 }
 \value{
 A list of tibles by day
 }
 \description{
-This function make an interpolation whith the trend surface method where the user
-have to inform the polynome degree. The interpolation is made over the tageded points
-for all the serie on the input.
+This function make an interpolation whith the trend surface method where the
+user have to inform the polynome degree. The interpolation is made over the
+tageded points for all the serie on the input.
 }

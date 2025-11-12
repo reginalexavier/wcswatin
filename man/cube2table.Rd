@@ -68,8 +68,8 @@ A table containing the:
 \description{
 The function extracts the values of a NetCDF/raster layer and converts it to
 a table format containing the values of the pixels and the layer name as two
-columns. The pixel is identified by the ID \verb{(row and col)}, and the layer name
-represents the date of the data collected. All layers are stacked in a
+columns. The pixel is identified by the ID \verb{(row and col)}, and the layer
+name represents the date of the data collected. All layers are stacked in a
 single table, each layer is differentiated by the column layer_name
 containing the date of the data collected. The function, due to the large
 amount of data, counts with the structure of parallel processing based on the
