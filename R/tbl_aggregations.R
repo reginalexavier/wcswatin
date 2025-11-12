@@ -2,7 +2,7 @@ utils::globalVariables(c(":=", "rh"))
 
 #' Create a daily aggregation from an hourly dataset
 #'
-#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation
+#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation # nolint: line_length_linter
 #'
 #' This function allows to aggregate hourly observations to daily time series.
 #' The function for aggregation can be informed in the
@@ -22,7 +22,8 @@ utils::globalVariables(c(":=", "rh"))
 #'   from and to must be the same as the length of the hours in the input files.
 #' @param aggregation_function The function to use on the hourly groups like
 #'   mean, sum, mode, etc
-#' @param mode The mode of aggregation. The options are \code{agg_fun}, \code{max_min} or \code{last_value}.
+#' @param mode The mode of aggregation. The options are \code{agg_fun},
+#' \code{max_min} or \code{last_value}.
 #' @param na.rm a logical value indicating whether NA values should be removed
 #'   before the computation proceeds.
 #' @details The function will create a daily aggregation from an hourly dataset.
@@ -43,20 +44,37 @@ utils::globalVariables(c(":=", "rh"))
 #'
 
 daily_aggregation <- function(
-    folder_in,
-    folder_out,
-    pattern = ".txt$",
-    from = "2002-01-01 00",
-    to = "2021-05-31 23",
-    take_out_first_record = TRUE,
-    aggregation_function = mean,
-    mode = c("agg_fun", "max_min", "last_value")[1],
-    na.rm = FALSE) {
+  folder_in,
+  folder_out,
+  pattern = ".txt$",
+  from = "2002-01-01 00",
+  to = "2021-05-31 23",
+  take_out_first_record = TRUE,
+  aggregation_function = mean,
+  mode = c("agg_fun", "max_min", "last_value")[1],
+  na.rm = FALSE # nolint: object_name_linter
+) {
   mode <- match.arg(mode, c("agg_fun", "max_min", "last_value"))
 
   touch_dir(folder_out)
 
   hourly_files <- list.files(folder_in, full.names = TRUE, pattern = pattern)
+  if (length(hourly_files) == 0) {
+    stop("No hourly files found")
+  }
+
+  # Check if from and to dates are valid date
+  if (
+    !lubridate::is.POSIXct(lubridate::ymd_h(from)) ||
+      !lubridate::is.POSIXct(lubridate::ymd_h(to))
+  ) {
+    stop("Invalid date format")
+  }
+
+  # Check if from and to dates are valid
+  if (lubridate::ymd_h(from) > lubridate::ymd_h(to)) {
+    stop("Invalid date range")
+  }
 
   # date
   my_ymdh <- seq(
@@ -99,7 +117,11 @@ daily_aggregation <- function(
     } else if (mode == "max_min") {
       temp_tbl <- temp_tbl[,
         .(
-          max_min = paste(round(max(value), 3), round(min(value), 3), sep = ",")
+          max_min = paste(
+            round(max(value), 3),
+            round(min(value), 3),
+            sep = ","
+          )
         ),
         by = day
       ]
@@ -108,7 +130,8 @@ daily_aggregation <- function(
     } else if (mode == "last_value") {
       temp_tbl[, hours := as.factor(lubridate::hour(date))]
 
-      daily_agg <- temp_tbl[hours == 23, 1] # TODO: last value of the day is 23 or 0?
+      # TODO: last value of the day is 23 or 0?
+      daily_agg <- temp_tbl[hours == 23, 1]
     }
 
     data.table::setnames(daily_agg, 1, col_name)
@@ -116,7 +139,10 @@ daily_aggregation <- function(
     # saving to file
     data.table::fwrite(
       daily_agg,
-      file.path(folder_out, glue::glue("{file_name(hourly_files[i])}.txt")),
+      file.path(
+        folder_out,
+        glue::glue("{file_name(hourly_files[i])}.txt")
+      ),
       row.names = FALSE,
       dec = ".",
       sep = ",",
@@ -131,10 +157,10 @@ daily_aggregation <- function(
 
 #' Calculate the Relative Humidity from dewpoint and ambient temperature
 #'
-#' This function performs the calculation of a relative humidity with dewpoint and
-#' ambient temperature as input applying the formula: \eqn{RH =
-#' 100*10^(m*[(Td/(Td+Tn)) - (Tambient/(Tambient+Tn)]))}. Where \eqn{m} and
-#' \eqn{Tn} are constants \cite{(Vaisala, 2013)}.
+#' This function performs the calculation of a relative humidity with dewpoint
+#' and ambient temperature as input applying the formula:
+#' \eqn{RH = 100*10^(m*[(Td/(Td+Tn)) - (Tambient/(Tambient+Tn)]))}. Where
+#' \eqn{m} and \eqn{Tn} are constants \cite{(Vaisala, 2013)}.
 #'
 #'
 #' @param folder_dpt Path of the input 2m dewpoint temperature files as
@@ -158,13 +184,14 @@ daily_aggregation <- function(
 #'
 
 rh_calculator <- function(
-    folder_dpt,
-    folder_tas,
-    folder_out,
-    file_name_output = "rh",
-    m_value = 7.591386,
-    Tn_value = 240.7263,
-    pattern = ".txt$") {
+  folder_dpt,
+  folder_tas,
+  folder_out,
+  file_name_output = "rh",
+  m_value = 7.591386,
+  Tn_value = 240.7263, # nolint: object_name_linter
+  pattern = ".txt$"
+) {
   dpt_files <- list.files(folder_dpt, full.names = TRUE, pattern = pattern)
 
   tas_files <- list.files(folder_tas, full.names = TRUE, pattern = pattern)
@@ -183,7 +210,8 @@ rh_calculator <- function(
     }
 
     # vaisala formula 2013 formula
-    rh_fun <- function(m, td, Tambient, Tn) {
+    # fmt: skip
+    rh_fun <- function(m, td, Tambient, Tn) { # nolint: object_name_linter
       100 * 10^(m * ((td / (td + Tn)) - (Tambient / (Tambient + Tn))))
     }
 
@@ -248,12 +276,13 @@ rh_calculator <- function(
 #'
 
 windspeed_calculator <- function(
-    folder_uas,
-    folder_vas,
-    folder_out,
-    col_name = "20020101",
-    file_name_output = "ws",
-    pattern = ".txt$") {
+  folder_uas,
+  folder_vas,
+  folder_out,
+  col_name = "20020101",
+  file_name_output = "ws",
+  pattern = ".txt$"
+) {
   uas_files <- list.files(folder_uas, full.names = TRUE, pattern = pattern)
 
   vas_files <- list.files(folder_vas, full.names = TRUE, pattern = pattern)

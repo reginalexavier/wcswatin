@@ -10,7 +10,8 @@ utils::globalVariables(c(
   "sd",
   "tas",
   "temperature",
-  "value"
+  "value",
+  "..i"
 ))
 
 
@@ -18,26 +19,29 @@ utils::globalVariables(c(
 #'
 #' @param files_path path where the files are.
 #' @param files_pattern  pattern for the observation/station points name.
-#' @param start_date Inform the start date of the series in the format  %Y-%m-%d.
+#' @param start_date Inform the start date of the series in the format
+#' %Y-%m-%d.
 #' @param end_date Inform the end date of the series in the format  %Y-%m-%d.
 #' @param interval Inform the interval between two observations. See
 #'   the function x
 #' @param na_value Value encoded as not available, use \code{NA} to leave it the
 #'   way it is.
-#' @param neg_to_zero logical. inform whether negative values should be corrected to zero.
+#' @param neg_to_zero logical. inform whether negative values should be
+#' corrected to zero.
 #'
 #' @return A `dataframe`.
 #' @export
 #'
 
 files_to_table <- function(
-    files_path,
-    files_pattern,
-    start_date = "1970-12-31",
-    end_date = "1980-12-31",
-    interval = "day",
-    na_value = NA,
-    neg_to_zero = FALSE) {
+  files_path,
+  files_pattern,
+  start_date = "1970-12-31",
+  end_date = "1980-12-31",
+  interval = "day",
+  na_value = NA,
+  neg_to_zero = FALSE
+) {
   files_name <- list.files(files_path, full.names = FALSE)
 
   point_list <- lapply(
@@ -94,7 +98,7 @@ files_to_table <- function(
 #'   This value is used to renaming the columns on every single file while
 #'   saving. The actual name is used as the file names. The suggested format is
 #'   \code{\%y\%m\%d}
-#' @param file_extention Character. `txt` or `csv`.
+#' @param file_extension Character. `txt` or `csv`.
 #'
 #' @return NULL
 #'
@@ -102,21 +106,23 @@ files_to_table <- function(
 #'
 
 table_to_files <- function(
-    table,
-    folder_path,
-    first_date,
-    file_extention = "txt") {
+  table,
+  folder_path,
+  first_date,
+  file_extension = "txt"
+) {
+  table <- input_table(table)
   for (i in seq_len(ncol(table))) {
-    col_i <- table[, i, drop = FALSE]
+    col_i <- table[, ..i, drop = FALSE]
     f_name_i <- colnames(col_i)
-    # print(my_col)
+
     colnames(col_i) <- first_date
-    # print(my_col)
+
     data.table::fwrite(
       col_i,
       file = file.path(
         folder_path,
-        paste0(f_name_i, ".", file_extention)
+        paste0(f_name_i, ".", file_extension)
       )
     )
   }
@@ -124,13 +130,14 @@ table_to_files <- function(
 
 #' Transforms the raw value from point perspective to a daily perspective
 #'
-#' Having the collected observation from a point perspective, this function transform the
-#' input to a vertical perspective, like a a daily perspective.
+#' Having the collected observation from a point perspective, this function
+#' transform the input to a vertical perspective, like a a daily perspective.
 #'
 #' @param my_folder character. The path to the raw files.
-#' @param var_pattern character. A pattern for the observation/station points name.
-#' @param main_pattern character. A pattern for the main file  containing all the
-#' points with ID, NAME, LAT, LONG and ELEVATION.
+#' @param var_pattern character. A pattern for the observation/station points
+#' name.
+#' @param main_pattern character. A pattern for the main file  containing all
+#' the points with ID, NAME, LAT, LONG and ELEVATION.
 #' @param start_date character. Inform the start date of the serie in the format
 #'   yyyymmdd.
 #' @param end_date character. Inform the end date of the serie in the format
@@ -155,15 +162,16 @@ table_to_files <- function(
 #' test01 <- point_to_daily(my_folder = folder)
 #'
 point_to_daily <- function(
-    my_folder,
-    var_pattern = "p-",
-    main_pattern = "pcp",
-    start_date = "20170301", # TODO: transformar o formato
-    end_date = "20170331",
-    interval = "day",
-    na_value = -99,
-    negatif_number = TRUE,
-    prefix = "day_") {
+  my_folder,
+  var_pattern = "p-",
+  main_pattern = "pcp",
+  start_date = "20170301", # TODO: transformar o formato
+  end_date = "20170331",
+  interval = "day",
+  na_value = -99,
+  negatif_number = TRUE,
+  prefix = "day_"
+) {
   files_name <- list.files(my_folder, full.names = FALSE)
 
   pcp <- data.table::fread(
@@ -196,7 +204,8 @@ point_to_daily <- function(
   # criando uma sequencia de datas igual ao tamanho da série
   datas <- seq.Date(
     from = as.Date(start_date, format = "%Y%m%d"), # FIXME
-    to = as.Date(end_date, format = "%Y%m%d"), # FIXME colocar no padrão igual a primeira função
+    # FIXME colocar no padrão igual a primeira função
+    to = as.Date(end_date, format = "%Y%m%d"),
     by = interval
   )
 
@@ -302,8 +311,8 @@ var_names <- function(path) {
 #' @seealso For more detail about the algorithm used to fill the gaps, please
 #'   see \code{\link[hyfo]{fillGap}}.
 #'
-
-fill_gap <- function(dataset, corPeriod = "daily") {
+# fmt: skip
+fill_gap <- function(dataset, corPeriod = "daily") { # nolint: object_name_linter
   dataset <- as.data.frame(dataset)
   col_names_original <- colnames(dataset)
   tbl_filled <- hyfo::fillGap(
@@ -355,10 +364,11 @@ count_na <- function(dataset, percent = FALSE) {
 #' @export
 #'
 tbl_from_references <- function(
-    raster_file,
-    ref_points,
-    prefix_colname = NULL,
-    ...) {
+  raster_file,
+  ref_points,
+  prefix_colname = NULL,
+  ...
+) {
   if ("sf" %in% class(ref_points)) {
     ref_points <- ref_points
   } else if ("data.frame" %in% class(ref_points)) {
@@ -369,7 +379,7 @@ tbl_from_references <- function(
     )
   } else if (
     "character" %in%
-      class(ref_points) &
+      class(ref_points) &&
       any(stringr::str_ends(ref_points, c(".txt", ".csv")))
   ) {
     tbl_ref <- data.table::fread(ref_points)
@@ -380,7 +390,9 @@ tbl_from_references <- function(
     )
   } else {
     stop(
-      "The ref_points must be an object of class `sf`, `data.frame` or a string character of the path of a file with extention `.csv` or `.txt`!"
+      "The ref_points must be an object of class `sf`, `data.frame` ",
+      "or a string character of the path of a file with ",
+      "extension `.csv` or `.txt`!"
     )
   }
   # extração dos  valores nos rasters
@@ -390,12 +402,14 @@ tbl_from_references <- function(
     ...
   )
 
-  df_extracted <- as.data.frame(t(values_extracted), row.names = F)
+  df_extracted <- as.data.frame(t(values_extracted[, -1]), row.names = FALSE)
 
   if (is.null(prefix_colname)) {
     colnames(df_extracted) <- ref_points$NAME
   } else {
-    colnames(df_extracted) <- glue::glue("{prefix_colname}_{ref_points$NAME}")
+    colnames(df_extracted) <- glue::glue(
+      "{prefix_colname}_{ref_points$NAME}"
+    )
   }
 
   df_extracted
@@ -423,7 +437,8 @@ file_name <- function(path) {
 #' This function creates a directory if it does not exist.
 #' It is an internal function used in the \code{unit_converter} function.
 #'
-#' @param folder_path A character string with the path of the directory to be created.
+#' @param folder_path A character string with the path of the directory to be
+#' created.
 #' @param return_path logical. If \code{TRUE}, the function returns the path
 #'
 #' @keywords internal
@@ -443,7 +458,8 @@ touch_dir <- function(folder_path, return_path = FALSE) {
 #' This function removes files and/or sub-directory within the
 #' directory if exists.
 #'
-#' @param folder_path A character string with the path of the directory to be cleaned.
+#' @param folder_path A character string with the path of the directory to be
+#' cleaned.
 #'
 #' @keywords internal
 #'
@@ -460,19 +476,22 @@ clean_dir <- function(folder_path) {
 #' This function extracts the date from the layer names of a raster object.
 #'
 #' @param raster_cube A raster object.
-#' @param origin A character string with the origin date. The default is "1970-01-01".
+#' @param origin A character string with the origin date. The default is
+#' "1970-01-01".
 #' @param tz A character string with the time zone. The default is "UTC".
-#' @param regex A character string with the regular expression to extract the date.
+#' @param regex A character string with the regular expression to extract the
+#' date.
 #'
 #' @keywords internal
 #'
 #' @return A POSIXct object.
 #'
 names_to_date <- function(
-    raster_cube,
-    origin = "1970-01-01",
-    tz = "UTC",
-    regex = ".*=(\\d+)") {
+  raster_cube,
+  origin = "1970-01-01",
+  tz = "UTC",
+  regex = ".*=(\\d+)"
+) {
   layer_names <- names(raster_cube)
   timestamp <- as.numeric(sub(regex, "\\1", layer_names))
   return(as.POSIXct(timestamp, origin = origin, tz = tz))
@@ -499,10 +518,11 @@ names_to_date <- function(
 #'
 
 unit_converter <- function(
-    folder_in,
-    folder_out,
-    pattern = ".txt$",
-    FUN = \(x) (x - 273.15)) {
+  folder_in,
+  folder_out,
+  pattern = ".txt$",
+  FUN = \(x) (x - 273.15) # nolint: object_name_linter
+) {
   touch_dir(folder_out)
 
   files_list <- list.files(folder_in, full.names = TRUE, pattern = pattern)
@@ -565,13 +585,14 @@ unit_converter <- function(
 #'
 
 summary_table <- function(
-    var_folder,
-    sample = 5,
-    percent = FALSE,
-    by_month = TRUE,
-    from = "2002-01-01",
-    to = "2021-05-31",
-    pattern = ".txt$") {
+  var_folder,
+  sample = 5,
+  percent = FALSE,
+  by_month = TRUE,
+  from = "2002-01-01",
+  to = "2021-05-31",
+  pattern = ".txt$"
+) {
   daily_files <- list.files(var_folder, full.names = TRUE, pattern = pattern)
 
   total_files <- length(daily_files)
@@ -582,7 +603,7 @@ summary_table <- function(
     sample_val <- sample
   }
 
-  print(glue::glue("Ok, {sample_val} files will be processed!\n\n"))
+  message(glue::glue("Ok, {sample_val} files will be processed!\n\n"))
 
   if (by_month) {
     # date
@@ -609,7 +630,10 @@ summary_table <- function(
           temp_tbl <- dplyr::mutate(
             temp_tbl,
             date = my_ymd,
-            month_val = as.factor(lubridate::month(date, label = TRUE))
+            month_val = as.factor(lubridate::month(
+              date,
+              label = TRUE
+            ))
           )
         }
       )
@@ -685,14 +709,15 @@ summary_table <- function(
 #'
 
 summary_plot <- function(
-    var_folder,
-    sample = 5,
-    percent = FALSE,
-    from = "2002-01-01",
-    to = "2021-05-31",
-    x_lab = "Months of observation",
-    y_lab = "Vriable name and unit",
-    pattern = ".txt$") {
+  var_folder,
+  sample = 5,
+  percent = FALSE,
+  from = "2002-01-01",
+  to = "2021-05-31",
+  x_lab = "Months of observation",
+  y_lab = "Vriable name and unit",
+  pattern = ".txt$"
+) {
   daily_files <- list.files(var_folder, full.names = TRUE, pattern = pattern)
 
   total_files <- length(daily_files)
@@ -722,7 +747,7 @@ summary_plot <- function(
     sample_val <- sample
   }
 
-  print(glue::glue("Ok, {sample_val} files will be processed!\n\n"))
+  message(glue::glue("Ok, {sample_val} files will be processed!\n\n"))
 
   # dataset preparation
   data_set <- do.call(
