@@ -19,7 +19,8 @@ files_to_table(
 
 \item{files_pattern}{pattern for the observation/station points name.}
 
-\item{start_date}{Inform the start date of the series in the format  \%Y-\%m-\%d.}
+\item{start_date}{Inform the start date of the series in the format
+\%Y-\%m-\%d.}
 
 \item{end_date}{Inform the end date of the series in the format  \%Y-\%m-\%d.}
 
@@ -29,7 +30,8 @@ the function x}
 \item{na_value}{Value encoded as not available, use \code{NA} to leave it the
 way it is.}
 
-\item{neg_to_zero}{logical. inform whether negative values should be corrected to zero.}
+\item{neg_to_zero}{logical. inform whether negative values should be
+corrected to zero.}
 }
 \value{
 A \code{dataframe}.

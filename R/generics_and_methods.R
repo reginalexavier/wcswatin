@@ -15,82 +15,87 @@
 #'
 #'
 #' @name input_raster
+#' @rdname input_raster
 #' @exportMethod input_raster
 #'
 
-methods::setGeneric(name = "input_raster",
-                    def = function(x, ...) {
-                      standardGeneric("input_raster")
-                      }
-                    )
+methods::setGeneric(
+  name = "input_raster",
+  def = function(x, ...) {
+    standardGeneric("input_raster")
+  }
+)
 
 
 # S4 method for signature 'character'
 #' @rdname input_raster
 #' @aliases character-raster
-methods::setMethod("input_raster", methods::signature(x = "character"),
-                   function(x, ...) {
-
-                     if (tools::file_ext(x) %in% c("nc", "nc4", "tif")) {
-
-                       return(terra::rast(x, ...))
-
-                     } else  {
-                         stop("The file extension is not supported. Please, use a nc or tif file.")
-                       }
-
-                     }
+methods::setMethod(
+  "input_raster",
+  methods::signature(x = "character"),
+  function(x, ...) {
+    if (!file.exists(x)) {
+      stop(
+        "File does not exist: ",
+        x
+      )
+    }
+    if (tools::file_ext(x) %in% c("nc", "nc4", "tif")) {
+      terra::rast(x, ...)
+    } else {
+      stop(
+        "The file extension is not supported. Please, use a nc or tif file."
+      )
+    }
+  }
 )
-
 
 
 # S4 method for signature 'SpatRaster'
 #' @rdname input_raster
 #' @aliases SpatRaster
-methods::setMethod("input_raster", methods::signature(x = "SpatRaster"),
-                   function(x, ...) {
-
-                     return(x)
-
-                   }
+methods::setMethod(
+  "input_raster",
+  methods::signature(x = "SpatRaster"),
+  function(x, ...) {
+    x
+  }
 )
 
 # S4 method for signature 'RasterLayer'
 #' @rdname input_raster
 #' @aliases RasterLayer
-methods::setMethod("input_raster", methods::signature(x = "RasterLayer"),
-                   function(x, ...) {
-
-                     return(terra::rast(x, ...))
-
-                   }
+methods::setMethod(
+  "input_raster",
+  methods::signature(x = "RasterLayer"),
+  function(x, ...) {
+    terra::rast(x, ...)
+  }
 )
 
 
 # S4 method for signature 'RasterBrick'
 #' @rdname input_raster
 #' @aliases RasterBrick
-methods::setMethod("input_raster", methods::signature(x = "RasterBrick"),
-                   function(x, ...) {
-
-                     return(terra::rast(x, ...))
-
-                   }
+methods::setMethod(
+  "input_raster",
+  methods::signature(x = "RasterBrick"),
+  function(x, ...) {
+    terra::rast(x, ...)
+  }
 )
 
 
 # S4 method for signature 'RasterStack'
 #' @rdname input_raster
 #' @aliases RasterStack
-methods::setMethod("input_raster", methods::signature(x = "RasterStack"),
-                   function(x, ...) {
-
-                     return(terra::rast(x, ...))
-
-                   }
+methods::setMethod(
+  "input_raster",
+  methods::signature(x = "RasterStack"),
+  function(x, ...) {
+    terra::rast(x, ...)
+  }
 )
-
-
 
 
 #' Input Vector
@@ -111,51 +116,57 @@ methods::setMethod("input_raster", methods::signature(x = "RasterStack"),
 #' @rdname input_vector
 #' @exportMethod input_vector
 
-methods::setGeneric(name = "input_vector",
-                    def = function(x, ...) {
-                      standardGeneric("input_vector")
-                      }
-                    )
+methods::setGeneric(
+  name = "input_vector",
+  def = function(x, ...) {
+    standardGeneric("input_vector")
+  }
+)
 
 # S4 method for signature 'character'
 #' @rdname input_vector
 #' @aliases character-vector
-methods::setMethod("input_vector", methods::signature(x = "character"),
-          function(x, ...) {
-
-            if (tools::file_ext(x) %in% c("shp", "gpkg")) {
-
-              return(terra::vect(x, ...))
-
-            } else  {
-              stop("The file extension is not supported. Please, use a shp or gpkg file.")
-            }
-
-          }
+methods::setMethod(
+  "input_vector",
+  methods::signature(x = "character"),
+  function(x, ...) {
+    if (!file.exists(x)) {
+      stop(
+        "File does not exist: ",
+        x
+      )
+    }
+    if (tools::file_ext(x) %in% c("shp", "gpkg")) {
+      terra::vect(x, ...)
+    } else {
+      stop(
+        "The file extension is not supported. Please, use a shp or gpkg file."
+      )
+    }
+  }
 )
 
 # S4 method for signature 'SpatVector'
 #' @rdname input_vector
 #' @aliases SpatVector
-methods::setMethod("input_vector", methods::signature(x = "SpatVector"),
-          function(x, ...) {
-
-            return(x)
-
-          }
+methods::setMethod(
+  "input_vector",
+  methods::signature(x = "SpatVector"),
+  function(x, ...) {
+    x
+  }
 )
 
 # S4 method for signature 'sf'
 #' @rdname input_vector
 #' @aliases sf
-methods::setMethod("input_vector", methods::signature(x = "sf"),
-          function(x, ...) {
-
-            return(terra::vect(x, ...))
-
-          }
+methods::setMethod(
+  "input_vector",
+  methods::signature(x = "sf"),
+  function(x, ...) {
+    terra::vect(x, ...)
+  }
 )
-
 
 
 #' Input Table
@@ -178,63 +189,57 @@ methods::setMethod("input_vector", methods::signature(x = "sf"),
 #' @exportMethod input_table
 #'
 #'
-methods::setGeneric(name = "input_table",
-                    def = function(x, ...) {
-                      standardGeneric("input_table")
-                      }
-                    )
-
+methods::setGeneric(
+  name = "input_table",
+  def = function(x, ...) {
+    standardGeneric("input_table")
+  }
+)
 
 
 # S4 method for signature 'character'
 #' @rdname input_table
 #' @aliases character-table
-methods::setMethod("input_table", methods::signature(x = "character"),
-          function(x, ...) {
-
-            if (tools::file_ext(x) %in% c("csv", "txt")) {
-
-              return(data.table::fread(x, ...))
-
-            } else  {
-              stop("The file extension is not supported. Please, use a csv or txt file.")
-            }
-
-          }
+methods::setMethod(
+  "input_table",
+  methods::signature(x = "character"),
+  function(x, ...) {
+    if (!file.exists(x)) {
+      stop(
+        "File does not exist: ",
+        x
+      )
+    }
+    if (tools::file_ext(x) %in% c("csv", "txt")) {
+      data.table::fread(x, ...)
+    } else {
+      stop(
+        "The file extension is not supported. Please, use a csv or txt file."
+      )
+    }
+  }
 )
-
 
 
 # S4 method for signature 'data.table'
 #' @rdname input_table
 #' @aliases data.table
-methods::setMethod("input_table", methods::signature(x = "data.table"),
-          function(x, ...) {
-
-            return(x)
-
-          }
+methods::setMethod(
+  "input_table",
+  methods::signature(x = "data.table"),
+  function(x, ...) {
+    x
+  }
 )
 
 
 # S4 method for signature 'data.frame' or 'tibble'
 #' @rdname input_table
 #' @aliases data.frame
-methods::setMethod("input_table", methods::signature(x = "data.frame"),
-          function(x, ...) {
-
-            return(data.table::as.data.table(x))
-
-          }
+methods::setMethod(
+  "input_table",
+  methods::signature(x = "data.frame"),
+  function(x, ...) {
+    data.table::as.data.table(x)
+  }
 )
-
-
-
-
-
-
-
-
-
-
-

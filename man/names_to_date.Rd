@@ -15,11 +15,13 @@ names_to_date(
 \arguments{
 \item{raster_cube}{A raster object.}
 
-\item{origin}{A character string with the origin date. The default is "1970-01-01".}
+\item{origin}{A character string with the origin date. The default is
+"1970-01-01".}
 
 \item{tz}{A character string with the time zone. The default is "UTC".}
 
-\item{regex}{A character string with the regular expression to extract the date.}
+\item{regex}{A character string with the regular expression to extract the
+date.}
 }
 \value{
 A POSIXct object.

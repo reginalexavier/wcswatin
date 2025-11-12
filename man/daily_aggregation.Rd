@@ -36,7 +36,8 @@ from and to must be the same as the length of the hours in the input files.}
 \item{aggregation_function}{The function to use on the hourly groups like
 mean, sum, mode, etc}
 
-\item{mode}{The mode of aggregation. The options are \code{agg_fun}, \code{max_min} or \code{last_value}.}
+\item{mode}{The mode of aggregation. The options are \code{agg_fun},
+\code{max_min} or \code{last_value}.}
 
 \item{na.rm}{a logical value indicating whether NA values should be removed
 before the computation proceeds.}
@@ -45,13 +46,15 @@ before the computation proceeds.}
 Files with a daily resolution
 }
 \description{
+https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation # nolint: line_length_linter
+}
+\details{
 This function allows to aggregate hourly observations to daily time series.
 The function for aggregation can be informed in the
 \code{aggregation_function} parameter, this parameter takes a function as
 argument. The default function is \code{\link[base]{mean}}, so a daily
 average is returned.
-}
-\details{
+
 The function will create a daily aggregation from an hourly dataset.
 The function for aggregation can be informed in the
 \code{aggregation_function} parameter, this parameter takes a function as

@@ -9,10 +9,11 @@ ts_to_area(my_folder, bassin_limit_path, poly_degree = 2, resolution = 0.01)
 \arguments{
 \item{my_folder}{Folder containing the ts input files.}
 
-\item{bassin_limit_path}{A shapefile containing the bassin limit where the trend
-suface function have to be predicted.}
+\item{bassin_limit_path}{A shapefile containing the bassin limit where the
+trend suface function have to be predicted.}
 
-\item{poly_degree}{The degree to be used in the polynomial function for the trend surface.}
+\item{poly_degree}{The degree to be used in the polynomial function for the
+trend surface.}
 
 \item{resolution}{The resolution for the output raster in degree.}
 }
@@ -20,14 +21,17 @@ suface function have to be predicted.}
 A rasterbrick
 }
 \description{
-This function make an interpolation whith the trend surface method where the user
-have to inform the polynome degree. The interpolation is made over the tageded points
-for all the serie on the input.
+This function make an interpolation whith the trend surface method where the
+user have to inform the polynome degree. The interpolation is made over the
+tageded points for all the serie on the input.
 }
 \examples{
-ts_to_area(my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
-          bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
-          package = "cwswatinput"),
-          poly_degree = 2,
-          resolution = 0.5)
+ts_to_area(
+  my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
+  bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
+    package = "cwswatinput"
+  ),
+  poly_degree = 2,
+  resolution = 0.5
+)
 }

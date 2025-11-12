@@ -1,6 +1,11 @@
-^cwswatinput\.Rproj$
-^\.Rproj\.user$
+^.lintr$
 ^LICENSE\.md$
-^README\.Rmd$
-^doc$
+^Makefile$
 ^Meta$
+^README\.Rmd$
+^\.Rproj\.user$
+^\.pre-commit-config\.yaml$
+^cwswatinput\.Rproj$
+^doc$
+^renv$
+^renv\.lock$
