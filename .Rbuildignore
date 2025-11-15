@@ -4,8 +4,12 @@
 ^Meta$
 ^README\.Rmd$
 ^\.Rproj\.user$
+^\.github$
 ^\.pre-commit-config\.yaml$
+^_pkgdown\.yml$
 ^doc$
+^docs$
+^pkgdown$
 ^renv$
 ^renv\.lock$
 ^wcswatin\.Rproj$
