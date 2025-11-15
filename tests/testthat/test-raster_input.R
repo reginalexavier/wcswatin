@@ -145,7 +145,7 @@ test_that("tbl_from_references validates input", {
 # Test layerValues2pixel function (if it exists)
 test_that("layervalues2pixel works correctly", {
   skip_if_not(
-    exists("layervalues2pixel", where = "package:cwswatinput"),
+    exists("layervalues2pixel", where = "package:wcswatin"),
     "layerValues2pixel function not found"
   )
 
@@ -205,7 +205,7 @@ test_that("tbl_from_references works with extraction parameters", {
 # Test with real package data
 test_that("raster functions work with package example data", {
   # Check if package has example raster data
-  extdata_path <- system.file("extdata", package = "cwswatinput")
+  extdata_path <- system.file("extdata", package = "wcswatin")
 
   if (dir.exists(extdata_path)) {
     # Look for raster files
@@ -225,7 +225,7 @@ test_that("raster functions work with package example data", {
       # Use example points from the package
       points_file <- system.file(
         "extdata/pcp_stations/pcp.txt",
-        package = "cwswatinput"
+        package = "wcswatin"
       )
 
       if (file.exists(points_file)) {

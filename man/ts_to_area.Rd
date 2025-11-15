@@ -27,9 +27,9 @@ tageded points for all the serie on the input.
 }
 \examples{
 ts_to_area(
-  my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
+  my_folder = system.file("extdata/ts_input", package = "wcswatin"),
   bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
-    package = "cwswatinput"
+    package = "wcswatin"
   ),
   poly_degree = 2,
   resolution = 0.5

@@ -158,7 +158,7 @@ table_to_files <- function(
 #' @import dplyr
 #'
 #' @examples
-#' folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
+#' folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 #' test01 <- point_to_daily(my_folder = folder)
 #'
 point_to_daily <- function(
@@ -260,7 +260,7 @@ point_to_daily <- function(
 #'
 #' @examples
 #' temp <- tempdir()
-#' folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
+#' folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 #' test01 <- point_to_daily(my_folder = folder)
 #' save_daily_tbl(
 #'   tbl_list = test01,

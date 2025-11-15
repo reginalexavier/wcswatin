@@ -15,18 +15,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-# cwswatinput
+# wcswatin
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 
-cwswatinput (Climate & Weather SWAT input) is an open-source R package for preparing weather and climate data from different sources for input in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded by the Critical Ecosystem Partnership Fund ([CEPF](https://www.cepf.net/)). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordinates using WGS 84 as datum. 
+wcswatin (Climate & Weather SWAT input) is an open-source R package for preparing weather and climate data from different sources for input in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded by the Critical Ecosystem Partnership Fund ([CEPF](https://www.cepf.net/)). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordinates using WGS 84 as datum. 
 
-### Conceptual overview of the `cwswatinput` package
+### Conceptual overview of the `wcswatin` package
 
-```{r, echo=FALSE, out.width="100%", fig.cap="Conceptual overview of the `cwswatinput` package"}
-knitr::include_graphics("man/figures/cwswatinput_flowchart150222.png")
+```{r, echo=FALSE, out.width="100%", fig.cap="Conceptual overview of the `wcswatin` package"}
+knitr::include_graphics("man/figures/wcswatin_flowchart150222.png")
 ```
 
 
@@ -36,12 +36,12 @@ You can install the development version from GitHub with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("swatufmt/cwswatinput")
+devtools::install_github("swatufmt/wcswatin")
 ```
 
 
 ```{r example}
-library(cwswatinput)
+library(wcswatin)
 ## basic example code
 ```
 
@@ -49,9 +49,9 @@ library(cwswatinput)
 
 ```{r include=FALSE}
 # o caminho dos arquivos
-base_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+base_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/raw_data_wcswatin_test"
 ncdf_path <- "/media/tredgi/Dados/transition/SWAT_UFMT/data_raw/new_gpm201703"
-# base_path <- "D:/transition/SWAT_UFMT/raw_data_cwswatinput_test"
+# base_path <- "D:/transition/SWAT_UFMT/raw_data_wcswatin_test"
 # ncdf_path <- "D:/transition/SWAT_UFMT/data_raw/new_gpm201703"
 
 era5land_2018 <- file.path(base_path, "ERA5-Land_data/Y2018.nc")
@@ -64,7 +64,7 @@ bassin_path <- file.path(base_path, "shapefiles/cba_slc.shp")
 
 # Rotinas para dados NetCDF ou raster(TIF)
 
-As rotinas permitem a extração espacial e temporal de conjuntos de dados de variáveis climatológicos e meteorológicos de grades globais como disponibilizados em sites como [Climate Change Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview), [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final"), [PERSIANN-CCS](https://chrsdata.eng.uci.edu/) entre outros. Esses dados são disponibilizados em formato de raster(.tif) ou em formato de NetCDF _(um formato binário muito utilizado para disponibilizar séries espaço-temporais de dados multiparamétricos)_. Para aumentar a eficiencia computacional no processamento, os respectivos produtos devem ser inicialmente baixados e armazenados localmente. As caracteristicas específicas de cada produto (parametros disponibilizados, resolução temporal e espacial) são detalhadas nos respectivos portais, mas são extraídas também pelas rotinas desenvolvidas. Para serem utilizados como entradas no SWAT, os dados meteorológicos e climatológicos são transformados em conjuntos de tabelas em formato txt demandados pelo modelo. Testados para conjuntos de dados de reanalise (ERA5_Land) e as grades de precipitação PERSIANN e GPM, o pacote `cwswatinput` disponibiliza porém, por meio de funções, rotinas gerais e universais para extração de grades provenientes de outras instituições.
+As rotinas permitem a extração espacial e temporal de conjuntos de dados de variáveis climatológicos e meteorológicos de grades globais como disponibilizados em sites como [Climate Change Service](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview), [GES DISC](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDF_06/summary?keywords="IMERG%20final"), [PERSIANN-CCS](https://chrsdata.eng.uci.edu/) entre outros. Esses dados são disponibilizados em formato de raster(.tif) ou em formato de NetCDF _(um formato binário muito utilizado para disponibilizar séries espaço-temporais de dados multiparamétricos)_. Para aumentar a eficiencia computacional no processamento, os respectivos produtos devem ser inicialmente baixados e armazenados localmente. As caracteristicas específicas de cada produto (parametros disponibilizados, resolução temporal e espacial) são detalhadas nos respectivos portais, mas são extraídas também pelas rotinas desenvolvidas. Para serem utilizados como entradas no SWAT, os dados meteorológicos e climatológicos são transformados em conjuntos de tabelas em formato txt demandados pelo modelo. Testados para conjuntos de dados de reanalise (ERA5_Land) e as grades de precipitação PERSIANN e GPM, o pacote `wcswatin` disponibiliza porém, por meio de funções, rotinas gerais e universais para extração de grades provenientes de outras instituições.
 
 
 ## Passo a passo:
@@ -95,7 +95,7 @@ one_brick <- raster::brick(era5land_2018,
 one_brick
 ```
 
-> Alguns arquivos NetCDF invertem a sequencia entre latitude com longitude, causando erros na transformação para raster. Neste caso `cwswatinput` tem a função `ncdf2raster()` que faz essa transformação.
+> Alguns arquivos NetCDF invertem a sequencia entre latitude com longitude, causando erros na transformação para raster. Neste caso `wcswatin` tem a função `ncdf2raster()` que faz essa transformação.
 
 # TIF
 
@@ -221,7 +221,7 @@ knitr::kable(cell_tables[1:10], format = "html")
 ## Rotinas para interpolação de dados de estações físicas em uma área especifica
 
 ```{r include=FALSE}
-pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
+pasta_estacoes <- system.file("extdata/pcp_stations", package = "wcswatin")
 
 estacoes <- list.files(pasta_estacoes,
   full.names = TRUE
@@ -283,19 +283,19 @@ knitr::kable(unique_table[-1])
 #### Calculo das porcentagens de NA em cada coluna:
 
 ```{r}
-cwswatinput::count_na(unique_table[-1], percent = TRUE)
+wcswatin::count_na(unique_table[-1], percent = TRUE)
 ```
 
 
 #### Executando o preenchimento das falhas:
 
 ```{r
-gap_filled <- cwswatinput::fill_gap(dataset = unique_table,
+gap_filled <- wcswatin::fill_gap(dataset = unique_table,
                                     corPeriod = "daily")
 ```
 
 ```{r include=FALSE}
-gap_filled <- cwswatinput::fill_gap(
+gap_filled <- wcswatin::fill_gap(
   dataset = unique_table,
   corPeriod = "daily"
 )
@@ -343,10 +343,10 @@ dados_diarios[18] # exemplo de uma tabela
 ```
 
 
-As tabelas diárias podem ser salvas com a função `save_daily_tbl` do pacote `cwswatinput` (por favor consultar a documentação da função).
+As tabelas diárias podem ser salvas com a função `save_daily_tbl` do pacote `wcswatin` (por favor consultar a documentação da função).
 
 ```{r include=FALSE}
-# pasta_dados_diarios <- system.file("extdata/ts_input", package = "cwswatinput")
+# pasta_dados_diarios <- system.file("extdata/ts_input", package = "wcswatin")
 
 dir.create(file.path(pasta_estacoes1, "test"))
 save_daily_tbl(dados_diarios,
@@ -355,11 +355,11 @@ save_daily_tbl(dados_diarios,
 pasta_dados_diarios <- file.path(pasta_estacoes1, "test")
 
 centroides_path <- system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
-  package = "cwswatinput"
+  package = "wcswatin"
 )
 
 bassin_path <- system.file("extdata/sl_bassin/sl_bassin_limit.shp",
-  package = "cwswatinput"
+  package = "wcswatin"
 )
 ```
 
@@ -469,7 +469,7 @@ unlink(pasta_estacoes1, recursive = TRUE)
 # Validação de dados simulados com dados coletados em campo
 
 ```{r include=FALSE}
-pasta_estacoes <- system.file("extdata/pcp_stations", package = "cwswatinput")
+pasta_estacoes <- system.file("extdata/pcp_stations", package = "wcswatin")
 
 estacoes <- list.files(pasta_estacoes,
   full.names = TRUE
@@ -484,9 +484,9 @@ Como exemplo, pegamos dados de precipitação coletados de 14 estações da ANA 
 
 ## Os passos:
 
-- Criar uma tabela unica com os dados de campo com ajuda da função `cwswatinput::files_to_table()`;
-- Transformar os arquivos NetCDF para dados em formato Raster com ajuda da função `cwswatinput::ncdf_to_raster()`;
-- Extrair os dados de precipitação nos dados em formato Raster com ajuda da função `cwswatinput::tbl_from_references()`;
+- Criar uma tabela unica com os dados de campo com ajuda da função `wcswatin::files_to_table()`;
+- Transformar os arquivos NetCDF para dados em formato Raster com ajuda da função `wcswatin::ncdf_to_raster()`;
+- Extrair os dados de precipitação nos dados em formato Raster com ajuda da função `wcswatin::tbl_from_references()`;
 - Juntar as duas tabelas em uma unica tabela;
 - Rodar a função `hydroGOF::ggof()`
 

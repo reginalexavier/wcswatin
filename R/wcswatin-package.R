@@ -1,8 +1,8 @@
 "_PACKAGE"
 
-#' cwswatinput: Climate & Weather SWAT Input.
+#' wcswatin: Climate & Weather SWAT Input.
 #'
-#' cwswatinput (Climate & Weather SWAT input) is an open-source R package for
+#' wcswatin (Climate & Weather SWAT input) is an open-source R package for
 #' preparing weather and climate data from different sources for input in the
 #' Soil & Water Assessment Tool (SWAT), funded by the Critical Ecosystem
 #' Partnership Fund (CEPF). Currently two blocks of processing routines are
@@ -16,8 +16,8 @@
 #'
 #' @author Reginal Exavier \email{reginalexavier@@rocketmail.com}, Peter
 #'   Zeilhofer \email{zeilhoferpeter@@gmail.com}
-#' @name cwswatinput-package
-#' @aliases cwswatinput
+#' @name wcswatin-package
+#' @aliases wcswatin
 #'
 #'
 #'

@@ -17,9 +17,9 @@
 #'
 # @examples
 # ts_to_point(my_folder = system.file("extdata/ts_input", package =
-#           "cwswatinput"), targeted_points_path =
-#            system.file("extdata/sl_centroides/Centroide_watershed_grau.shp",
-#           package = "cwswatinput"), poly_degree = 2)
+#           "wcswatin"), targeted_points_path =
+#           system.file("extdata/sl_centroides/centroide_watershed_wgs84.txt",
+#           package = "wcswatin"), poly_degree = 2)
 ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
   var_files <- list.files(my_folder, full.names = TRUE, pattern = ".csv$")
 
@@ -117,9 +117,9 @@ ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
 #'
 #' @examples
 #' ts_to_area(
-#'   my_folder = system.file("extdata/ts_input", package = "cwswatinput"),
+#'   my_folder = system.file("extdata/ts_input", package = "wcswatin"),
 #'   bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
-#'     package = "cwswatinput"
+#'     package = "wcswatin"
 #'   ),
 #'   poly_degree = 2,
 #'   resolution = 0.5
@@ -218,7 +218,7 @@ ts_to_area <- function(
 #' @examples
 #' var_main_creator(targeted_points_path = system.file("extdata/sl_centroides",
 #'   "Centroide_watershed_grau.shp",
-#'   package = "cwswatinput"
+#'   package = "wcswatin"
 #' ))
 var_main_creator <- function(
   targeted_points_path,

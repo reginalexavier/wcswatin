@@ -55,7 +55,7 @@ test_that("interpolation to grid works", {
 # Test inverse distance weighting (if available)
 test_that("inverse distance weighting interpolation works", {
   skip_if_not(
-    exists("idw_interpolation", where = "package:cwswatinput"),
+    exists("idw_interpolation", where = "package:wcswatin"),
     "IDW interpolation function not found"
   )
 
@@ -67,7 +67,7 @@ test_that("inverse distance weighting interpolation works", {
 # Test kriging interpolation (if available)
 test_that("kriging interpolation works", {
   skip_if_not(
-    exists("kriging_interpolation", where = "package:cwswatinput"),
+    exists("kriging_interpolation", where = "package:wcswatin"),
     "Kriging interpolation function not found"
   )
 

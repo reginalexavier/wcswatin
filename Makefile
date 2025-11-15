@@ -7,7 +7,7 @@ RED := \033[0;31m
 NC := \033[0m # No Color
 
 help: ## Show this help
-	@echo "$(GREEN)CWSWATINPUT - Available commands:$(NC)"
+	@echo "$(GREEN)WCSWATIN - Available commands:$(NC)"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(BLUE)%-15s$(NC) %s\n", $$1, $$2}'
 	@echo ""

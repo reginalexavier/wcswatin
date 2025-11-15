@@ -1,4 +1,4 @@
 library(testthat)
-library(cwswatinput)
+library(wcswatin)
 
-test_check("cwswatinput")
+test_check("wcswatin")
