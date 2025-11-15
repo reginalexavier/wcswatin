@@ -45,6 +45,6 @@ Imports:
     future.apply,
     progressr,
     methods
-URL: https://github.com/reginalexavier/wcswatin
+URL: https://github.com/reginalexavier/wcswatin, https://reginalexavier.github.io/wcswatin/
 BugReports: https://github.com/reginalexavier/wcswatin/issues
 VignetteBuilder: knitr
