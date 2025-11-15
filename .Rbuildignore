@@ -5,7 +5,7 @@
 ^README\.Rmd$
 ^\.Rproj\.user$
 ^\.pre-commit-config\.yaml$
-^wcswatin\.Rproj$
 ^doc$
 ^renv$
 ^renv\.lock$
+^wcswatin\.Rproj$
