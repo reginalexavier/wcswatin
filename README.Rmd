@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-wcswatin (Climate & Weather SWAT input) is an open-source R package for preparing weather and climate data from different sources for input in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded by the Critical Ecosystem Partnership Fund ([CEPF](https://www.cepf.net/)). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordinates using WGS 84 as datum. 
+wcswatin (Weather & Climate SWAT input) is an open-source R package for preparing weather and climate data from different sources for input in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)), funded by the Critical Ecosystem Partnership Fund ([CEPF](https://www.cepf.net/)). Currently two blocks of processing routines are implemented, one for the pre-processing of NetCDF and tif raster files as made available from a increasing number of data-providing institutions around the globe and a second one for the upscaling of physical station data by interpolation methods. For processing all used datasets MUST have geographic coordinates using WGS 84 as datum.
 
 ### Conceptual overview of the `wcswatin` package
 
@@ -36,7 +36,7 @@ You can install the development version from GitHub with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("swatufmt/wcswatin")
+devtools::install_github("reginalexavier/wcswatin")
 ```
 
 
