@@ -50,7 +50,7 @@ Having the collected observation from a point perspective, this function
 transform the input to a vertical perspective, like a a daily perspective.
 }
 \examples{
-folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
+folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 test01 <- point_to_daily(my_folder = folder)
 
 }

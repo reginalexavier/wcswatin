@@ -1,12 +1,12 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# cwswatinput
+# wcswatin
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-cwswatinput (Climate & Weather SWAT input) is an open-source R package
+wcswatin (Climate & Weather SWAT input) is an open-source R package
 for preparing weather and climate data from different sources for input
 in the Soil & Water Assessment Tool ([SWAT](https://swat.tamu.edu/)),
 funded by the Critical Ecosystem Partnership Fund
@@ -18,9 +18,9 @@ upscaling of physical station data by interpolation methods. For
 processing all used datasets MUST have geographic coordinates using WGS
 84 as datum.
 
-### Conceptual overview of the `cwswatinput` package
+### Conceptual overview of the `wcswatin` package
 
-<img src="man/figures/cwswatinput_flowchart150222.png" title="Conceptual overview of the `cwswatinput` package" alt="Conceptual overview of the `cwswatinput` package" width="100%" />
+<img src="man/figures/wcswatin_flowchart150222.png" title="Conceptual overview of the `wcswatin` package" alt="Conceptual overview of the `wcswatin` package" width="100%" />
 
 ## Installation
 
@@ -28,11 +28,11 @@ You can install the development version from GitHub with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("swatufmt/cwswatinput")
+devtools::install_github("swatufmt/wcswatin")
 ```
 
 ``` r
-library(cwswatinput)
+library(wcswatin)
 ## basic example code
 ```
 
@@ -56,7 +56,7 @@ extraídas também pelas rotinas desenvolvidas. Para serem utilizados como
 entradas no SWAT, os dados meteorológicos e climatológicos são
 transformados em conjuntos de tabelas em formato txt demandados pelo
 modelo. Testados para conjuntos de dados de reanalise (ERA5_Land) e as
-grades de precipitação PERSIANN e GPM, o pacote `cwswatinput`
+grades de precipitação PERSIANN e GPM, o pacote `wcswatin`
 disponibiliza porém, por meio de funções, rotinas gerais e universais
 para extração de grades provenientes de outras instituições.
 
@@ -98,7 +98,7 @@ one_brick
 
 > Alguns arquivos NetCDF invertem a sequencia entre latitude com
 > longitude, causando erros na transformação para raster. Neste caso
-> `cwswatinput` tem a função `ncdf2raster()` que faz essa transformação.
+> `wcswatin` tem a função `ncdf2raster()` que faz essa transformação.
 
 # TIF
 
@@ -699,7 +699,7 @@ unique_table <- files_to_table(files_path = pasta_estacoes,
 #### Calculo das porcentagens de NA em cada coluna:
 
 ``` r
-cwswatinput::count_na(unique_table[-1], percent = TRUE)
+wcswatin::count_na(unique_table[-1], percent = TRUE)
 #>       column   Prop_NA
 #> 1  p-1553003 22.580645
 #> 2  p-1554006 12.903226
@@ -720,7 +720,7 @@ cwswatinput::count_na(unique_table[-1], percent = TRUE)
 #### Executando o preenchimento das falhas:
 
 ``` {r
-gap_filled <- cwswatinput::fill_gap(dataset = unique_table,
+gap_filled <- wcswatin::fill_gap(dataset = unique_table,
                                     corPeriod = "daily")
 ```
 
@@ -799,7 +799,7 @@ dados_diarios[18] # exemplo de uma tabela
 ```
 
 As tabelas diárias podem ser salvas com a função `save_daily_tbl` do
-pacote `cwswatinput` (por favor consultar a documentação da função).
+pacote `wcswatin` (por favor consultar a documentação da função).
 
 Segue a leitura dos centroides das estações utilizadas nas
 interpolações:
@@ -957,11 +957,11 @@ de precipitação para o mesmo periodo.
 ## Os passos:
 
 -   Criar uma tabela unica com os dados de campo com ajuda da função
-    `cwswatinput::files_to_table()`;
+    `wcswatin::files_to_table()`;
 -   Transformar os arquivos NetCDF para dados em formato Raster com
-    ajuda da função `cwswatinput::ncdf_to_raster()`;
+    ajuda da função `wcswatin::ncdf_to_raster()`;
 -   Extrair os dados de precipitação nos dados em formato Raster com
-    ajuda da função `cwswatinput::tbl_from_references()`;
+    ajuda da função `wcswatin::tbl_from_references()`;
 -   Juntar as duas tabelas em uma unica tabela;
 -   Rodar a função `hydroGOF::ggof()`
 

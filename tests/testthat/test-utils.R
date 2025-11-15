@@ -3,7 +3,7 @@
 
 # Test setup
 test_that("package loads correctly", {
-  expect_true(require(cwswatinput))
+  expect_true(require(wcswatin))
 })
 
 # Test files_to_table function
@@ -258,7 +258,7 @@ test_that("summary_plot creates ggplot object", {
 # Test with real package data
 test_that("point_to_daily works with package example data", {
   # Use the example data included in the package
-  folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
+  folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 
   # Skip if no example data is available
   skip_if_not(dir.exists(folder), "Example data not available")

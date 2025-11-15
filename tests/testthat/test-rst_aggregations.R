@@ -14,7 +14,7 @@ test_that("rst_aggregations helper functions work", {
 # Test cube2table function (if it exists)
 test_that("cube2table function works correctly", {
   skip_if_not(
-    exists("cube2table", where = "package:cwswatinput"),
+    exists("cube2table", where = "package:wcswatin"),
     "cube2table function not found"
   )
 
@@ -26,7 +26,7 @@ test_that("cube2table function works correctly", {
 # Test datacube_aggregation function (if it exists)
 test_that("datacube_aggregation works with raster inputs", {
   skip_if_not(
-    exists("datacube_aggregation", where = "package:cwswatinput"),
+    exists("datacube_aggregation", where = "package:wcswatin"),
     "datacube_aggregation function not found"
   )
 
@@ -218,7 +218,7 @@ test_that("raster operations are memory efficient", {
 # Test integration with package data
 test_that("raster functions work with package example data", {
   # Look for example raster data in the package
-  extdata_path <- system.file("extdata", package = "cwswatinput")
+  extdata_path <- system.file("extdata", package = "wcswatin")
 
   if (dir.exists(extdata_path)) {
     raster_files <- list.files(

@@ -4,7 +4,7 @@
 # Test package loading and basic structure
 test_that("package loads correctly and has expected structure", {
   # Test that package loads without errors
-  expect_true(require(cwswatinput))
+  expect_true(require(wcswatin))
 
   # Test that main functions are available
   expected_functions <- c(
@@ -22,7 +22,7 @@ test_that("package loads correctly and has expected structure", {
 
   for (func in expected_functions) {
     expect_true(
-      exists(func, where = "package:cwswatinput"),
+      exists(func, where = "package:wcswatin"),
       info = paste("Function", func, "not found")
     )
   }
@@ -34,7 +34,7 @@ test_that("package example data is accessible and well-formed", {
   # Test precipitation station data
   pcp_file <- system.file(
     "extdata/pcp_stations/pcp.txt",
-    package = "cwswatinput"
+    package = "wcswatin"
   )
 
   if (file.exists(pcp_file)) {
@@ -65,7 +65,7 @@ test_that("complete file processing workflow works", {
   # Test the typical workflow from files to processed data
 
   # Check if example data is available
-  pcp_folder <- system.file("extdata/pcp_stations", package = "cwswatinput")
+  pcp_folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 
   if (dir.exists(pcp_folder)) {
     # Test point_to_daily function with example data
@@ -358,7 +358,7 @@ test_that("package dependencies are properly handled", {
 # Test package versioning and metadata
 test_that("package metadata is consistent", {
   # Test that DESCRIPTION file information is accessible
-  pkg_info <- utils::packageDescription("cwswatinput")
+  pkg_info <- utils::packageDescription("wcswatin")
 
   expect_true(is.list(pkg_info))
   expect_true("Version" %in% names(pkg_info))
