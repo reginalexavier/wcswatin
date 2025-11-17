@@ -15,6 +15,7 @@ save_daily_tbl(tbl_list, path)
 Save the csv files after transformation to daily form
 }
 \examples{
+\donttest{
 temp <- tempdir()
 folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 test01 <- point_to_daily(my_folder = folder)
@@ -23,4 +24,5 @@ save_daily_tbl(
   path = temp
 )
 unlink(temp, recursive = TRUE)
+}
 }

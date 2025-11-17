@@ -259,6 +259,7 @@ point_to_daily <- function(
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' temp <- tempdir()
 #' folder <- system.file("extdata/pcp_stations", package = "wcswatin")
 #' test01 <- point_to_daily(my_folder = folder)
@@ -267,6 +268,7 @@ point_to_daily <- function(
 #'   path = temp
 #' )
 #' unlink(temp, recursive = TRUE)
+#' }
 save_daily_tbl <- function(tbl_list, path) {
   for (i in seq_along(tbl_list)) {
     data.table::fwrite(

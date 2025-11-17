@@ -1,3 +1,60 @@
 url: https://reginalexavier.github.io/wcswatin/
 template:
   bootstrap: 5
+
+development:
+  mode: auto
+
+code:
+  width: 80
+
+reference:
+  - title: "Package Overview"
+    desc: "Package documentation"
+  - contents:
+    - wcswatin-package
+
+  - title: "Data Input & Loading"
+    desc: "Functions for loading different data types"
+  - contents:
+    - input_raster
+    - input_table
+    - input_vector
+    - var_names
+
+  - title: "Raster/NetCDF Processing"
+    desc: "Functions for processing gridded climate data"
+  - contents:
+    - study_area_records
+    - layervalues2pixel
+    - cube2table
+    - datacube_aggregation
+    - daily_aggregation
+    - tbl_from_references
+
+  - title: "Station Data Processing"
+    desc: "Functions for processing weather station data"
+  - contents:
+    - point_to_daily
+    - files_to_table
+    - table_to_files
+    - fill_gap
+    - ts_to_point
+    - ts_to_area
+    - save_daily_tbl
+
+  - title: "SWAT-Specific Functions"
+    desc: "Functions for SWAT model input preparation"
+  - contents:
+    - var_main_creator
+    - main_input_var
+    - rh_calculator
+    - windspeed_calculator
+
+  - title: "Data Analysis & Utilities"
+    desc: "Helper functions for data analysis"
+  - contents:
+    - count_na
+    - summary_table
+    - summary_plot
+    - unit_converter
