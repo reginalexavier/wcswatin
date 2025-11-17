@@ -268,28 +268,35 @@ cube2table <- function(
 
 #' Series of Pixel Values
 #'
-#' With the extracted values by raster layer from the (cube2table) function,
-#' this function organize these values in the format of swat input, i.e, a time
-#' serie for every pixel of the study area.
+#' Converts layer-wise values from `cube2table()` into SWAT-style input:
+#' a time series for each pixel in the study area.
 #'
-#' @param layer_values List. Values extracted by raster
-#' @param main_tbl A vector contain the names for every table created. These
-#'   names are in the mainTable
-#' @param col_name A name for the column of every swatinput table created.
-#'   Commonly this name is the first date of time serie being analysed.
-#' @param inline_output Logical. If TRUE, the output will be an inline table.
-#' @param path_output Path to save the individual tables. One of these
-#'   parameters (inline_output or path_output) must be provided.
-#' @param append Logical. If TRUE, the output will be appended to the existing
-#'   file. If FALSE, the output will be overwritten. Choose TRUE if you want to
-#'   append the output to an existing file, very useful when you are running
-#'   different time periods and want to append the output to the same file.
+#' @name layervalues2pixel
+#' @rdname layervalues2pixel
 #'
+#' @param layer_values List. Values extracted per raster layer (from
+#'   `cube2table()`).
+#' @param main_tbl A table with pixel metadata (e.g., from
+#'   `main_input_var()`), used to name each output table.
+#' @param col_name Column name for each SWAT input table. Typically the first
+#'   date in the time series (e.g., "20220101").
+#' @param inline_output Logical. If TRUE, returns a list of data.tables.
+#' @param path_output Directory to write one file per pixel when
+#'   `inline_output = FALSE`.
+#' @param append Logical. If TRUE, append to existing files; otherwise
+#'   overwrite.
 #'
-#' @return A list of table or a set of files in the path_output, one for each
-#' pixel
+#' @return A list of tables (when `inline_output = TRUE`) or a set of files in
+#'   `path_output` (one for each pixel).
 #' @export
 #'
+#' @examples
+#' \dontrun{
+#' # Example (pseudo-code):
+#' # lv <- cube2table(input_path, var = "tmin", n_layers = 10, study_area)
+#' # mt <- main_input_var(study_area, var_name = "tmin")
+#' # out <- layervalues2pixel(lv, mt, col_name = "20220101", inline_output = TRUE)
+#' }
 layervalues2pixel <- function(
   # nolint: object_name_linter
   layer_values,

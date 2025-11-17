@@ -8,8 +8,9 @@ development:
 code:
   width: 80
 
-# Disable autolink to avoid downlit cache issues
-autolink: false
+# Downlit options
+downlit:
+  autolink: false
 
 reference:
   - title: "Package Overview"
