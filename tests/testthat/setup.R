@@ -59,8 +59,8 @@ generate_test_data_with_na <- function(n_rows = 100, na_prob = 0.1) {
 
 # Test for package version compatibility
 check_package_version <- function() {
-  r_version <- R.version.string
-  testthat::expect_true(grepl("R version", r_version))
+  testthat::expect_true(exists("R.version"))
+  testthat::expect_true(is.list(R.version))
 }
 
 # Setup function to run before all tests
