@@ -5,9 +5,11 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/reginalexavier/wcswatin/workflows/R-CMD-check/badge.svg)](https://github.com/reginalexavier/wcswatin/actions)
+[![R-CMD-check](https://github.com/reginalexavier/wcswatin/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/reginalexavier/wcswatin/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Codecov test
+coverage](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg)](https://codecov.io/gh/reginalexavier/wcswatin?branch=main)
 <!-- badges: end -->
 
 ## Overview
