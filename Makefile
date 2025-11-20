@@ -84,3 +84,6 @@ pcc: ## Clean pre-commit cache
 
 knit-readme: ## Render README.Rmd to markdown
 		Rscript -e "rmarkdown::render('README.Rmd', output_format = 'github_document')"
+
+pkgdown: ## Package down check
+		Rscript -e "pkgdown::check_pkgdown()"
