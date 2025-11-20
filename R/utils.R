@@ -430,7 +430,11 @@ tbl_from_references <- function(
 #' @keywords internal
 #'
 file_name <- function(path) {
-  stringr::str_extract(path, "[a-z0-9]+_[0-9]+")
+  # Get basename first to handle different path separators
+  base <- basename(path)
+  # Remove extension
+  name <- tools::file_path_sans_ext(base)
+  return(name)
 }
 
 

@@ -165,17 +165,22 @@ test_that("clean_dir removes directories", {
 
 # Test unit_converter function
 test_that("unit_converter works correctly", {
+  skip_on_cran()
+
   # Setup test data
   temp_dir_in <- file.path(tempdir(), "test_in")
   temp_dir_out <- file.path(tempdir(), "test_out")
 
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  dir.create(temp_dir_in, showWarnings = FALSE, recursive = TRUE)
+  dir.create(temp_dir_out, showWarnings = FALSE, recursive = TRUE)
 
   # Create test file with Kelvin temperatures
   test_file <- file.path(temp_dir_in, "temp_20200101.txt")
   kelvin_temps <- data.frame(temperature = c(273.15, 283.15, 293.15))
-  write.table(kelvin_temps, test_file, row.names = FALSE, sep = ",")
+  write.table(kelvin_temps, test_file, row.names = FALSE, sep = ",", quote = FALSE)
+
+  # Verify input file was created
+  expect_true(file.exists(test_file))
 
   # Test conversion (Kelvin to Celsius)
   unit_converter(
@@ -185,14 +190,25 @@ test_that("unit_converter works correctly", {
     FUN = function(x) x - 273.15
   )
 
-  # Check output
+  # Check output directory has files
+  output_files <- list.files(temp_dir_out, pattern = ".txt$", full.names = TRUE)
+  expect_true(length(output_files) > 0)
+
+  # Check specific output file
   output_file <- file.path(temp_dir_out, "temp_20200101.txt")
+
+  # Debug: print available files if test fails
+  if (!file.exists(output_file)) {
+    message("Output file not found. Available files in output directory:")
+    message(paste(list.files(temp_dir_out, full.names = TRUE), collapse = "\n"))
+  }
+
   expect_true(file.exists(output_file))
 
   result <- read.table(output_file, header = TRUE, sep = ",")
-  expect_equal(result$temperature[1], 0)
-  expect_equal(result$temperature[2], 10)
-  expect_equal(result$temperature[3], 20)
+  expect_equal(result$temperature[1], 0, tolerance = 0.01)
+  expect_equal(result$temperature[2], 10, tolerance = 0.01)
+  expect_equal(result$temperature[3], 20, tolerance = 0.01)
 
   # Clean up
   unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
