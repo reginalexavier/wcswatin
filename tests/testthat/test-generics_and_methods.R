@@ -22,15 +22,9 @@ test_that("input_raster accepts supported file extensions", {
 
   # Test file extension validation (without actually creating the files)
   # since creating valid raster files is complex
-  nc_file <- file.path(temp_dir, "test.nc")
   tif_file <- file.path(temp_dir, "test.tif")
 
   # criar os arquivos temporários
-  terra::writeCDF(
-    terra::rast(nrows = 10, ncols = 10, vals = 1:100),
-    nc_file,
-    overwrite = TRUE
-  )
   terra::writeRaster(
     terra::rast(nrows = 10, ncols = 10, vals = 1:100),
     tif_file,
@@ -38,8 +32,18 @@ test_that("input_raster accepts supported file extensions", {
   )
 
   # check
-  expect_s4_class(input_raster(nc_file), "SpatRaster")
   expect_s4_class(input_raster(tif_file), "SpatRaster")
+
+  # Test NetCDF - skip on macOS due to terra::writeCDF segfault issues
+  if (Sys.info()["sysname"] != "Darwin") {
+    nc_file <- file.path(temp_dir, "test.nc")
+    terra::writeCDF(
+      terra::rast(nrows = 10, ncols = 10, vals = 1:100),
+      nc_file,
+      overwrite = TRUE
+    )
+    expect_s4_class(input_raster(nc_file), "SpatRaster")
+  }
 
   # Test unsupported extension
   bad_file <- file.path(temp_dir, "test.bad")
