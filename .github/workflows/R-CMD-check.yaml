@@ -46,12 +46,7 @@ jobs:
 
       - name: Install macOS system dependencies
         if: runner.os == 'macOS'
-        run: brew install gdal proj geos netcdf
-
-      - name: Install terra on macOS with custom configuration
-        if: runner.os == 'macOS'
-        run: |
-          Rscript -e 'install.packages("terra", type = "source", configure.args = "--with-proj-lib=$(brew --prefix)/lib")'
+        run: brew install gdal proj geos
 
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
