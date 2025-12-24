@@ -63,7 +63,7 @@ daily_aggregation <- function(
     stop("No hourly files found")
   }
 
-  # Check if from and to dates are valid date
+  # Check if 'from' and 'to' dates are valid dates
   if (
     !lubridate::is.POSIXct(lubridate::ymd_h(from)) ||
       !lubridate::is.POSIXct(lubridate::ymd_h(to))
@@ -71,7 +71,7 @@ daily_aggregation <- function(
     stop("Invalid date format")
   }
 
-  # Check if from and to dates are valid
+  # Check if the range between from and to is a valid interval
   if (lubridate::ymd_h(from) > lubridate::ymd_h(to)) {
     stop("Invalid date range")
   }
@@ -287,6 +287,7 @@ windspeed_calculator <- function(
 
   vas_files <- list.files(folder_vas, full.names = TRUE, pattern = pattern)
 
+  # FIXME: use the name function from utils to avoid duplication
   file_name <- function(x) {
     stringr::str_extract(x, "[a-z_]+[0-9]+")
   }
