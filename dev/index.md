@@ -175,8 +175,3 @@ GPL (\>= 3)
 
 This project is funded by the [Critical Ecosystem Partnership Fund
 (CEPF)](https://www.cepf.net/).
-
-------------------------------------------------------------------------
-
-**Note**: This package is under active development. Functions and
-features may change.
