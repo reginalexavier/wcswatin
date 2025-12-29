@@ -34,10 +34,10 @@ jobs:
           journal: joss
           paper-path: paper/paper.md
 
-      - name: Create releases directory
-        run: mkdir -p releases
+      - name: Create paper/draft-pdf directory
+        run: mkdir -p paper/draft-pdf
 
-      - name: Copy PDF to releases folder
+      - name: Copy PDF to paper/draft-pdf folder
         run: cp paper/paper.pdf paper/draft-pdf/paper.pdf
 
       - name: Add timestamp to force update detection
