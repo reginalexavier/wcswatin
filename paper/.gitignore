@@ -1,2 +1,5 @@
 jats/
 *.pdf
+# Allow only JOSS draft PDF
+!paper/draft-pdf/paper.pdf
+!paper/draft-pdf/.last-updated
