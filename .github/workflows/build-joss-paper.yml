@@ -1,0 +1,141 @@
+name: Build JOSS Paper
+
+on:
+  push:
+    branches:
+      - paper-joss
+    paths:
+      - "paper/paper.md"
+      - "paper/paper.bib"
+      - "paper/img/**"
+  pull_request:
+    branches:
+      - paper-joss
+    paths:
+      - "paper/paper.md"
+      - "paper/paper.bib"
+      - "paper/img/**"
+  workflow_dispatch:
+
+jobs:
+  build-paper:
+    name: Build JOSS Paper
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build paper PDF
+        uses: openjournals/openjournals-draft-action@master
+        with:
+          journal: joss
+          paper-path: paper/paper.md
+
+      - name: Create releases directory
+        run: mkdir -p releases
+
+      - name: Copy PDF to releases folder
+        run: cp paper/paper.pdf paper/draft-pdf/paper.pdf
+
+      - name: Add timestamp to force update detection
+        run: |
+          echo "Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" > paper/draft-pdf/.last-updated
+
+      - name: Upload paper PDF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: joss-paper-pdf
+          path: paper/paper.pdf
+          retention-days: 30
+
+      - name: Auto-commit PDF to releases
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-update paper.pdf from JOSS build [skip ci]"
+          file_pattern: "paper/draft-pdf/*"
+          skip_dirty_check: false
+          add_options: "--force"
+
+      - name: Upload JATS XML as artifact (if exists)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: joss-paper-jats
+          path: paper/paper.jats
+          retention-days: 30
+          if-no-files-found: ignore
+
+  validate-paper:
+    name: Validate Paper Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc biber
+
+      - name: Check required files
+        run: |
+          echo "Checking JOSS paper files..."
+
+          if [ ! -f "paper/paper.md" ]; then
+            echo "❌ Error: paper/paper.md not found!"
+            exit 1
+          fi
+          echo "✓ paper.md found"
+
+          if [ ! -f "paper/paper.bib" ]; then
+            echo "❌ Error: paper/paper.bib not found!"
+            exit 1
+          fi
+          echo "✓ paper.bib found"
+
+          if ! grep -q "^title:" paper/paper.md; then
+            echo "❌ Error: YAML metadata not found in paper.md!"
+            exit 1
+          fi
+          echo "✓ YAML metadata found"
+
+          if ! grep -q "^# Summary" paper/paper.md; then
+            echo "⚠️  Warning: '# Summary' section not found"
+          fi
+
+          if ! grep -q "^# Statement of need" paper/paper.md; then
+            echo "⚠️  Warning: '# Statement of need' section not found"
+          fi
+
+          echo ""
+          echo "✓ Basic validation passed"
+
+      - name: Check paper length
+        run: |
+          echo "Checking paper length..."
+          WORD_COUNT=$(pandoc paper/paper.md -t plain --strip-comments | wc -w)
+          echo "Word count: $WORD_COUNT"
+
+          if [ $WORD_COUNT -lt 250 ]; then
+            echo "⚠️  Warning: Paper is shorter than recommended 250 words"
+          elif [ $WORD_COUNT -gt 1000 ]; then
+            echo "⚠️  Warning: Paper is longer than recommended 1000 words"
+          else
+            echo "✓ Word count is within recommended range (250-1000)"
+          fi
+        continue-on-error: true
+
+      - name: Validate BibTeX
+        run: |
+          echo "Validating BibTeX file..."
+          if command -v biber &> /dev/null; then
+            biber --tool --validate-datamodel paper/paper.bib || true
+          else
+            echo "ℹ️  Biber not available, skipping BibTeX validation"
+          fi
+        continue-on-error: true
