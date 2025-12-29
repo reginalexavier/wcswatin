@@ -10,7 +10,7 @@ tags:
   - weather data
   - spatial interpolation
 authors:
-  - name: Reginal Exavier
+  - name: Réginal Exavier
     orcid: 0000-0002-5237-523X
     affiliation: 1
     corresponding: true
