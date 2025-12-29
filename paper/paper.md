@@ -22,12 +22,12 @@ affiliations:
     index: 1
   - name: Federal University of Mato Grosso (UFMT), Postgraduate Program in Geography, Cuiabá - MT, Brazil.
     index: 2
-date: 29 December 2025
+date: 28 December 2025
 bibliography: paper.bib
 ---
 
 
-# Summary
+# Summary test-ci
 
 Weather and climate variables constitute essential boundary conditions for hydrological modeling frameworks; however, the acquisition, harmonization, preprocessing, and quality control of heterogeneous datasets originating from multiple sources remain computationally intensive and susceptible to systematic and random errors. `wcswatin` is an R package developed to standardize and automate the preprocessing of multi-source weather and climate datasets, with a specific emphasis on generating rigorously formatted meteorological inputs for the Soil and Water Assessment Tool (SWAT), a globally established, process-based ecohydrological model.
 

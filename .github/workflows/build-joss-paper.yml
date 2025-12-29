@@ -87,33 +87,33 @@ jobs:
           echo "Checking JOSS paper files..."
 
           if [ ! -f "paper/paper.md" ]; then
-            echo "❌ Error: paper/paper.md not found!"
+            echo "Error: paper/paper.md not found!"
             exit 1
           fi
-          echo "✓ paper.md found"
+          echo "paper.md found"
 
           if [ ! -f "paper/paper.bib" ]; then
-            echo "❌ Error: paper/paper.bib not found!"
+            echo "Error: paper/paper.bib not found!"
             exit 1
           fi
-          echo "✓ paper.bib found"
+          echo "paper.bib found"
 
           if ! grep -q "^title:" paper/paper.md; then
-            echo "❌ Error: YAML metadata not found in paper.md!"
+            echo "Error: YAML metadata not found in paper.md!"
             exit 1
           fi
-          echo "✓ YAML metadata found"
+          echo "YAML metadata found"
 
           if ! grep -q "^# Summary" paper/paper.md; then
-            echo "⚠️  Warning: '# Summary' section not found"
+            echo "Warning: '# Summary' section not found"
           fi
 
           if ! grep -q "^# Statement of need" paper/paper.md; then
-            echo "⚠️  Warning: '# Statement of need' section not found"
+            echo "Warning: '# Statement of need' section not found"
           fi
 
           echo ""
-          echo "✓ Basic validation passed"
+          echo "Basic validation passed"
 
       - name: Check paper length
         run: |
@@ -122,11 +122,11 @@ jobs:
           echo "Word count: $WORD_COUNT"
 
           if [ $WORD_COUNT -lt 250 ]; then
-            echo "⚠️  Warning: Paper is shorter than recommended 250 words"
+            echo "Warning: Paper is shorter than recommended 250 words"
           elif [ $WORD_COUNT -gt 1000 ]; then
-            echo "⚠️  Warning: Paper is longer than recommended 1000 words"
+            echo "Warning: Paper is longer than recommended 1000 words"
           else
-            echo "✓ Word count is within recommended range (250-1000)"
+            echo "Word count is within recommended range (250-1000)"
           fi
         continue-on-error: true
 
@@ -136,6 +136,6 @@ jobs:
           if command -v biber &> /dev/null; then
             biber --tool --validate-datamodel paper/paper.bib || true
           else
-            echo "ℹ️  Biber not available, skipping BibTeX validation"
+            echo "Biber not available, skipping BibTeX validation"
           fi
         continue-on-error: true
