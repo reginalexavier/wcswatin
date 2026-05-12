@@ -9,7 +9,7 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![Codecov test
-coverage](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg)](https://codecov.io/gh/reginalexavier/wcswatin?branch=main)
+coverage](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg)](https://app.codecov.io/gh/reginalexavier/wcswatin?branch=main)
 <!-- badges: end -->
 
 ## Overview
@@ -73,7 +73,6 @@ station_data <- ts_to_point(
 
 <img src="man/figures/wcswatin_flowchart150222.png" alt="Conceptual workflow of the wcswatin package" width="100%" />
 <p class="caption">
-
 Conceptual workflow of the wcswatin package
 </p>
 
