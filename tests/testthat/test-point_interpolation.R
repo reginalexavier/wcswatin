@@ -52,30 +52,6 @@ test_that("interpolation to grid works", {
   expect_equal(terra::ncell(target_grid), 100)
 })
 
-# Test inverse distance weighting (if available)
-test_that("inverse distance weighting interpolation works", {
-  skip_if_not(
-    exists("idw_interpolation", where = "package:wcswatin"),
-    "IDW interpolation function not found"
-  )
-
-  # Test IDW interpolation
-  # This would depend on the actual function implementation
-  expect_true(TRUE) # Placeholder
-})
-
-# Test kriging interpolation (if available)
-test_that("kriging interpolation works", {
-  skip_if_not(
-    exists("kriging_interpolation", where = "package:wcswatin"),
-    "Kriging interpolation function not found"
-  )
-
-  # Test kriging interpolation
-  # This would depend on the actual function implementation
-  expect_true(TRUE) # Placeholder
-})
-
 # Test nearest neighbor interpolation
 test_that("nearest neighbor interpolation works", {
   testthat::skip_if_not_installed("terra")
