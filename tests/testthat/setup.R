@@ -11,7 +11,7 @@ create_test_dir <- function(name = "test") {
     paste0(name, "_", Sys.getpid(), "_", sample(1000, 1))
   )
   dir.create(test_dir, showWarnings = FALSE, recursive = TRUE)
-  return(test_dir)
+  test_dir
 }
 
 # Helper function to clean up test directories

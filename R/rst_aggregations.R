@@ -48,6 +48,6 @@ datacube_aggregation <- function(
   )
 
   if (output_filename != "") {
-    return(agg_raster)
+    agg_raster
   }
 }

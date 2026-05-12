@@ -177,7 +177,13 @@ test_that("unit_converter works correctly", {
   # Create test file with Kelvin temperatures
   test_file <- file.path(temp_dir_in, "temp_20200101.txt")
   kelvin_temps <- data.frame(temperature = c(273.15, 283.15, 293.15))
-  write.table(kelvin_temps, test_file, row.names = FALSE, sep = ",", quote = FALSE)
+  write.table(
+    kelvin_temps,
+    test_file,
+    row.names = FALSE,
+    sep = ",",
+    quote = FALSE
+  )
 
   # Verify input file was created
   expect_true(file.exists(test_file))

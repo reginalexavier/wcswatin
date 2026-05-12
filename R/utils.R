@@ -434,7 +434,7 @@ file_name <- function(path) {
   base <- basename(path)
   # Remove extension
   name <- tools::file_path_sans_ext(base)
-  return(name)
+  name
 }
 
 
@@ -456,7 +456,7 @@ touch_dir <- function(folder_path, return_path = FALSE) {
     dir.create(folder_path, recursive = TRUE)
   }
   if (return_path) {
-    return(folder_path)
+    folder_path
   }
 }
 
@@ -500,7 +500,7 @@ names_to_date <- function(
 ) {
   layer_names <- names(raster_cube)
   timestamp <- as.numeric(sub(regex, "\\1", layer_names))
-  return(as.POSIXct(timestamp, origin = origin, tz = tz))
+  as.POSIXct(timestamp, origin = origin, tz = tz)
 }
 
 
@@ -657,7 +657,7 @@ summary_table <- function(
       dplyr::select(-data) %>%
       tidyr::unnest(c(min, max, mean, sd, n))
 
-    return(unique_tbl)
+    unique_tbl
   } else {
     temp_tbl <- do.call(
       rbind,
@@ -684,7 +684,7 @@ summary_table <- function(
         n = length(all_values)
       )
 
-    return(unique_tbl)
+    unique_tbl
   }
 }
 

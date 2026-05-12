@@ -295,7 +295,8 @@ cube2table <- function(
 #' # Example (pseudo-code):
 #' # lv <- cube2table(input_path, var = "tmin", n_layers = 10, study_area)
 #' # mt <- main_input_var(study_area, var_name = "tmin")
-#' # out <- layervalues2pixel(lv, mt, col_name = "20220101", inline_output = TRUE)
+#' # out <- layervalues2pixel(lv, mt, col_name = "20220101",
+#' #                         inline_output = TRUE)
 #' }
 layervalues2pixel <- function(
   # nolint: object_name_linter
@@ -352,9 +353,9 @@ layervalues2pixel <- function(
     }
 
     if (inline_output) {
-      return(final_list)
+      final_list
     }
   } else {
-    return(final_list)
+    final_list
   }
 }
