@@ -164,6 +164,66 @@ test_that("daily_aggregation validates input parameters", {
   )
 })
 
+test_that("daily_aggregation supports max-min and last-value modes", {
+  input_dir <- create_test_dir("daily_modes_input")
+  max_min_dir <- create_test_dir("daily_modes_max_min")
+  last_value_dir <- create_test_dir("daily_modes_last_value")
+  on.exit(
+    unlink(c(input_dir, max_min_dir, last_value_dir), recursive = TRUE),
+    add = TRUE
+  )
+
+  data.table::fwrite(
+    data.frame(value = 1:24),
+    file.path(input_dir, "tas_20200101.txt")
+  )
+
+  daily_aggregation(
+    folder_in = input_dir,
+    folder_out = max_min_dir,
+    from = "2020-01-01 00",
+    to = "2020-01-01 23",
+    take_out_first_record = FALSE,
+    mode = "max_min"
+  )
+  max_min_lines <- readLines(file.path(max_min_dir, "tas_20200101.txt"))
+  expect_equal(max_min_lines, c("value", "24,1"))
+
+  daily_aggregation(
+    folder_in = input_dir,
+    folder_out = last_value_dir,
+    from = "2020-01-01 00",
+    to = "2020-01-01 23",
+    take_out_first_record = FALSE,
+    mode = "last_value"
+  )
+  last_value <- data.table::fread(file.path(last_value_dir, "tas_20200101.txt"))
+  expect_equal(last_value[[1]], 24L)
+})
+
+test_that("daily_aggregation drops the first record when requested", {
+  input_dir <- create_test_dir("daily_drop_input")
+  output_dir <- create_test_dir("daily_drop_output")
+  on.exit(unlink(c(input_dir, output_dir), recursive = TRUE), add = TRUE)
+
+  data.table::fwrite(
+    data.frame(value = c(999, rep(1, 24))),
+    file.path(input_dir, "pcp_20200101.txt")
+  )
+
+  daily_aggregation(
+    folder_in = input_dir,
+    folder_out = output_dir,
+    from = "2020-01-01 00",
+    to = "2020-01-01 23",
+    take_out_first_record = TRUE,
+    aggregation_function = sum
+  )
+
+  result <- data.table::fread(file.path(output_dir, "pcp_20200101.txt"))
+  expect_equal(result[[1]], 24)
+})
+
 
 # Test temporal aggregation utilities
 test_that("temporal aggregation handles edge cases", {
@@ -455,4 +515,61 @@ test_that("aggregation integrates well with other package functions", {
 
   # Clean up
   unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
+})
+
+test_that("rh_calculator writes relative humidity from paired files", {
+  dpt_dir <- create_test_dir("rh_dpt")
+  tas_dir <- create_test_dir("rh_tas")
+  output_dir <- create_test_dir("rh_output")
+  on.exit(unlink(c(dpt_dir, tas_dir, output_dir), recursive = TRUE), add = TRUE)
+
+  data.table::fwrite(
+    data.frame(temp = c(10, 15)),
+    file.path(dpt_dir, "dpt_20200101.txt")
+  )
+  data.table::fwrite(
+    data.frame(temp = c(10, 20)),
+    file.path(tas_dir, "tas_20200101.txt")
+  )
+
+  rh_calculator(dpt_dir, tas_dir, output_dir, file_name_output = "rh")
+
+  output <- data.table::fread(file.path(output_dir, "rh20200101.txt"))
+  expect_equal(names(output), "temp")
+  expect_equal(output[[1]][1], 100)
+  expect_lt(output[[1]][2], 100)
+})
+
+test_that("windspeed_calculator writes vector magnitude from component files", {
+  uas_dir <- create_test_dir("uas")
+  vas_dir <- create_test_dir("vas")
+  output_dir <- create_test_dir("ws_output")
+  on.exit(unlink(c(uas_dir, vas_dir, output_dir), recursive = TRUE), add = TRUE)
+
+  data.table::fwrite(
+    data.frame(value = c(3, 5)),
+    file.path(uas_dir, "uas_20200101.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(4, 12)),
+    file.path(vas_dir, "vas_20200101.txt")
+  )
+
+  windspeed_calculator(
+    folder_uas = uas_dir,
+    folder_vas = vas_dir,
+    folder_out = output_dir,
+    col_name = "wind"
+  )
+
+  output_files <- list.files(
+    output_dir,
+    pattern = "^ws.*\\.txt$",
+    full.names = TRUE
+  )
+  expect_length(output_files, 1)
+
+  output <- data.table::fread(output_files)
+  expect_equal(names(output), "wind")
+  expect_equal(output[[1]], c(5, 13))
 })
