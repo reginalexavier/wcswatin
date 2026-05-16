@@ -143,8 +143,10 @@ cube2table <- function(
     "\n"
   )
 
+  tbl_files <- file.path(temp_dir, paste0("tbl_", seq_len(n_layers), ".csv"))
+
   tbl_list <- lapply(
-    list.files(temp_dir, full.names = TRUE),
+    tbl_files,
     data.table::fread
   )
 

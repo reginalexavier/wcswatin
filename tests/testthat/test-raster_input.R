@@ -222,6 +222,33 @@ test_that("cube2table extracts selected raster cells layer by layer", {
   expect_true(file.exists(file.path(temp_dir, "tbl_2.csv")))
 })
 
+test_that("cube2table reads intermediate files in layer order", {
+  skip_if_not_installed("terra")
+  skip_if_not_installed("future.apply")
+  skip_if_not_installed("progressr")
+
+  cube <- terra::rast(nrows = 1, ncols = 1, nlyrs = 10, vals = seq_len(10))
+  names(cube) <- paste0("X202001", sprintf("%02d", seq_len(10)))
+
+  cube_file <- file.path(tempdir(), "cube2table_order_input.tif")
+  temp_dir <- create_test_dir("cube2table_order")
+  on.exit(unlink(c(cube_file, temp_dir), recursive = TRUE), add = TRUE)
+  terra::writeRaster(cube, cube_file, overwrite = TRUE)
+
+  result <- cube2table(
+    input_path = cube_file,
+    var = NULL,
+    n_layers = 10,
+    study_area = data.frame(ID = 1),
+    side_effect = "none",
+    temp_dir = temp_dir,
+    clean_after = FALSE
+  )
+
+  expect_equal(result$values, seq_len(10))
+  expect_equal(result$layer_name, names(cube))
+})
+
 test_that("cube2table writes output and validates side effects", {
   skip_if_not_installed("terra")
   skip_if_not_installed("future.apply")
