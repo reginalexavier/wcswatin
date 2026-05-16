@@ -1,18 +1,5 @@
 # Tests for raster_cube_tables.R
 
-test_that("cube2table function works correctly", {
-  skip_if_not(
-    exists("cube2table", where = "package:wcswatin"),
-    "cube2table function not found"
-  )
-
-  # This would test the cube2table function
-  # Implementation depends on the actual function signature
-  expect_true(TRUE) # Placeholder
-})
-
-# Test datacube_aggregation function (if it exists)
-
 test_that("cube2table extracts selected raster cells layer by layer", {
   skip_if_not_installed("terra")
   skip_if_not_installed("future.apply")

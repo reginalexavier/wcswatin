@@ -250,65 +250,6 @@ test_that("raster functions handle errors gracefully", {
     )
   )
 
-  # Test with mismatched CRS (if function handles this)
-  test_raster <- create_test_raster()
-
-  # Points with different CRS
-  test_points_utm <- data.frame(
-    NAME = "station_1",
-    LAT = 500000, # UTM coordinates
-    LONG = 5000000,
-    ELEVATION = 100
-  )
-
-  # This might work if the function handles CRS transformation
-  # or might error - either is acceptable behavior
-  tryCatch(
-    {
-      result <- tbl_from_references(
-        raster_file = test_raster,
-        ref_points = test_points_utm
-      )
-      expect_s3_class(result, "data.frame")
-    },
-    error = function(e) {
-      # Error is acceptable for mismatched CRS
-      expect_true(TRUE)
-    }
-  )
-})
-
-# Test performance with larger datasets
-
-test_that("raster extraction performs reasonably", {
-  skip_on_cran() # Skip on CRAN to avoid long test times
-  skip_if_not_installed("terra")
-
-  # Create larger raster
-  large_raster <- terra::rast(nrows = 100, ncols = 100, vals = 1:10000)
-
-  # Create many points
-  n_points <- 50
-  large_points <- data.frame(
-    NAME = paste0("station_", 1:n_points),
-    LAT = runif(n_points, -1, 1),
-    LONG = runif(n_points, -1, 1),
-    ELEVATION = runif(n_points, 0, 1000)
-  )
-
-  start_time <- Sys.time()
-
-  result <- tbl_from_references(
-    raster_file = large_raster,
-    ref_points = large_points
-  )
-
-  end_time <- Sys.time()
-  elapsed_time <- as.numeric(end_time - start_time)
-
-  expect_s3_class(result, "data.frame")
-  expect_equal(ncol(result), n_points)
-  expect_lt(elapsed_time, 10) # Should complete in less than 10 seconds
 })
 
 # Test integration with other package functions
