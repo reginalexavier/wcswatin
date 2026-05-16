@@ -22,7 +22,7 @@ deps-optional:
 
 # Run code linting
 lint:
-    Rscript -e "if (!require('lintr')) install.packages('lintr'); lintr::lint_package()"
+    Rscript -e "if (!require('lintr')) install.packages('lintr'); devtools::load_all('.', quiet = TRUE); lintr::lint_package()"
 
 # Format code with styler
 format:
