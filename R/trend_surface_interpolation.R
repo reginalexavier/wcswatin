@@ -56,22 +56,22 @@ ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
       col_types = "dcdddd"
     )
 
-    if (!all(c("pcp", "LONG", "LAT") %in% names(pcp_temp))) {
+    if (!all(c("pcp", "LON", "LAT") %in% names(pcp_temp))) {
       stop(
-        "Input time-series files must contain 'pcp', 'LONG', and 'LAT' ",
+        "Input time-series files must contain 'pcp', 'LON', and 'LAT' ",
         "columns."
       )
     }
 
     # o polynomio do modelo
-    my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))
+    my_formula <- as.formula(pcp ~ poly(LON, LAT, degree = poly_degree))
 
     # ajuste do modelo
     fit_lm <- lm(my_formula, data = pcp_temp)
 
     # estimando para os pontos de referencia
     target_temp <- dplyr::tibble(
-      LONG = targeted_points$Lon_dec,
+      LON = targeted_points$Lon_dec,
       LAT = targeted_points$Lat_dec
     )
     interpolation <- dplyr::mutate(
@@ -180,7 +180,7 @@ ts_to_area <- function(
   )
 
   grd_template_sl <- expand.grid(
-    LONG = seq(from = bbox["xmin"], to = bbox["xmax"], by = resolution),
+    LON = seq(from = bbox["xmin"], to = bbox["xmax"], by = resolution),
     LAT = seq(from = bbox["ymin"], to = bbox["ymax"], by = resolution)
   )
 
@@ -193,15 +193,15 @@ ts_to_area <- function(
       col_types = "dcdddd"
     )
 
-    if (!all(c("pcp", "LONG", "LAT") %in% names(pcp_temp))) {
+    if (!all(c("pcp", "LON", "LAT") %in% names(pcp_temp))) {
       stop(
-        "Input time-series files must contain 'pcp', 'LONG', and 'LAT' ",
+        "Input time-series files must contain 'pcp', 'LON', and 'LAT' ",
         "columns."
       )
     }
 
     # o polynomio do modelo
-    my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))
+    my_formula <- as.formula(pcp ~ poly(LON, LAT, degree = poly_degree))
 
     # ajuste do modelo
     fit_lm <- lm(my_formula, data = pcp_temp)

@@ -45,7 +45,7 @@ test_that("point_to_daily validates input files and dates", {
   )
 
   data.table::fwrite(
-    data.frame(ID = 1, NAME = "station_1", LAT = 0, LONG = 0, ELEVATION = 1),
+    data.frame(ID = 1, NAME = "station_1", LAT = 0, LON = 0, ELEVATION = 1),
     file.path(input_dir, "pcp.txt")
   )
 

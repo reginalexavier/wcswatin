@@ -47,7 +47,7 @@ var_main_creator <- function(
     ID = targeted_points$OBJECTID,
     NAME = paste0(var_name, seq_len(nrow(targeted_points))),
     LAT = points$Y,
-    LONG = points$X,
+    LON = points$X,
     ELEVATION = targeted_points[[col_elev]]
   )
 }

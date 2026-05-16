@@ -17,7 +17,7 @@ create_test_points <- function() {
   data.frame(
     NAME = paste0("station_", 1:3),
     LAT = c(-0.5, 0, 0.5),
-    LONG = c(-0.5, 0, 0.5),
+    LON = c(-0.5, 0, 0.5),
     ELEVATION = c(100, 200, 300)
   )
 }
@@ -55,7 +55,7 @@ test_that("tbl_from_references works with sf input", {
   # Convert to sf object
   sf_points <- sf::st_as_sf(
     test_points,
-    coords = c("LONG", "LAT"),
+    coords = c("LON", "LAT"),
     crs = "EPSG:4326"
   )
 
@@ -295,7 +295,7 @@ test_that("raster functions handle edge cases", {
   single_point <- data.frame(
     NAME = "single_station",
     LAT = 0,
-    LONG = 0,
+    LON = 0,
     ELEVATION = 100
   )
 
@@ -313,7 +313,7 @@ test_that("raster functions handle edge cases", {
   outside_points <- data.frame(
     NAME = "outside_station",
     LAT = 10, # Outside the raster extent
-    LONG = 10,
+    LON = 10,
     ELEVATION = 100
   )
 

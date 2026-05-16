@@ -44,7 +44,7 @@ test_that("package example data is accessible and well-formed", {
     expect_gt(nrow(pcp_data), 0)
 
     # Check expected columns
-    expected_cols <- c("ID", "NAME", "LAT", "LONG", "ELEVATION")
+    expected_cols <- c("ID", "NAME", "LAT", "LON", "ELEVATION")
     expect_true(
       all(expected_cols %in% names(pcp_data)),
       info = "Expected columns missing from precipitation data"
@@ -52,9 +52,9 @@ test_that("package example data is accessible and well-formed", {
 
     # Check data quality
     expect_true(all(!is.na(pcp_data$LAT)))
-    expect_true(all(!is.na(pcp_data$LONG)))
+    expect_true(all(!is.na(pcp_data$LON)))
     expect_true(all(pcp_data$LAT >= -90 & pcp_data$LAT <= 90))
-    expect_true(all(pcp_data$LONG >= -180 & pcp_data$LONG <= 180))
+    expect_true(all(pcp_data$LON >= -180 & pcp_data$LON <= 180))
   } else {
     skip("Precipitation station data not found")
   }

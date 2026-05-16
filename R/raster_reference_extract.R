@@ -28,7 +28,7 @@ tbl_from_references <- function(
   } else if ("data.frame" %in% class(ref_points)) {
     ref_points <- sf::st_as_sf(
       ref_points,
-      coords = c("LONG", "LAT"),
+      coords = c("LON", "LAT"),
       crs = "+proj=longlat +datum=WGS84 +no_defs"
     )
   } else if (
@@ -39,7 +39,7 @@ tbl_from_references <- function(
     tbl_ref <- data.table::fread(ref_points)
     ref_points <- sf::st_as_sf(
       tbl_ref,
-      coords = c("LONG", "LAT"), # TODO: rename LONG to LON
+      coords = c("LON", "LAT"),
       crs = "+proj=longlat +datum=WGS84 +no_defs"
     )
   } else {

@@ -49,7 +49,7 @@ generate_test_points <- function(n = 5) {
   data.frame(
     NAME = paste0("station_", 1:n),
     LAT = runif(n, -1, 1),
-    LONG = runif(n, -1, 1),
+    LON = runif(n, -1, 1),
     ELEVATION = runif(n, 0, 1000)
   )
 }

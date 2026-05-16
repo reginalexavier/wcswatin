@@ -23,7 +23,7 @@ point_to_daily(
 name.}
 
 \item{main_pattern}{character. A pattern for the main file  containing all
-the points with ID, NAME, LAT, LONG and ELEVATION.}
+the points with ID, NAME, LAT, LON and ELEVATION.}
 
 \item{start_date}{character. Inform the start date of the serie in the format
 yyyymmdd.}

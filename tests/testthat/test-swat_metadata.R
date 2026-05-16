@@ -34,10 +34,10 @@ test_that("var_main_creator preserves coordinates and metadata", {
 
   result <- var_main_creator(target_file, var_name = "pcp", col_elev = "Elev")
 
-  expect_equal(names(result), c("ID", "NAME", "LAT", "LONG", "ELEVATION"))
+  expect_equal(names(result), c("ID", "NAME", "LAT", "LON", "ELEVATION"))
   expect_equal(result$ID, c(11, 12))
   expect_equal(result$NAME, c("pcp1", "pcp2"))
   expect_equal(result$LAT, c(-15.1, -15.2))
-  expect_equal(result$LONG, c(-54.1, -54.2))
+  expect_equal(result$LON, c(-54.1, -54.2))
   expect_equal(result$ELEVATION, c(123, 456))
 })

@@ -7,7 +7,7 @@
 #' @param var_pattern character. A pattern for the observation/station points
 #' name.
 #' @param main_pattern character. A pattern for the main file  containing all
-#' the points with ID, NAME, LAT, LONG and ELEVATION.
+#' the points with ID, NAME, LAT, LON and ELEVATION.
 #' @param start_date character. Inform the start date of the serie in the format
 #'   yyyymmdd.
 #' @param end_date character. Inform the end date of the serie in the format

@@ -11,7 +11,7 @@ test_that("ts_to_point returns one time series per target point", {
     ID = 1:4,
     NAME = paste0("p", 1:4),
     LAT = c(0, 0, 1, 1),
-    LONG = c(0, 1, 0, 1),
+    LON = c(0, 1, 0, 1),
     ELEVATION = c(10, 20, 30, 40),
     pcp = c(1, 2, 3, 4)
   )
@@ -100,7 +100,7 @@ test_that("ts_to_point validates input files and arguments", {
       ID = 1:4,
       NAME = paste0("p", 1:4),
       LAT = c(0, 0, 1, 1),
-      LONG = c(0, 1, 0, 1),
+      LON = c(0, 1, 0, 1),
       ELEVATION = c(10, 20, 30, 40),
       value = c(1, 2, 3, 4)
     ),
@@ -134,7 +134,7 @@ test_that("ts_to_point validates input files and arguments", {
       targeted_points_path = target_file,
       poly_degree = 1
     ),
-    "must contain 'pcp', 'LONG', and 'LAT'"
+    "must contain 'pcp', 'LON', and 'LAT'"
   )
 })
 
@@ -150,7 +150,7 @@ test_that("trend surface interpolation can create a raster brick", {
     ID = 1:4,
     NAME = paste0("p", 1:4),
     LAT = c(0, 0, 1, 1),
-    LONG = c(0, 1, 0, 1),
+    LON = c(0, 1, 0, 1),
     ELEVATION = c(10, 20, 30, 40),
     pcp = c(1, 2, 3, 4)
   )
@@ -243,7 +243,7 @@ test_that("ts_to_area validates input files and arguments", {
       ID = 1:4,
       NAME = paste0("p", 1:4),
       LAT = c(0, 0, 1, 1),
-      LONG = c(0, 1, 0, 1),
+      LON = c(0, 1, 0, 1),
       ELEVATION = c(10, 20, 30, 40),
       value = c(1, 2, 3, 4)
     ),
@@ -256,6 +256,6 @@ test_that("ts_to_area validates input files and arguments", {
       bassin_limit_path = basin_file,
       poly_degree = 1
     ),
-    "must contain 'pcp', 'LONG', and 'LAT'"
+    "must contain 'pcp', 'LON', and 'LAT'"
   )
 })
