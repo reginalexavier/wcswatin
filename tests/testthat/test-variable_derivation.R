@@ -3,9 +3,8 @@
 test_that("unit_converter works correctly", {
   skip_on_cran()
 
-  temp_dir_in <- create_test_dir("unit_converter_in")
-  temp_dir_out <- create_test_dir("unit_converter_out")
-  on.exit(unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE), add = TRUE)
+  temp_dir_in <- local_test_dir("unit_converter_in")
+  temp_dir_out <- local_test_dir("unit_converter_out")
 
   # Create test file with Kelvin temperatures
   test_file <- file.path(temp_dir_in, "temp_20200101.txt")
@@ -57,11 +56,10 @@ test_that("unit_converter works correctly", {
 })
 
 test_that("rh_calculator writes relative humidity from paired files", {
-  dpt_dir <- create_test_dir("rh_dpt")
-  tas_dir <- create_test_dir("rh_tas")
-  parent_dir <- create_test_dir("rh_parent")
+  dpt_dir <- local_test_dir("rh_dpt")
+  tas_dir <- local_test_dir("rh_tas")
+  parent_dir <- local_test_dir("rh_parent")
   output_dir <- file.path(parent_dir, "rh_output")
-  on.exit(unlink(c(dpt_dir, tas_dir, parent_dir), recursive = TRUE), add = TRUE)
 
   data.table::fwrite(
     data.frame(temp = c(10, 15)),
@@ -82,11 +80,10 @@ test_that("rh_calculator writes relative humidity from paired files", {
 })
 
 test_that("windspeed_calculator writes vector magnitude from component files", {
-  uas_dir <- create_test_dir("uas")
-  vas_dir <- create_test_dir("vas")
-  parent_dir <- create_test_dir("ws_parent")
+  uas_dir <- local_test_dir("uas")
+  vas_dir <- local_test_dir("vas")
+  parent_dir <- local_test_dir("ws_parent")
   output_dir <- file.path(parent_dir, "ws_output")
-  on.exit(unlink(c(uas_dir, vas_dir, parent_dir), recursive = TRUE), add = TRUE)
 
   data.table::fwrite(
     data.frame(value = c(3, 5)),

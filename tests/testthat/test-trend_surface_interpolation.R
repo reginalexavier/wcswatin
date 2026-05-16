@@ -334,9 +334,8 @@ test_that("ts_to_point returns one time series per target point", {
   skip_if_not_installed("sf")
   skip_if_not_installed("vroom")
 
-  input_dir <- create_test_dir("ts_point_input")
-  target_file <- file.path(tempdir(), "ts_point_targets.gpkg")
-  on.exit(unlink(c(input_dir, target_file), recursive = TRUE), add = TRUE)
+  input_dir <- local_test_dir("ts_point_input")
+  target_file <- local_test_file("ts_point_targets", ".gpkg")
 
   station_tbl <- data.frame(
     ID = 1:4,
@@ -382,9 +381,8 @@ test_that("trend surface interpolation can create a raster brick", {
   skip_if_not_installed("raster")
   skip_if_not_installed("vroom")
 
-  input_dir <- create_test_dir("ts_area_input")
-  basin_file <- file.path(tempdir(), "ts_area_basin.gpkg")
-  on.exit(unlink(c(input_dir, basin_file), recursive = TRUE), add = TRUE)
+  input_dir <- local_test_dir("ts_area_input")
+  basin_file <- local_test_file("ts_area_basin", ".gpkg")
 
   station_tbl <- data.frame(
     ID = 1:4,

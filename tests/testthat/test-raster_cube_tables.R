@@ -23,9 +23,8 @@ test_that("cube2table extracts selected raster cells layer by layer", {
   cube <- c(layer_1, layer_2)
   names(cube) <- c("X20200101", "X20200102")
 
-  cube_file <- file.path(tempdir(), "cube2table_input.tif")
-  temp_dir <- create_test_dir("cube2table")
-  on.exit(unlink(c(cube_file, temp_dir), recursive = TRUE), add = TRUE)
+  cube_file <- local_test_file("cube2table_input", ".tif")
+  temp_dir <- local_test_dir("cube2table")
   terra::writeRaster(cube, cube_file, overwrite = TRUE)
 
   result <- cube2table(
@@ -57,9 +56,8 @@ test_that("cube2table reads intermediate files in layer order", {
   cube <- terra::rast(nrows = 1, ncols = 1, nlyrs = 10, vals = seq_len(10))
   names(cube) <- paste0("X202001", sprintf("%02d", seq_len(10)))
 
-  cube_file <- file.path(tempdir(), "cube2table_order_input.tif")
-  temp_dir <- create_test_dir("cube2table_order")
-  on.exit(unlink(c(cube_file, temp_dir), recursive = TRUE), add = TRUE)
+  cube_file <- local_test_file("cube2table_order_input", ".tif")
+  temp_dir <- local_test_dir("cube2table_order")
   terra::writeRaster(cube, cube_file, overwrite = TRUE)
 
   result <- cube2table(
@@ -84,13 +82,9 @@ test_that("cube2table writes output and validates side effects", {
   cube <- terra::rast(nrows = 2, ncols = 2, vals = c(1, NA, 3, 4))
   names(cube) <- "X20200101"
 
-  cube_file <- file.path(tempdir(), "cube2table_side_effects.tif")
-  both_dir <- create_test_dir("cube2table_both")
-  only_dir <- create_test_dir("cube2table_only")
-  on.exit(
-    unlink(c(cube_file, both_dir, only_dir), recursive = TRUE),
-    add = TRUE
-  )
+  cube_file <- local_test_file("cube2table_side_effects", ".tif")
+  both_dir <- local_test_dir("cube2table_both")
+  only_dir <- local_test_dir("cube2table_only")
   terra::writeRaster(cube, cube_file, overwrite = TRUE)
 
   study_area <- data.frame(ID = c(1, 2))
@@ -162,8 +156,7 @@ test_that("layervalues2pixel pivots layer values to one series per pixel", {
 })
 
 test_that("layervalues2pixel writes one file per pixel when requested", {
-  output_dir <- create_test_dir("pixel_output")
-  on.exit(unlink(output_dir, recursive = TRUE), add = TRUE)
+  output_dir <- local_test_dir("pixel_output")
 
   layer_values <- data.frame(
     ID = c(1, 2, 1, 2),
@@ -196,9 +189,8 @@ test_that("layervalues2pixel writes one file per pixel when requested", {
 })
 
 test_that("layervalues2pixel creates output directory when needed", {
-  parent_dir <- create_test_dir("pixel_parent")
+  parent_dir <- local_test_dir("pixel_parent")
   output_dir <- file.path(parent_dir, "nested", "pixels")
-  on.exit(unlink(parent_dir, recursive = TRUE), add = TRUE)
 
   layervalues2pixel(
     layer_values = data.frame(

@@ -1,8 +1,7 @@
 # Tests for table_io.R
 
 test_that("files_to_table works correctly", {
-  # Setup test data
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("files_to_table")
   test_file1 <- file.path(temp_dir, "test-file1.txt")
   test_file2 <- file.path(temp_dir, "test-file2.txt")
 
@@ -25,12 +24,10 @@ test_that("files_to_table works correctly", {
   expect_equal(ncol(result), 3) # date + 2 files
   expect_true("date" %in% names(result))
 
-  # Clean up
-  unlink(c(test_file1, test_file2))
 })
 
 test_that("files_to_table handles missing files gracefully", {
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("files_to_table_missing")
 
   # Test with non-existent pattern
   expect_error(
@@ -45,7 +42,7 @@ test_that("files_to_table handles missing files gracefully", {
 })
 
 test_that("files_to_table handles NA values correctly", {
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("files_to_table_na")
   test_file <- file.path(temp_dir, "test-na.txt")
 
   # Create test file with -99 values
@@ -61,15 +58,12 @@ test_that("files_to_table handles NA values correctly", {
 
   expect_true(is.na(result[2, 2]))
 
-  # Clean up
-  unlink(test_file)
 })
 
 # Test table_to_files function
 
 test_that("table_to_files works correctly", {
-  # Setup test data
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("table_to_files")
   test_table <- data.frame(
     col1 = c(1, 2, 3),
     col2 = c(4, 5, 6)
@@ -92,15 +86,12 @@ test_that("table_to_files works correctly", {
   expect_equal(names(col1_content), "X20200101")
   expect_equal(nrow(col1_content), 3)
 
-  # Clean up
-  unlink(file.path(temp_dir, c("col1.txt", "col2.txt")))
 })
 
 # Test count_na function
 
 test_that("files_to_table can replace missing codes and clamp negatives", {
-  input_dir <- create_test_dir("files_to_table_negatives")
-  on.exit(unlink(input_dir, recursive = TRUE), add = TRUE)
+  input_dir <- local_test_dir("files_to_table_negatives")
 
   data.table::fwrite(
     data.frame(value = c(-1, -99, 3)),
@@ -120,8 +111,7 @@ test_that("files_to_table can replace missing codes and clamp negatives", {
 })
 
 test_that("table I/O functions handle invalid inputs gracefully", {
-  input_dir <- create_test_dir("table_io_invalid")
-  on.exit(unlink(input_dir, recursive = TRUE), add = TRUE)
+  input_dir <- local_test_dir("table_io_invalid")
 
   expect_error(
     files_to_table(
@@ -135,7 +125,7 @@ test_that("table I/O functions handle invalid inputs gracefully", {
   expect_error(
     table_to_files(
       table = "not a table",
-      folder_path = tempdir(),
+      folder_path = local_test_dir("table_io_invalid_out"),
       first_date = "20200101"
     )
   )

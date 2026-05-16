@@ -79,7 +79,7 @@ test_that("complete file processing workflow works", {
     expect_gt(length(result), 0)
 
     # Test that result can be saved
-    temp_dir <- tempdir()
+    temp_dir <- local_test_dir("integration_file_workflow")
     save_daily_tbl(tbl_list = result, path = temp_dir)
 
     # Check that files were created
@@ -97,8 +97,6 @@ test_that("complete file processing workflow works", {
       expect_gt(nrow(read_back), 0)
     }
 
-    # Clean up
-    unlink(saved_files)
   } else {
     skip("Example precipitation data not available")
   }
@@ -131,11 +129,8 @@ test_that("data quality assessment workflow works", {
 # Test integration workflow: unit conversion
 test_that("unit conversion workflow works", {
   # Create test temperature data in Kelvin
-  temp_dir_in <- file.path(tempdir(), "temp_kelvin")
-  temp_dir_out <- file.path(tempdir(), "temp_celsius")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("temp_kelvin")
+  temp_dir_out <- local_test_dir("temp_celsius")
 
   # Create test file with Kelvin temperatures
   kelvin_data <- data.frame(
@@ -162,15 +157,11 @@ test_that("unit conversion workflow works", {
     expect_equal(celsius_data$temperature, expected_celsius)
   }
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 # Test integration workflow: summary statistics
 test_that("summary statistics workflow works", {
-  # Create test data directory with multiple files
-  test_dir <- file.path(tempdir(), "summary_test")
-  dir.create(test_dir, showWarnings = FALSE)
+  test_dir <- local_test_dir("summary_test")
 
   # Create multiple data files
   for (i in 1:3) {
@@ -204,8 +195,6 @@ test_that("summary statistics workflow works", {
 
   expect_s3_class(plot_result, "ggplot")
 
-  # Clean up
-  unlink(test_dir, recursive = TRUE)
 })
 
 # Test error handling across package functions
@@ -236,7 +225,7 @@ test_that("package functions handle errors consistently", {
   expect_error(
     table_to_files(
       table = "not a table",
-      folder_path = tempdir(),
+      folder_path = local_test_dir("package_invalid_table_out"),
       first_date = "20200101"
     )
   )

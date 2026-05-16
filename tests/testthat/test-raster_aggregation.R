@@ -41,8 +41,7 @@ test_that("datacube_aggregation aggregates raster layers by date", {
   )
   names(cube) <- c("time=0", "time=3600", "time=90000")
 
-  output_file <- file.path(tempdir(), "daily_cube.tif")
-  on.exit(unlink(output_file), add = TRUE)
+  output_file <- local_test_file("daily_cube", ".tif")
 
   result <- wcswatin:::datacube_aggregation(
     input_path = cube,
@@ -309,7 +308,7 @@ test_that("raster file operations work correctly", {
   test_raster <- terra::rast(nrows = 5, ncols = 5, vals = 1:25)
 
   # Test writing to file
-  temp_file <- file.path(tempdir(), "test_raster.tif")
+  temp_file <- local_test_file("test_raster", ".tif")
   terra::writeRaster(test_raster, temp_file, overwrite = TRUE)
 
   expect_true(file.exists(temp_file))
@@ -324,6 +323,4 @@ test_that("raster file operations work correctly", {
   read_values <- terra::values(read_raster)
   expect_equal(original_values, read_values)
 
-  # Clean up
-  unlink(temp_file)
 })

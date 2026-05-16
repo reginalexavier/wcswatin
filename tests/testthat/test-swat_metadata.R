@@ -18,8 +18,7 @@ test_that("main_input_var builds metadata names from study area IDs", {
 test_that("var_main_creator preserves coordinates and metadata", {
   skip_if_not_installed("sf")
 
-  target_file <- file.path(tempdir(), "main_creator_targets.gpkg")
-  on.exit(unlink(target_file, recursive = TRUE), add = TRUE)
+  target_file <- local_test_file("main_creator_targets", ".gpkg")
 
   target_points <- sf::st_as_sf(
     data.frame(

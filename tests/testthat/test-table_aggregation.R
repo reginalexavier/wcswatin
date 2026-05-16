@@ -1,12 +1,8 @@
 # Tests for table_aggregation.R
 
 test_that("daily_aggregation creates proper file structure", {
-  # Setup test environment
-  temp_dir_in <- file.path(tempdir(), "agg_test_in")
-  temp_dir_out <- file.path(tempdir(), "agg_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("agg_test_in")
+  temp_dir_out <- local_test_dir("agg_test_out")
 
   # Create test hourly data file
   # Simulating 24 hours of data for one day
@@ -44,16 +40,11 @@ test_that("daily_aggregation creates proper file structure", {
     expect_gt(nrow(output_data), 0)
   }
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 test_that("daily_aggregation handles different aggregation modes", {
-  temp_dir_in <- file.path(tempdir(), "mode_test_in")
-  temp_dir_out <- file.path(tempdir(), "mode_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("mode_test_in")
+  temp_dir_out <- local_test_dir("mode_test_out")
 
   # Create test data with known values for testing
   hourly_data <- data.frame(
@@ -84,16 +75,11 @@ test_that("daily_aggregation handles different aggregation modes", {
     }
   )
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 test_that("daily_aggregation handles missing data appropriately", {
-  temp_dir_in <- file.path(tempdir(), "na_test_in")
-  temp_dir_out <- file.path(tempdir(), "na_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("na_test_in")
+  temp_dir_out <- local_test_dir("na_test_out")
 
   # Create test data with NA values
   hourly_data <- data.frame(
@@ -126,13 +112,11 @@ test_that("daily_aggregation handles missing data appropriately", {
     }
   )
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 test_that("daily_aggregation validates input parameters", {
-  temp_dir_in <- tempdir()
-  temp_dir_out <- tempdir()
+  temp_dir_in <- local_test_dir("daily_invalid_in")
+  temp_dir_out <- local_test_dir("daily_invalid_out")
 
   # Test with invalid date format
   expect_error(
@@ -163,13 +147,9 @@ test_that("daily_aggregation validates input parameters", {
 })
 
 test_that("daily_aggregation supports max-min and last-value modes", {
-  input_dir <- create_test_dir("daily_modes_input")
-  max_min_dir <- create_test_dir("daily_modes_max_min")
-  last_value_dir <- create_test_dir("daily_modes_last_value")
-  on.exit(
-    unlink(c(input_dir, max_min_dir, last_value_dir), recursive = TRUE),
-    add = TRUE
-  )
+  input_dir <- local_test_dir("daily_modes_input")
+  max_min_dir <- local_test_dir("daily_modes_max_min")
+  last_value_dir <- local_test_dir("daily_modes_last_value")
 
   data.table::fwrite(
     data.frame(value = 1:24),
@@ -200,9 +180,8 @@ test_that("daily_aggregation supports max-min and last-value modes", {
 })
 
 test_that("daily_aggregation drops the first record when requested", {
-  input_dir <- create_test_dir("daily_drop_input")
-  output_dir <- create_test_dir("daily_drop_output")
-  on.exit(unlink(c(input_dir, output_dir), recursive = TRUE), add = TRUE)
+  input_dir <- local_test_dir("daily_drop_input")
+  output_dir <- local_test_dir("daily_drop_output")
 
   data.table::fwrite(
     data.frame(value = c(999, rep(1, 24))),
@@ -227,11 +206,8 @@ test_that("daily_aggregation drops the first record when requested", {
 
 test_that("temporal aggregation handles edge cases", {
   # Test with single hour data
-  temp_dir_in <- file.path(tempdir(), "edge_test_in")
-  temp_dir_out <- file.path(tempdir(), "edge_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("edge_test_in")
+  temp_dir_out <- local_test_dir("edge_test_out")
 
   # Single value data
   single_data <- data.frame(value = 42)
@@ -261,18 +237,13 @@ test_that("temporal aggregation handles edge cases", {
     }
   )
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 # Test aggregation with different functions
 
 test_that("aggregation works with different statistical functions", {
-  temp_dir_in <- file.path(tempdir(), "stat_test_in")
-  temp_dir_out <- file.path(tempdir(), "stat_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("stat_test_in")
+  temp_dir_out <- local_test_dir("stat_test_out")
 
   # Create test data with known statistical properties
   test_values <- c(
@@ -355,18 +326,13 @@ test_that("aggregation works with different statistical functions", {
     )
   }
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 # Test file pattern matching
 
 test_that("aggregation respects file patterns", {
-  temp_dir_in <- file.path(tempdir(), "pattern_test_in")
-  temp_dir_out <- file.path(tempdir(), "pattern_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("pattern_test_in")
+  temp_dir_out <- local_test_dir("pattern_test_out")
 
   # Create files with different patterns
   test_data <- data.frame(value = 1:24)
@@ -411,8 +377,6 @@ test_that("aggregation respects file patterns", {
     }
   )
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 # Performance test for larger datasets
@@ -420,11 +384,8 @@ test_that("aggregation respects file patterns", {
 test_that("aggregation performs reasonably with larger datasets", {
   skip_on_cran() # Skip on CRAN to avoid long test times
 
-  temp_dir_in <- file.path(tempdir(), "perf_test_in")
-  temp_dir_out <- file.path(tempdir(), "perf_test_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("perf_test_in")
+  temp_dir_out <- local_test_dir("perf_test_out")
 
   # Create multiple files with larger datasets
   for (day in 1:3) {
@@ -466,19 +427,14 @@ test_that("aggregation performs reasonably with larger datasets", {
     }
   )
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 # Integration test with other package functions
 
 test_that("aggregation integrates well with other package functions", {
   # Test that aggregated output can be used with other functions
-  temp_dir_in <- file.path(tempdir(), "integration_in")
-  temp_dir_out <- file.path(tempdir(), "integration_out")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("integration_in")
+  temp_dir_out <- local_test_dir("integration_out")
 
   # Create test data
   test_data <- data.frame(value = seq(1, 24))
@@ -516,6 +472,4 @@ test_that("aggregation integrates well with other package functions", {
     }
   )
 
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })

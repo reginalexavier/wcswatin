@@ -21,6 +21,22 @@ cleanup_test_dir <- function(test_dir) {
   }
 }
 
+local_test_dir <- function(name = "test", .local_envir = parent.frame()) {
+  test_dir <- create_test_dir(name)
+  withr::defer(cleanup_test_dir(test_dir), envir = .local_envir)
+  test_dir
+}
+
+local_test_file <- function(
+  name = "test",
+  ext = "",
+  .local_envir = parent.frame()
+) {
+  test_file <- tempfile(pattern = paste0(name, "_"), fileext = ext)
+  withr::defer(unlink(test_file, recursive = TRUE), envir = .local_envir)
+  test_file
+}
+
 # Helper function to skip tests based on package availability
 skip_if_package_not_available <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {

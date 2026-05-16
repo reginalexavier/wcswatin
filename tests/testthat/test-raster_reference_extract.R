@@ -76,7 +76,7 @@ test_that("tbl_from_references works with file input", {
   test_points <- create_test_points()
 
   # Create temporary CSV file
-  temp_file <- file.path(tempdir(), "test_points.csv")
+  temp_file <- local_test_file("test_points", ".csv")
   write.csv(test_points, temp_file, row.names = FALSE)
 
   result_file <- tbl_from_references(
@@ -88,7 +88,7 @@ test_that("tbl_from_references works with file input", {
   expect_equal(ncol(result_file), 3)
 
   # Test with TXT file
-  temp_txt <- file.path(tempdir(), "test_points.txt")
+  temp_txt <- local_test_file("test_points", ".txt")
   write.table(test_points, temp_txt, row.names = FALSE, sep = ",")
 
   result_txt <- tbl_from_references(
@@ -98,8 +98,6 @@ test_that("tbl_from_references works with file input", {
 
   expect_s3_class(result_txt, "data.frame")
 
-  # Clean up
-  unlink(c(temp_file, temp_txt))
 })
 
 test_that("tbl_from_references handles prefix correctly", {
@@ -339,14 +337,12 @@ test_that("raster functions integrate with other package components", {
   expect_s3_class(na_summary, "data.frame")
 
   # Test writing to file and reading back
-  temp_file <- file.path(tempdir(), "extracted_test.csv")
+  temp_file <- local_test_file("extracted_test", ".csv")
   write.csv(extracted_values, temp_file, row.names = FALSE)
 
   read_back <- input_table(temp_file)
   expect_s3_class(read_back, "data.table")
 
-  # Clean up
-  unlink(temp_file)
 })
 
 # Test edge cases

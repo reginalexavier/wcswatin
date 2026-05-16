@@ -38,7 +38,7 @@ test_that("save_daily_tbl saves files correctly", {
     )
   )
 
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("save_daily_tbl")
 
   save_daily_tbl(tbl_list = test_list, path = temp_dir)
 
@@ -51,8 +51,6 @@ test_that("save_daily_tbl saves files correctly", {
   expect_equal(nrow(file1_content), 3)
   expect_equal(file1_content$value, c(1, 2, 3))
 
-  # Clean up
-  unlink(file.path(temp_dir, c("day_2020-01-01.csv", "day_2020-01-02.csv")))
 })
 
 # Error handling tests

@@ -1,8 +1,10 @@
 # Tests for internal_files.R
 
 test_that("utility file-system helpers create, return, and clean directories", {
-  helper_dir <- file.path(tempdir(), "wcswatin_helper_dir")
-  on.exit(unlink(helper_dir, recursive = TRUE), add = TRUE)
+  helper_dir <- file.path(
+    local_test_dir("wcswatin_helper_parent"),
+    "helper_dir"
+  )
 
   created_path <- wcswatin:::touch_dir(helper_dir, return_path = TRUE)
   expect_equal(created_path, helper_dir)
