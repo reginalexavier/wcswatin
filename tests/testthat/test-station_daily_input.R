@@ -23,6 +23,42 @@ test_that("point_to_daily works with package example data", {
   expect_true("pcp" %in% names(first_table))
 })
 
+test_that("point_to_daily validates input files and dates", {
+  input_dir <- local_test_dir("point_to_daily_invalid")
+
+  expect_error(
+    point_to_daily(
+      my_folder = input_dir,
+      start_date = "2017-03-01",
+      end_date = "20170331"
+    ),
+    "YYYYMMDD"
+  )
+
+  expect_error(
+    point_to_daily(
+      my_folder = input_dir,
+      start_date = "20170301",
+      end_date = "20170331"
+    ),
+    "main_pattern"
+  )
+
+  data.table::fwrite(
+    data.frame(ID = 1, NAME = "station_1", LAT = 0, LONG = 0, ELEVATION = 1),
+    file.path(input_dir, "pcp.txt")
+  )
+
+  expect_error(
+    point_to_daily(
+      my_folder = input_dir,
+      start_date = "20170301",
+      end_date = "20170331"
+    ),
+    "No variable files found"
+  )
+})
+
 test_that("save_daily_tbl saves files correctly", {
   # Create test data
   test_list <- list(

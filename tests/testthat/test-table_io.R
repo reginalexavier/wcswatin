@@ -37,7 +37,7 @@ test_that("files_to_table handles missing files gracefully", {
       start_date = "2020-01-01",
       end_date = "2020-01-03"
     ),
-    class = "error"
+    "No input files found"
   )
 })
 
@@ -128,5 +128,23 @@ test_that("table I/O functions handle invalid inputs gracefully", {
       folder_path = local_test_dir("table_io_invalid_out"),
       first_date = "20200101"
     )
+  )
+})
+
+test_that("files_to_table validates date range length", {
+  input_dir <- local_test_dir("files_to_table_date_length")
+  data.table::fwrite(
+    data.frame(value = 1:2),
+    file.path(input_dir, "pcp_1.txt")
+  )
+
+  expect_error(
+    files_to_table(
+      files_path = input_dir,
+      files_pattern = "pcp",
+      start_date = "2020-01-01",
+      end_date = "2020-01-03"
+    ),
+    "date range has 3 dates"
   )
 })

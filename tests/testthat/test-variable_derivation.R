@@ -55,6 +55,21 @@ test_that("unit_converter works correctly", {
 
 })
 
+test_that("unit_converter validates input files and transformation function", {
+  input_dir <- local_test_dir("unit_converter_invalid")
+  output_dir <- local_test_dir("unit_converter_invalid_out")
+
+  expect_error(
+    unit_converter(input_dir, output_dir, FUN = "not a function"),
+    "must be a function"
+  )
+
+  expect_error(
+    unit_converter(input_dir, output_dir),
+    "No input files found"
+  )
+})
+
 test_that("rh_calculator writes relative humidity from paired files", {
   dpt_dir <- local_test_dir("rh_dpt")
   tas_dir <- local_test_dir("rh_tas")
@@ -77,6 +92,32 @@ test_that("rh_calculator writes relative humidity from paired files", {
   expect_equal(names(output), "temp")
   expect_equal(output[[1]][1], 100)
   expect_lt(output[[1]][2], 100)
+})
+
+test_that("rh_calculator validates paired input files", {
+  dpt_dir <- local_test_dir("rh_dpt_invalid")
+  tas_dir <- local_test_dir("rh_tas_invalid")
+  output_dir <- local_test_dir("rh_output_invalid")
+
+  data.table::fwrite(
+    data.frame(temp = c(10, 15)),
+    file.path(dpt_dir, "dpt_20200101.txt")
+  )
+
+  expect_error(
+    rh_calculator(dpt_dir, tas_dir, output_dir),
+    "No temperature files found"
+  )
+
+  data.table::fwrite(
+    data.frame(temp = 10),
+    file.path(tas_dir, "tas_20200101.txt")
+  )
+
+  expect_error(
+    rh_calculator(dpt_dir, tas_dir, output_dir),
+    "same number of rows"
+  )
 })
 
 test_that("windspeed_calculator writes vector magnitude from component files", {
@@ -112,4 +153,30 @@ test_that("windspeed_calculator writes vector magnitude from component files", {
   output <- data.table::fread(output_files)
   expect_equal(names(output), "wind")
   expect_equal(output[[1]], c(5, 13))
+})
+
+test_that("windspeed_calculator validates paired input files", {
+  uas_dir <- local_test_dir("uas_invalid")
+  vas_dir <- local_test_dir("vas_invalid")
+  output_dir <- local_test_dir("ws_output_invalid")
+
+  data.table::fwrite(
+    data.frame(value = c(3, 5)),
+    file.path(uas_dir, "uas_20200101.txt")
+  )
+
+  expect_error(
+    windspeed_calculator(uas_dir, vas_dir, output_dir),
+    "No northward wind files found"
+  )
+
+  data.table::fwrite(
+    data.frame(value = 4),
+    file.path(vas_dir, "vas_20200101.txt")
+  )
+
+  expect_error(
+    windspeed_calculator(uas_dir, vas_dir, output_dir),
+    "same number of rows"
+  )
 })

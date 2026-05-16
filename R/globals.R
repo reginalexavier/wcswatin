@@ -20,5 +20,11 @@ utils::globalVariables(c(
   "study_area",
   "tas",
   "temperature",
+  "validate_files_found",
+  "validate_function",
+  "validate_input_dir",
+  "validate_positive_whole_number",
+  "validate_scalar_character",
+  "validate_scalar_logical",
   "value"
 ))

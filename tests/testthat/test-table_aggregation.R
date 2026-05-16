@@ -128,7 +128,7 @@ test_that("daily_aggregation validates input parameters", {
         to = "2020-01-01 23"
       )
     },
-    class = "error"
+    "format 'YYYY-MM-DD HH'"
   )
 
   # Test with non-existent input directory
@@ -142,7 +142,28 @@ test_that("daily_aggregation validates input parameters", {
         take_out_first_record = FALSE
       )
     },
-    class = "error"
+    "folder_in"
+  )
+})
+
+test_that("daily_aggregation validates hourly record count", {
+  input_dir <- local_test_dir("daily_record_count_input")
+  output_dir <- local_test_dir("daily_record_count_output")
+
+  data.table::fwrite(
+    data.frame(value = 1:3),
+    file.path(input_dir, "short_20200101.txt")
+  )
+
+  expect_error(
+    daily_aggregation(
+      folder_in = input_dir,
+      folder_out = output_dir,
+      from = "2020-01-01 00",
+      to = "2020-01-01 23",
+      take_out_first_record = FALSE
+    ),
+    "date range has 24 hours"
   )
 })
 

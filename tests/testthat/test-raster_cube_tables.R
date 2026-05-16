@@ -128,6 +128,30 @@ test_that("cube2table writes output and validates side effects", {
   expect_true(file.exists(file.path(only_dir, "tbls.csv")))
 })
 
+test_that("cube2table validates key arguments before extraction", {
+  expect_error(
+    cube2table(
+      input_path = "missing.tif",
+      var = NULL,
+      n_layers = 0,
+      study_area = data.frame(ID = 1),
+      side_effect = "none"
+    ),
+    "positive whole number"
+  )
+
+  expect_error(
+    cube2table(
+      input_path = "missing.tif",
+      var = NULL,
+      n_layers = 1,
+      study_area = data.frame(cell = 1),
+      side_effect = "none"
+    ),
+    "ID"
+  )
+})
+
 test_that("layervalues2pixel pivots layer values to one series per pixel", {
   layer_values <- data.frame(
     ID = c(1, 2, 1, 2),
@@ -222,4 +246,20 @@ test_that("layervalues2pixel validates file-output configuration", {
   )
 })
 
-# Test raster processing with multi-layer inputs
+test_that("layervalues2pixel validates required table columns", {
+  expect_error(
+    layervalues2pixel(
+      layer_values = data.frame(ID = 1, value = 1),
+      main_tbl = data.frame(ID = 1, NAME = "pcp_1")
+    ),
+    "values"
+  )
+
+  expect_error(
+    layervalues2pixel(
+      layer_values = data.frame(ID = c(1, 1), values = c(1, 2)),
+      main_tbl = data.frame(ID = 1)
+    ),
+    "NAME"
+  )
+})

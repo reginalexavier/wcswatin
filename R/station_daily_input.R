@@ -42,23 +42,47 @@ point_to_daily <- function(
   negatif_number = TRUE,
   prefix = "day_"
 ) {
+  validate_input_dir(my_folder, "my_folder")
+  validate_scalar_character(var_pattern, "var_pattern")
+  validate_scalar_character(main_pattern, "main_pattern")
+  validate_scalar_character(start_date, "start_date")
+  validate_scalar_character(end_date, "end_date")
+  validate_scalar_character(interval, "interval")
+  validate_scalar_logical(negatif_number, "negatif_number")
+  validate_scalar_character(prefix, "prefix")
+
+  start_date_i <- as.Date(start_date, format = "%Y%m%d")
+  end_date_i <- as.Date(end_date, format = "%Y%m%d")
+  if (is.na(start_date_i) || is.na(end_date_i)) {
+    stop(
+      "The arguments 'start_date' and 'end_date' must use the format ",
+      "'YYYYMMDD'."
+    )
+  }
+  if (start_date_i > end_date_i) {
+    stop(
+      "The argument 'start_date' must be earlier than or equal to 'end_date'."
+    )
+  }
+
   files_name <- list.files(my_folder, full.names = FALSE)
+  main_files <- grep(main_pattern, files_name, value = TRUE)
+  var_files <- grep(var_pattern, files_name, value = TRUE)
+
+  if (length(main_files) != 1) {
+    stop(
+      "The argument 'main_pattern' must match exactly one file in 'my_folder'."
+    )
+  }
+  validate_files_found(var_files, my_folder, var_pattern, "variable files")
 
   pcp <- data.table::fread(
-    glue::glue(
-      "{my_folder}/{grep(main_pattern,
-                                                files_name,
-                                                value = TRUE)}"
-    ),
+    file.path(my_folder, main_files),
     header = TRUE
   )
 
   point_list <- lapply(
-    glue::glue(
-      "{my_folder}/{grep(var_pattern,
-                                                files_name,
-                                                value = TRUE)}"
-    ),
+    file.path(my_folder, var_files),
     function(x) {
       data.table::fread(x, header = TRUE)
     }
@@ -73,15 +97,21 @@ point_to_daily <- function(
 
   # criando uma sequencia de datas igual ao tamanho da série
   datas <- seq.Date(
-    from = as.Date(start_date, format = "%Y%m%d"), # FIXME
+    from = start_date_i, # FIXME
     # FIXME colocar no padrão igual a primeira função
-    to = as.Date(end_date, format = "%Y%m%d"),
+    to = end_date_i,
     by = interval
   )
 
   # juntando as precipitaçoes em uma tabela só
   cplt_tbl <- do.call(cbind, point_list)
   colnames(cplt_tbl) <- names_sans_ext
+  if (nrow(cplt_tbl) != length(datas)) {
+    stop(
+      "The variable files have ", nrow(cplt_tbl),
+      " records, but the date range has ", length(datas), " dates."
+    )
+  }
   cplt_tbl <- dplyr::as_tibble(cplt_tbl) %>% dplyr::mutate(ymd = datas)
 
   # setar valores inferios a -99 para Nan

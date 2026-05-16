@@ -69,9 +69,29 @@ cube2table <- function(
   temp_dir = NULL,
   clean_after = FALSE
 ) {
-  roi_id <- input_table(study_area)$ID
-
   side_effect <- match.arg(side_effect, c("only", "both", "none"))
+  validate_positive_whole_number(n_layers, "n_layers")
+  validate_scalar_logical(clean_after, "clean_after")
+
+  if (!is.null(final_dir)) {
+    validate_scalar_character(final_dir, "final_dir")
+  }
+  if (!is.null(temp_dir)) {
+    validate_scalar_character(temp_dir, "temp_dir")
+  }
+
+  if (side_effect != "none" && is.null(final_dir)) {
+    stop(
+      "The argument 'final_dir' must be provided ",
+      "when 'side_effect' is 'only' or 'both'." # nolint: line_length_linter.
+    )
+  }
+
+  study_area <- input_table(study_area)
+  if (!"ID" %in% names(study_area)) {
+    stop("The argument 'study_area' must contain an 'ID' column.")
+  }
+  roi_id <- study_area$ID
 
   if (is.null(temp_dir)) {
     temp_dir <- file.path(tempdir(), "cube2table")
@@ -82,13 +102,6 @@ cube2table <- function(
 
   if (!is.null(final_dir)) {
     touch_dir(final_dir)
-  }
-  # error if side_effect is only or both and final_dir is NULL
-  if (side_effect != "none" && is.null(final_dir)) {
-    stop(
-      "The argument 'final_dir' must be provided ",
-      "when 'side_effect' is 'only' or 'both'." # nolint: line_length_linter.
-    )
   }
 
   message("The intermediate tables will be saved in: ", temp_dir, "\n")
@@ -221,6 +234,9 @@ layervalues2pixel <- function(
   path_output = NULL,
   append = FALSE
 ) {
+  validate_scalar_logical(inline_output, "inline_output")
+  validate_scalar_logical(append, "append")
+
   if (is.null(path_output) && !inline_output) {
     stop(
       "The argument 'inline_output' is FALSE, so the argument ",
@@ -229,6 +245,7 @@ layervalues2pixel <- function(
   }
 
   if (!is.null(path_output)) {
+    validate_scalar_character(path_output, "path_output")
     # TODO: uso de dir.create??
     if (!dir.exists(path_output)) {
       dir.create(path_output, recursive = TRUE)
@@ -237,9 +254,21 @@ layervalues2pixel <- function(
 
   input_tbl <- input_table(layer_values)
   tb_name <- input_table(main_tbl)$NAME
+  if (!all(c("values") %in% names(input_tbl))) {
+    stop("The argument 'layer_values' must contain a 'values' column.")
+  }
+  if (is.null(tb_name)) {
+    stop("The argument 'main_tbl' must contain a 'NAME' column.")
+  }
 
   n_row <- length(tb_name)
   n_col <- nrow(input_tbl) / n_row
+  if (n_row == 0 || nrow(input_tbl) %% n_row != 0) {
+    stop(
+      "The number of rows in 'layer_values' must be a multiple of the ",
+      "number of rows in 'main_tbl'."
+    )
+  }
   n_layers <- 1
 
   m_array <- input_tbl$values |>

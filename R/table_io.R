@@ -25,13 +25,33 @@ files_to_table <- function(
   na_value = NA,
   neg_to_zero = FALSE
 ) {
+  validate_input_dir(files_path, "files_path")
+  validate_scalar_character(files_pattern, "files_pattern")
+  validate_scalar_character(start_date, "start_date")
+  validate_scalar_character(end_date, "end_date")
+  validate_scalar_character(interval, "interval")
+  validate_scalar_logical(neg_to_zero, "neg_to_zero")
+
+  start_date_i <- as.Date(start_date, format = "%Y-%m-%d")
+  end_date_i <- as.Date(end_date, format = "%Y-%m-%d")
+  if (is.na(start_date_i) || is.na(end_date_i)) {
+    stop(
+      "The arguments 'start_date' and 'end_date' must use the format ",
+      "'YYYY-MM-DD'."
+    )
+  }
+  if (start_date_i > end_date_i) {
+    stop(
+      "The argument 'start_date' must be earlier than or equal to 'end_date'."
+    )
+  }
+
   files_name <- list.files(files_path, full.names = FALSE)
+  matching_files <- grep(files_pattern, files_name, value = TRUE)
+  validate_files_found(matching_files, files_path, files_pattern, "input files")
 
   point_list <- lapply(
-    glue::glue(
-      "{files_path}/{grep(files_pattern,
-                                files_name, value = TRUE)}"
-    ),
+    file.path(files_path, matching_files),
     function(x) {
       data.table::fread(x, header = TRUE)
     }
@@ -63,10 +83,17 @@ files_to_table <- function(
   }
 
   date <- seq.Date(
-    from = as.Date(start_date, format = "%Y-%m-%d"),
-    to = as.Date(end_date, format = "%Y-%m-%d"),
+    from = start_date_i,
+    to = end_date_i,
     by = interval
   )
+
+  if (nrow(points_tbl) != length(date)) {
+    stop(
+      "The matched files have ", nrow(points_tbl),
+      " records, but the date range has ", length(date), " dates."
+    )
+  }
 
   cbind.data.frame(date, points_tbl)
 }
@@ -94,6 +121,12 @@ table_to_files <- function(
   first_date,
   file_extension = "txt"
 ) {
+  validate_scalar_character(folder_path, "folder_path")
+  validate_scalar_character(first_date, "first_date")
+  validate_scalar_character(file_extension, "file_extension")
+
+  touch_dir(folder_path)
+
   table <- input_table(table)
   for (i in seq_len(ncol(table))) {
     col_i <- table[, ..i, drop = FALSE]

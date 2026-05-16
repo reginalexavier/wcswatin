@@ -23,9 +23,15 @@ unit_converter <- function(
   pattern = ".txt$",
   FUN = \(x) (x - 273.15) # nolint: object_name_linter
 ) {
+  validate_input_dir(folder_in, "folder_in")
+  validate_scalar_character(folder_out, "folder_out")
+  validate_scalar_character(pattern, "pattern")
+  validate_function(FUN, "FUN")
+
   touch_dir(folder_out)
 
   files_list <- list.files(folder_in, full.names = TRUE, pattern = pattern)
+  validate_files_found(files_list, folder_in, pattern, "input files")
 
   # transformation
   pb <- txtProgressBar(min = 0, max = length(files_list), style = 3)
@@ -88,11 +94,26 @@ rh_calculator <- function(
   Tn_value = 240.7263, # nolint: object_name_linter
   pattern = ".txt$"
 ) {
+  validate_input_dir(folder_dpt, "folder_dpt")
+  validate_input_dir(folder_tas, "folder_tas")
+  validate_scalar_character(folder_out, "folder_out")
+  validate_scalar_character(file_name_output, "file_name_output")
+  validate_scalar_character(pattern, "pattern")
+
   touch_dir(folder_out)
 
   dpt_files <- list.files(folder_dpt, full.names = TRUE, pattern = pattern)
 
   tas_files <- list.files(folder_tas, full.names = TRUE, pattern = pattern)
+
+  validate_files_found(dpt_files, folder_dpt, pattern, "dewpoint files")
+  validate_files_found(tas_files, folder_tas, pattern, "temperature files")
+  if (length(dpt_files) != length(tas_files)) {
+    stop(
+      "The arguments 'folder_dpt' and 'folder_tas' must contain the same ",
+      "number of matching files."
+    )
+  }
 
   # transformation
   pb <- txtProgressBar(min = 0, max = length(dpt_files), style = 3)
@@ -101,6 +122,13 @@ rh_calculator <- function(
     temp_dpt <- data.table::fread(dpt_files[i], header = TRUE)
 
     temp_tas <- data.table::fread(tas_files[i], header = TRUE)
+
+    if (nrow(temp_dpt) != nrow(temp_tas)) {
+      stop(
+        "Paired files must have the same number of rows: '",
+        dpt_files[i], "' and '", tas_files[i], "'."
+      )
+    }
 
     # create col_name if not exists
     if (!exists("col_name")) {
@@ -181,11 +209,27 @@ windspeed_calculator <- function(
   file_name_output = "ws",
   pattern = ".txt$"
 ) {
+  validate_input_dir(folder_uas, "folder_uas")
+  validate_input_dir(folder_vas, "folder_vas")
+  validate_scalar_character(folder_out, "folder_out")
+  validate_scalar_character(col_name, "col_name")
+  validate_scalar_character(file_name_output, "file_name_output")
+  validate_scalar_character(pattern, "pattern")
+
   touch_dir(folder_out)
 
   uas_files <- list.files(folder_uas, full.names = TRUE, pattern = pattern)
 
   vas_files <- list.files(folder_vas, full.names = TRUE, pattern = pattern)
+
+  validate_files_found(uas_files, folder_uas, pattern, "eastward wind files")
+  validate_files_found(vas_files, folder_vas, pattern, "northward wind files")
+  if (length(uas_files) != length(vas_files)) {
+    stop(
+      "The arguments 'folder_uas' and 'folder_vas' must contain the same ",
+      "number of matching files."
+    )
+  }
 
   # FIXME: use the name function from utils to avoid duplication
   file_name <- function(x) {
@@ -199,6 +243,13 @@ windspeed_calculator <- function(
     temp_uas <- data.table::fread(uas_files[i], header = TRUE)
 
     temp_vas <- data.table::fread(vas_files[i], header = TRUE)
+
+    if (nrow(temp_uas) != nrow(temp_vas)) {
+      stop(
+        "Paired files must have the same number of rows: '",
+        uas_files[i], "' and '", vas_files[i], "'."
+      )
+    }
 
     # create col_name if not exists
     if (!exists("col_name")) {

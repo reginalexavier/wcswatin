@@ -54,30 +54,36 @@ daily_aggregation <- function(
 ) {
   mode <- match.arg(mode, c("agg_fun", "max_min", "last_value"))
 
-  touch_dir(folder_out)
+  validate_input_dir(folder_in, "folder_in")
+  validate_scalar_character(folder_out, "folder_out")
+  validate_scalar_character(pattern, "pattern")
+  validate_scalar_logical(take_out_first_record, "take_out_first_record")
+  validate_function(aggregation_function, "aggregation_function")
+  validate_scalar_logical(na.rm, "na.rm")
 
-  hourly_files <- list.files(folder_in, full.names = TRUE, pattern = pattern)
-  if (length(hourly_files) == 0) {
-    stop("No hourly files found")
-  }
+  from_date <- suppressWarnings(lubridate::ymd_h(from, quiet = TRUE))
+  to_date <- suppressWarnings(lubridate::ymd_h(to, quiet = TRUE))
 
-  # Check if 'from' and 'to' dates are valid dates
-  if (
-    !lubridate::is.POSIXct(lubridate::ymd_h(from)) ||
-      !lubridate::is.POSIXct(lubridate::ymd_h(to))
-  ) {
-    stop("Invalid date format")
+  if (is.na(from_date) || is.na(to_date)) {
+    stop(
+      "The arguments 'from' and 'to' must use the format 'YYYY-MM-DD HH'."
+    )
   }
 
   # Check if the range between from and to is a valid interval
-  if (lubridate::ymd_h(from) > lubridate::ymd_h(to)) {
-    stop("Invalid date range")
+  if (from_date > to_date) {
+    stop("The argument 'from' must be earlier than or equal to 'to'.")
   }
+
+  touch_dir(folder_out)
+
+  hourly_files <- list.files(folder_in, full.names = TRUE, pattern = pattern)
+  validate_files_found(hourly_files, folder_in, pattern, "hourly files")
 
   # date
   my_ymdh <- seq(
-    from = lubridate::ymd_h(from),
-    to = lubridate::ymd_h(to),
+    from = from_date,
+    to = to_date,
     by = "hours"
   )
 
@@ -91,6 +97,14 @@ daily_aggregation <- function(
       temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
     } else {
       temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)
+    }
+
+    if (nrow(temp_tbl) != length(my_ymdh)) {
+      stop(
+        "The file '", hourly_files[i], "' has ", nrow(temp_tbl),
+        " records after preprocessing, but the date range has ",
+        length(my_ymdh), " hours."
+      )
     }
 
     # create col_name if not exists
