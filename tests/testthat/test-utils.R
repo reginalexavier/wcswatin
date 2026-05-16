@@ -1,5 +1,4 @@
 # Tests for utils.R functions
-# Following R package testing best practices
 
 # Test setup
 test_that("package loads correctly", {
@@ -133,35 +132,118 @@ test_that("var_names requires valid input", {
   expect_error(var_names("non_existent_file.nc"))
 })
 
-# Test file_name function (internal)
-test_that("file_name extracts correctly", {
-  test_path <- "/path/to/file_tas_20200101.nc"
-  # Note: This function might need to be exported for testing
-  # or we test it indirectly through other functions
-  skip("file_name is internal function")
+
+test_that("files_to_table can replace missing codes and clamp negatives", {
+  input_dir <- create_test_dir("files_to_table_negatives")
+  on.exit(unlink(input_dir, recursive = TRUE), add = TRUE)
+
+  data.table::fwrite(
+    data.frame(value = c(-1, -99, 3)),
+    file.path(input_dir, "pcp_1.txt")
+  )
+
+  result <- files_to_table(
+    files_path = input_dir,
+    files_pattern = "pcp",
+    start_date = "2020-01-01",
+    end_date = "2020-01-03",
+    na_value = -99,
+    neg_to_zero = TRUE
+  )
+
+  expect_equal(result$pcp_1, c(0, NA, 3))
 })
 
-# Test touch_dir function (internal)
-test_that("touch_dir creates directories", {
-  temp_test_dir <- file.path(tempdir(), "test_touch_dir")
+test_that("summary_table computes monthly summaries with percent sample", {
+  input_dir <- create_test_dir("summary_table_monthly")
+  on.exit(unlink(input_dir, recursive = TRUE), add = TRUE)
 
-  # Clean up first in case it exists
-  if (dir.exists(temp_test_dir)) {
-    unlink(temp_test_dir, recursive = TRUE)
-  }
+  data.table::fwrite(
+    data.frame(value = c(1, 2, 3, 4)),
+    file.path(input_dir, "station_1.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(10, 20, 30, 40)),
+    file.path(input_dir, "station_2.txt")
+  )
 
-  # This would need the function to be exported or tested indirectly
-  skip(
-    "touch_dir is internal function - test indirectly through other functions"
+  set.seed(123)
+  result <- summary_table(
+    var_folder = input_dir,
+    sample = 50,
+    percent = TRUE,
+    by_month = TRUE,
+    from = "2020-01-01",
+    to = "2020-01-04",
+    pattern = "station_.*\\.txt$"
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
+  expect_equal(as.character(result$Month), "Jan")
+  expect_true(all(c("min", "max", "mean", "sd", "n") %in% names(result)))
+  expect_equal(result$n, 4)
+})
+
+test_that("summary_plot respects percent-based sampling", {
+  input_dir <- create_test_dir("summary_plot_percent")
+  on.exit(unlink(input_dir, recursive = TRUE), add = TRUE)
+
+  data.table::fwrite(
+    data.frame(value = c(1, 2, 3, 4)),
+    file.path(input_dir, "station_1.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(10, 20, 30, 40)),
+    file.path(input_dir, "station_2.txt")
+  )
+
+  set.seed(123)
+  result <- summary_plot(
+    var_folder = input_dir,
+    sample = 50,
+    percent = TRUE,
+    from = "2020-01-01",
+    to = "2020-01-04",
+    pattern = "station_.*\\.txt$"
+  )
+
+  expect_s3_class(result, "ggplot")
+  expect_equal(nrow(result$data), 4)
+  expect_equal(length(unique(result$data$var_file)), 1)
+})
+
+
+test_that("utility file-system helpers create, return, and clean directories", {
+  helper_dir <- file.path(tempdir(), "wcswatin_helper_dir")
+  on.exit(unlink(helper_dir, recursive = TRUE), add = TRUE)
+
+  created_path <- wcswatin:::touch_dir(helper_dir, return_path = TRUE)
+  expect_equal(created_path, helper_dir)
+  expect_true(dir.exists(helper_dir))
+
+  writeLines("x", file.path(helper_dir, "x.txt"))
+  wcswatin:::clean_dir(helper_dir)
+  expect_false(dir.exists(helper_dir))
+})
+
+test_that("names_to_date extracts timestamps from raster layer names", {
+  skip_if_not_installed("terra")
+
+  cube <- c(
+    terra::rast(nrows = 1, ncols = 1, vals = 1),
+    terra::rast(nrows = 1, ncols = 1, vals = 2)
+  )
+  names(cube) <- c("time=0", "time=86400")
+
+  result <- wcswatin:::names_to_date(cube)
+
+  expect_equal(
+    as.Date(result),
+    as.Date(c("1970-01-01", "1970-01-02"))
   )
 })
 
-# Test clean_dir function (internal)
-test_that("clean_dir removes directories", {
-  skip(
-    "clean_dir is internal function - test indirectly through other functions"
-  )
-})
 
 # Test unit_converter function
 test_that("unit_converter works correctly", {
