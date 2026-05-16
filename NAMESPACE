@@ -3,6 +3,7 @@
 export(count_na)
 export(cube2table)
 export(daily_aggregation)
+export(datacube_aggregation)
 export(files_to_table)
 export(fill_gap)
 export(layervalues2pixel)

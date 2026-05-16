@@ -1,0 +1,153 @@
+#' Create a daily aggregation from an hourly dataset
+#'
+#' https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation # nolint: line_length_linter
+#'
+#' This function allows to aggregate hourly observations to daily time series.
+#' The function for aggregation can be informed in the
+#' \code{aggregation_function} parameter, this parameter takes a function as
+#' argument. The default function is \code{\link[base]{mean}}, so a daily
+#' average is returned.
+#'
+#' @param folder_in Path of the input files
+#' @param folder_out Path where to save the transformed files
+#' @param pattern an optional \code{\link[base:regex]{regular expression}}. Only
+#'   file names which match the regular expression will be returned.
+#' @param from The first date of the series, including the hour part.
+#' @param to The last date of the series, including the hour part.
+#' @param take_out_first_record Logical. If TRUE, the first record of the input
+#'   file will be removed. This is useful when the first record is the hour
+#'   00:00, that corresponds to the previous day. The length in hour between the
+#'   from and to must be the same as the length of the hours in the input files.
+#' @param aggregation_function The function to use on the hourly groups like
+#'   mean, sum, mode, etc
+#' @param mode The mode of aggregation. The options are \code{agg_fun},
+#' \code{max_min} or \code{last_value}.
+#' @param na.rm a logical value indicating whether NA values should be removed
+#'   before the computation proceeds.
+#' @details The function will create a daily aggregation from an hourly dataset.
+#'   The function for aggregation can be informed in the
+#'   \code{aggregation_function} parameter, this parameter takes a function as
+#'   argument. The default function is \code{\link[base]{mean}}, so a daily
+#'   average is returned. Alternatively, the user can choose the \code{mode}
+#'   parameter to inform the function to use choosing between the agg_fun,
+#'   max_min, and last_value. The \code{agg_fun} will use the function informed
+#'   in the \code{aggregation_function} parameter. The \code{max_min} will
+#'   return the maximum and minimum values of the day. The \code{last_value}
+#'   will return the last value of the day, which is useful for some variables
+#'   like precipitation where the last value of the day is the accumulated
+#'   precipitation.
+#'
+#' @return Files with a daily resolution
+#' @export
+#'
+
+daily_aggregation <- function(
+  folder_in,
+  folder_out,
+  pattern = ".txt$",
+  from = "2002-01-01 00",
+  to = "2021-05-31 23",
+  take_out_first_record = TRUE,
+  aggregation_function = mean,
+  mode = c("agg_fun", "max_min", "last_value")[1],
+  na.rm = FALSE # nolint: object_name_linter
+) {
+  mode <- match.arg(mode, c("agg_fun", "max_min", "last_value"))
+
+  touch_dir(folder_out)
+
+  hourly_files <- list.files(folder_in, full.names = TRUE, pattern = pattern)
+  if (length(hourly_files) == 0) {
+    stop("No hourly files found")
+  }
+
+  # Check if 'from' and 'to' dates are valid dates
+  if (
+    !lubridate::is.POSIXct(lubridate::ymd_h(from)) ||
+      !lubridate::is.POSIXct(lubridate::ymd_h(to))
+  ) {
+    stop("Invalid date format")
+  }
+
+  # Check if the range between from and to is a valid interval
+  if (lubridate::ymd_h(from) > lubridate::ymd_h(to)) {
+    stop("Invalid date range")
+  }
+
+  # date
+  my_ymdh <- seq(
+    from = lubridate::ymd_h(from),
+    to = lubridate::ymd_h(to),
+    by = "hours"
+  )
+
+  by_ydm <- lubridate::as_date(my_ymdh)
+
+  # transformation
+  pb <- txtProgressBar(min = 0, max = length(hourly_files), style = 3)
+
+  for (i in seq_along(hourly_files)) {
+    if (take_out_first_record) {
+      temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
+    } else {
+      temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)
+    }
+
+    # create col_name if not exists
+    if (!exists("col_name")) {
+      col_name <- data.table::copy(colnames(temp_tbl))
+    }
+
+    temp_tbl[, `:=`(
+      date = my_ymdh,
+      day = by_ydm
+    )]
+
+    data.table::setnames(temp_tbl, 1, "value")
+
+    if (mode == "agg_fun") {
+      temp_tbl <- temp_tbl[,
+        .(daily_agg = aggregation_function(value, na.rm = na.rm)),
+        by = day
+      ]
+
+      daily_agg <- temp_tbl[, "daily_agg"]
+    } else if (mode == "max_min") {
+      temp_tbl <- temp_tbl[,
+        .(
+          max_min = paste(
+            round(max(value), 3),
+            round(min(value), 3),
+            sep = ","
+          )
+        ),
+        by = day
+      ]
+
+      daily_agg <- temp_tbl[, list(max_min)]
+    } else if (mode == "last_value") {
+      temp_tbl[, hours := as.factor(lubridate::hour(date))]
+
+      # TODO: last value of the day is 23 or 0?
+      daily_agg <- temp_tbl[hours == 23, 1]
+    }
+
+    data.table::setnames(daily_agg, 1, col_name)
+
+    # saving to file
+    data.table::fwrite(
+      daily_agg,
+      file.path(
+        folder_out,
+        glue::glue("{file_name(hourly_files[i])}.txt")
+      ),
+      row.names = FALSE,
+      dec = ".",
+      sep = ",",
+      quote = FALSE
+    )
+    setTxtProgressBar(pb, i)
+  }
+
+  close(pb)
+}
