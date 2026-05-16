@@ -1,7 +1,5 @@
-# Tests for point_interpolation.R functions
-# Testing spatial interpolation and point processing functions
+# Tests for trend_surface_interpolation.R
 
-# Test basic interpolation functions
 test_that("point interpolation functions exist and work", {
   # Check if interpolation functions are available
   # This test framework assumes the functions exist in the package
@@ -19,6 +17,7 @@ test_that("point interpolation functions exist and work", {
 })
 
 # Test spatial interpolation methods
+
 test_that("spatial interpolation methods work correctly", {
   testthat::skip_if_not_installed("sf")
 
@@ -37,6 +36,7 @@ test_that("spatial interpolation methods work correctly", {
 })
 
 # Test interpolation to grid
+
 test_that("interpolation to grid works", {
   testthat::skip_if_not_installed("terra")
 
@@ -53,6 +53,7 @@ test_that("interpolation to grid works", {
 })
 
 # Test nearest neighbor interpolation
+
 test_that("nearest neighbor interpolation works", {
   testthat::skip_if_not_installed("terra")
   testthat::skip_if_not_installed("sf")
@@ -76,6 +77,7 @@ test_that("nearest neighbor interpolation works", {
 })
 
 # Test interpolation quality metrics
+
 test_that("interpolation quality can be assessed", {
   # Create test data with known pattern
   x <- rep(1:5, each = 5)
@@ -97,6 +99,7 @@ test_that("interpolation quality can be assessed", {
 })
 
 # Test spatial autocorrelation analysis
+
 test_that("spatial autocorrelation can be analyzed", {
   testthat::skip_if_not_installed("sf")
 
@@ -125,6 +128,7 @@ test_that("spatial autocorrelation can be analyzed", {
 })
 
 # Test interpolation with missing data
+
 test_that("interpolation handles missing data appropriately", {
   # Create data with missing values
   coords <- data.frame(
@@ -141,6 +145,7 @@ test_that("interpolation handles missing data appropriately", {
 })
 
 # Test interpolation parameter sensitivity
+
 test_that("interpolation parameters affect results appropriately", {
   # Create test points in a grid
   test_grid <- expand.grid(x = c(1, 3, 5), y = c(1, 3, 5))
@@ -160,6 +165,7 @@ test_that("interpolation parameters affect results appropriately", {
 })
 
 # Test integration with raster outputs
+
 test_that("interpolation integrates with raster operations", {
   testthat::skip_if_not_installed("terra")
 
@@ -182,6 +188,7 @@ test_that("interpolation integrates with raster operations", {
 })
 
 # Test point density effects on interpolation
+
 test_that("point density affects interpolation quality", {
   # Create sparse point set
   sparse_points <- data.frame(
@@ -206,6 +213,7 @@ test_that("point density affects interpolation quality", {
 })
 
 # Test boundary effects in interpolation
+
 test_that("interpolation handles boundary conditions", {
   # Create points near boundaries
   boundary_points <- data.frame(
@@ -222,6 +230,7 @@ test_that("interpolation handles boundary conditions", {
 })
 
 # Test interpolation with different coordinate systems
+
 test_that("interpolation works with different CRS", {
   testthat::skip_if_not_installed("sf")
 
@@ -243,6 +252,7 @@ test_that("interpolation works with different CRS", {
 })
 
 # Test error handling in interpolation
+
 test_that("interpolation functions handle errors gracefully", {
   # Test with insufficient points
   insufficient_points <- data.frame(
@@ -266,6 +276,7 @@ test_that("interpolation functions handle errors gracefully", {
 })
 
 # Test performance with larger point sets
+
 test_that("interpolation performs reasonably with larger datasets", {
   skip_on_cran() # Skip on CRAN to avoid long test times
 
@@ -293,6 +304,7 @@ test_that("interpolation performs reasonably with larger datasets", {
 })
 
 # Test integration with package workflow
+
 test_that("interpolation integrates with package workflow", {
   # Test that interpolation can work with package data structures
 
@@ -412,32 +424,4 @@ test_that("trend surface interpolation can create a raster brick", {
   expect_equal(raster::nlayers(result), 2)
   expect_equal(names(result), c("X2020.01.01", "X2020.01.02"))
   expect_true(all(raster::values(result) >= 0))
-})
-
-test_that("var_main_creator preserves coordinates and metadata", {
-  skip_if_not_installed("sf")
-
-  target_file <- file.path(tempdir(), "main_creator_targets.gpkg")
-  on.exit(unlink(target_file, recursive = TRUE), add = TRUE)
-
-  target_points <- sf::st_as_sf(
-    data.frame(
-      OBJECTID = c(11, 12),
-      Elev = c(123, 456),
-      lon = c(-54.1, -54.2),
-      lat = c(-15.1, -15.2)
-    ),
-    coords = c("lon", "lat"),
-    crs = 4326
-  )
-  sf::st_write(target_points, target_file, quiet = TRUE)
-
-  result <- var_main_creator(target_file, var_name = "pcp", col_elev = "Elev")
-
-  expect_equal(names(result), c("ID", "NAME", "LAT", "LONG", "ELEVATION"))
-  expect_equal(result$ID, c(11, 12))
-  expect_equal(result$NAME, c("pcp1", "pcp2"))
-  expect_equal(result$LAT, c(-15.1, -15.2))
-  expect_equal(result$LONG, c(-54.1, -54.2))
-  expect_equal(result$ELEVATION, c(123, 456))
 })

@@ -1,8 +1,6 @@
-# Tests for rst_aggregations.R functions
-# Testing raster aggregation and processing functions
+# Tests for raster_aggregation.R
 
-# Test helper functions for rst_aggregations
-test_that("rst_aggregations helper functions work", {
+test_that("raster aggregation helper objects work", {
   testthat::skip_if_not_installed("terra")
 
   # Test creating a simple raster for testing
@@ -11,19 +9,6 @@ test_that("rst_aggregations helper functions work", {
   expect_equal(terra::ncell(test_raster), 100)
 })
 
-# Test cube2table function (if it exists)
-test_that("cube2table function works correctly", {
-  skip_if_not(
-    exists("cube2table", where = "package:wcswatin"),
-    "cube2table function not found"
-  )
-
-  # This would test the cube2table function
-  # Implementation depends on the actual function signature
-  expect_true(TRUE) # Placeholder
-})
-
-# Test datacube_aggregation function (if it exists)
 test_that("datacube_aggregation works with raster inputs", {
   skip_if_not(
     exists("datacube_aggregation", where = "package:wcswatin"),
@@ -72,6 +57,7 @@ test_that("datacube_aggregation aggregates raster layers by date", {
 })
 
 # Test raster temporal aggregation
+
 test_that("raster temporal operations work correctly", {
   testthat::skip_if_not_installed("terra")
 
@@ -95,6 +81,7 @@ test_that("raster temporal operations work correctly", {
 })
 
 # Test spatial aggregation
+
 test_that("spatial aggregation works correctly", {
   testthat::skip_if_not_installed("terra")
 
@@ -110,6 +97,7 @@ test_that("spatial aggregation works correctly", {
 })
 
 # Test raster statistics functions
+
 test_that("raster statistics calculations work", {
   testthat::skip_if_not_installed("terra")
 
@@ -128,6 +116,7 @@ test_that("raster statistics calculations work", {
 })
 
 # Test raster masking and cropping
+
 test_that("raster masking and cropping work", {
   testthat::skip_if_not_installed("terra")
   testthat::skip_if_not_installed("sf")
@@ -158,6 +147,7 @@ test_that("raster masking and cropping work", {
 })
 
 # Test raster resampling
+
 test_that("raster resampling works correctly", {
   testthat::skip_if_not_installed("terra")
   # Skip on macOS due to terra::resample segfault issues with GDAL/PROJ in CI
@@ -180,6 +170,7 @@ test_that("raster resampling works correctly", {
 })
 
 # Test raster layer operations
+
 test_that("raster layer operations work", {
   testthat::skip_if_not_installed("terra")
 
@@ -206,6 +197,7 @@ test_that("raster layer operations work", {
 })
 
 # Test error handling in raster operations
+
 test_that("raster operations handle errors gracefully", {
   testthat::skip_if_not_installed("terra")
 
@@ -218,6 +210,7 @@ test_that("raster operations handle errors gracefully", {
 })
 
 # Test memory efficiency with larger rasters
+
 test_that("raster operations are memory efficient", {
   skip_on_cran() # Skip on CRAN to avoid memory issues
   testthat::skip_if_not_installed("terra")
@@ -243,6 +236,7 @@ test_that("raster operations are memory efficient", {
 })
 
 # Test integration with package data
+
 test_that("raster functions work with package example data", {
   # Look for example raster data in the package
   extdata_path <- system.file("extdata", package = "wcswatin")
@@ -282,6 +276,7 @@ test_that("raster functions work with package example data", {
 })
 
 # Test raster coordinate reference systems
+
 test_that("raster CRS operations work correctly", {
   testthat::skip_if_not_installed("terra")
   # Skip on macOS due to terra::project segfault issues with GDAL/PROJ in CI
@@ -306,6 +301,7 @@ test_that("raster CRS operations work correctly", {
 })
 
 # Test raster file I/O operations
+
 test_that("raster file operations work correctly", {
   testthat::skip_if_not_installed("terra")
 
