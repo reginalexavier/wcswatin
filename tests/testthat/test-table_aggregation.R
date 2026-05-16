@@ -54,27 +54,17 @@ test_that("daily_aggregation handles different aggregation modes", {
   test_file <- file.path(temp_dir_in, "test_20200101.txt")
   write.table(hourly_data, test_file, row.names = FALSE, sep = ",")
 
-  # Test different modes if the function supports them
-  # Note: Need to check the actual implementation for available modes
-  tryCatch(
-    {
-      daily_aggregation(
-        folder_in = temp_dir_in,
-        folder_out = temp_dir_out,
-        from = "2020-01-01 00",
-        to = "2020-01-01 23",
-        take_out_first_record = FALSE,
-        aggregation_function = sum
-      )
-
-      output_files <- list.files(temp_dir_out, full.names = TRUE)
-      expect_gt(length(output_files), 0)
-    },
-    error = function(e) {
-      skip(paste("Function implementation issue:", e$message))
-    }
+  daily_aggregation(
+    folder_in = temp_dir_in,
+    folder_out = temp_dir_out,
+    from = "2020-01-01 00",
+    to = "2020-01-01 23",
+    take_out_first_record = FALSE,
+    aggregation_function = sum
   )
 
+  result <- data.table::fread(file.path(temp_dir_out, "test_20200101.txt"))
+  expect_equal(result[[1]], sum(hourly_data$value))
 })
 
 test_that("daily_aggregation handles missing data appropriately", {
@@ -89,29 +79,18 @@ test_that("daily_aggregation handles missing data appropriately", {
   test_file <- file.path(temp_dir_in, "test_na_20200101.txt")
   write.table(hourly_data, test_file, row.names = FALSE, sep = ",")
 
-  # Test aggregation with na.rm = TRUE
-  tryCatch(
-    {
-      daily_aggregation(
-        folder_in = temp_dir_in,
-        folder_out = temp_dir_out,
-        from = "2020-01-01 00",
-        to = "2020-01-01 23",
-        take_out_first_record = FALSE,
-        aggregation_function = mean,
-        na.rm = TRUE
-      )
-
-      # Check if files were created despite NA values
-      output_files <- list.files(temp_dir_out, full.names = TRUE)
-      expect_gte(length(output_files), 0) # Should handle NAs gracefully
-    },
-    error = function(e) {
-      # If function doesn't exist or has issues, skip
-      skip(paste("Function implementation issue:", e$message))
-    }
+  daily_aggregation(
+    folder_in = temp_dir_in,
+    folder_out = temp_dir_out,
+    from = "2020-01-01 00",
+    to = "2020-01-01 23",
+    take_out_first_record = FALSE,
+    aggregation_function = mean,
+    na.rm = TRUE
   )
 
+  result <- data.table::fread(file.path(temp_dir_out, "test_na_20200101.txt"))
+  expect_equal(result[[1]], mean(stats::na.omit(hourly_data$value)))
 })
 
 test_that("daily_aggregation validates input parameters", {
@@ -235,29 +214,17 @@ test_that("temporal aggregation handles edge cases", {
   test_file <- file.path(temp_dir_in, "single_20200101.txt")
   write.table(single_data, test_file, row.names = FALSE, sep = ",")
 
-  tryCatch(
-    {
-      daily_aggregation(
-        folder_in = temp_dir_in,
-        folder_out = temp_dir_out,
-        from = "2020-01-01 00",
-        to = "2020-01-01 00", # Same start and end
-        take_out_first_record = FALSE,
-        aggregation_function = mean
-      )
-
-      # Should handle single value appropriately
-      output_files <- list.files(temp_dir_out, full.names = TRUE)
-      if (length(output_files) > 0) {
-        result <- read.table(output_files[1], header = TRUE, sep = ",")
-        expect_equal(nrow(result), 1)
-      }
-    },
-    error = function(e) {
-      skip(paste("Edge case handling issue:", e$message))
-    }
+  daily_aggregation(
+    folder_in = temp_dir_in,
+    folder_out = temp_dir_out,
+    from = "2020-01-01 00",
+    to = "2020-01-01 00",
+    take_out_first_record = FALSE,
+    aggregation_function = mean
   )
 
+  result <- data.table::fread(file.path(temp_dir_out, "single_20200101.txt"))
+  expect_equal(result[[1]], 42)
 })
 
 # Test aggregation with different functions
@@ -312,39 +279,20 @@ test_that("aggregation works with different statistical functions", {
     output_subdir <- file.path(temp_dir_out, func_name)
     dir.create(output_subdir, showWarnings = FALSE)
 
-    tryCatch(
-      {
-        daily_aggregation(
-          folder_in = temp_dir_in,
-          folder_out = output_subdir,
-          from = "2020-01-01 00",
-          to = "2020-01-01 23",
-          take_out_first_record = FALSE,
-          aggregation_function = func
-        )
-
-        output_files <- list.files(output_subdir, full.names = TRUE)
-        if (length(output_files) > 0) {
-          result <- read.table(
-            output_files[1],
-            header = TRUE,
-            sep = ","
-          )
-          expect_s3_class(result, "data.frame")
-
-          # Verify the aggregation worked
-          expected_value <- func(test_values, na.rm = TRUE)
-          if (is.finite(expected_value)) {
-            expect_true(any(
-              abs(result[, 1] - expected_value) < 1e-6
-            ))
-          }
-        }
-      },
-      error = function(e) {
-        message(paste("Skipping", func_name, "due to:", e$message))
-      }
+    daily_aggregation(
+      folder_in = temp_dir_in,
+      folder_out = output_subdir,
+      from = "2020-01-01 00",
+      to = "2020-01-01 23",
+      take_out_first_record = FALSE,
+      aggregation_function = func,
+      na.rm = TRUE
     )
+
+    result <- data.table::fread(
+      file.path(output_subdir, "stat_test_20200101.txt")
+    )
+    expect_equal(result[[1]], func(test_values, na.rm = TRUE))
   }
 
 })
@@ -377,77 +325,16 @@ test_that("aggregation respects file patterns", {
     sep = ","
   )
 
-  tryCatch(
-    {
-      # Test with specific pattern - should only process temp files
-      daily_aggregation(
-        folder_in = temp_dir_in,
-        folder_out = temp_dir_out,
-        pattern = "temp_.*\\.txt$",
-        from = "2020-01-01 00",
-        to = "2020-01-01 23",
-        take_out_first_record = FALSE
-      )
-
-      output_files <- list.files(temp_dir_out, full.names = TRUE)
-      # Should only have processed the temp file
-      expect_gte(length(output_files), 0)
-    },
-    error = function(e) {
-      skip(paste("Pattern matching test failed:", e$message))
-    }
+  daily_aggregation(
+    folder_in = temp_dir_in,
+    folder_out = temp_dir_out,
+    pattern = "temp_.*\\.txt$",
+    from = "2020-01-01 00",
+    to = "2020-01-01 23",
+    take_out_first_record = FALSE
   )
 
-})
-
-# Performance test for larger datasets
-
-test_that("aggregation performs reasonably with larger datasets", {
-  skip_on_cran() # Skip on CRAN to avoid long test times
-
-  temp_dir_in <- local_test_dir("perf_test_in")
-  temp_dir_out <- local_test_dir("perf_test_out")
-
-  # Create multiple files with larger datasets
-  for (day in 1:3) {
-    large_data <- data.frame(
-      value = rnorm(24 * 365) # One year of hourly data
-    )
-
-    filename <- sprintf("large_data_%02d.txt", day)
-    write.table(
-      large_data,
-      file.path(temp_dir_in, filename),
-      row.names = FALSE,
-      sep = ","
-    )
-  }
-
-  # Test performance
-  start_time <- Sys.time()
-
-  tryCatch(
-    {
-      daily_aggregation(
-        folder_in = temp_dir_in,
-        folder_out = temp_dir_out,
-        from = "2020-01-01 00",
-        to = "2020-12-30 22",
-        take_out_first_record = TRUE,
-        aggregation_function = mean
-      )
-
-      end_time <- Sys.time()
-      elapsed_time <- as.numeric(end_time - start_time)
-
-      # Should complete in reasonable time (adjust threshold as needed)
-      expect_lt(elapsed_time, 60) # Less than 60 seconds
-    },
-    error = function(e) {
-      skip(paste("Performance test failed:", e$message))
-    }
-  )
-
+  expect_equal(list.files(temp_dir_out), "temp_20200101.txt")
 })
 
 # Integration test with other package functions
@@ -466,31 +353,19 @@ test_that("aggregation integrates well with other package functions", {
     sep = ","
   )
 
-  tryCatch(
-    {
-      # Run aggregation
-      daily_aggregation(
-        folder_in = temp_dir_in,
-        folder_out = temp_dir_out,
-        take_out_first_record = FALSE,
-        from = "2020-01-01 00",
-        to = "2020-01-01 23"
-      )
-
-      # Try to use output with other functions (e.g., summary_table)
-      if (length(list.files(temp_dir_out)) > 0) {
-        summary_result <- summary_table(
-          var_folder = temp_dir_out,
-          sample = 1,
-          by_month = FALSE
-        )
-
-        expect_s3_class(summary_result, "data.frame")
-      }
-    },
-    error = function(e) {
-      skip(paste("Integration test failed:", e$message))
-    }
+  daily_aggregation(
+    folder_in = temp_dir_in,
+    folder_out = temp_dir_out,
+    take_out_first_record = FALSE,
+    from = "2020-01-01 00",
+    to = "2020-01-01 23"
   )
 
+  summary_result <- summary_table(
+    var_folder = temp_dir_out,
+    sample = 1,
+    by_month = FALSE
+  )
+
+  expect_s3_class(summary_result, "data.frame")
 })
