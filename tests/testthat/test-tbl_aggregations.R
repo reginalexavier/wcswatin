@@ -520,8 +520,9 @@ test_that("aggregation integrates well with other package functions", {
 test_that("rh_calculator writes relative humidity from paired files", {
   dpt_dir <- create_test_dir("rh_dpt")
   tas_dir <- create_test_dir("rh_tas")
-  output_dir <- create_test_dir("rh_output")
-  on.exit(unlink(c(dpt_dir, tas_dir, output_dir), recursive = TRUE), add = TRUE)
+  parent_dir <- create_test_dir("rh_parent")
+  output_dir <- file.path(parent_dir, "rh_output")
+  on.exit(unlink(c(dpt_dir, tas_dir, parent_dir), recursive = TRUE), add = TRUE)
 
   data.table::fwrite(
     data.frame(temp = c(10, 15)),
@@ -534,6 +535,7 @@ test_that("rh_calculator writes relative humidity from paired files", {
 
   rh_calculator(dpt_dir, tas_dir, output_dir, file_name_output = "rh")
 
+  expect_true(dir.exists(output_dir))
   output <- data.table::fread(file.path(output_dir, "rh20200101.txt"))
   expect_equal(names(output), "temp")
   expect_equal(output[[1]][1], 100)
@@ -543,8 +545,9 @@ test_that("rh_calculator writes relative humidity from paired files", {
 test_that("windspeed_calculator writes vector magnitude from component files", {
   uas_dir <- create_test_dir("uas")
   vas_dir <- create_test_dir("vas")
-  output_dir <- create_test_dir("ws_output")
-  on.exit(unlink(c(uas_dir, vas_dir, output_dir), recursive = TRUE), add = TRUE)
+  parent_dir <- create_test_dir("ws_parent")
+  output_dir <- file.path(parent_dir, "ws_output")
+  on.exit(unlink(c(uas_dir, vas_dir, parent_dir), recursive = TRUE), add = TRUE)
 
   data.table::fwrite(
     data.frame(value = c(3, 5)),
@@ -567,6 +570,7 @@ test_that("windspeed_calculator writes vector magnitude from component files", {
     pattern = "^ws.*\\.txt$",
     full.names = TRUE
   )
+  expect_true(dir.exists(output_dir))
   expect_length(output_files, 1)
 
   output <- data.table::fread(output_files)

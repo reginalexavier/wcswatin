@@ -88,6 +88,8 @@ rh_calculator <- function(
   Tn_value = 240.7263, # nolint: object_name_linter
   pattern = ".txt$"
 ) {
+  touch_dir(folder_out)
+
   dpt_files <- list.files(folder_dpt, full.names = TRUE, pattern = pattern)
 
   tas_files <- list.files(folder_tas, full.names = TRUE, pattern = pattern)
@@ -179,6 +181,8 @@ windspeed_calculator <- function(
   file_name_output = "ws",
   pattern = ".txt$"
 ) {
+  touch_dir(folder_out)
+
   uas_files <- list.files(folder_uas, full.names = TRUE, pattern = pattern)
 
   vas_files <- list.files(folder_vas, full.names = TRUE, pattern = pattern)
