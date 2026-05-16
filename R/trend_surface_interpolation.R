@@ -21,13 +21,23 @@
 #           system.file("extdata/sl_centroides/centroide_watershed_wgs84.txt",
 #           package = "wcswatin"), poly_degree = 2)
 ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
+  validate_input_dir(my_folder, "my_folder")
+  validate_input_file(targeted_points_path, "targeted_points_path")
+  validate_positive_whole_number(poly_degree, "poly_degree")
+
   var_files <- list.files(my_folder, full.names = TRUE, pattern = ".csv$")
+  validate_files_found(var_files, my_folder, ".csv$", "time-series files")
 
   temp_name <- list.files(my_folder, full.names = FALSE)
 
   names_sans_ext <- tools::file_path_sans_ext(temp_name)
 
   targeted_points <- sf::read_sf(targeted_points_path)
+  if (!all(c("Lon_dec", "Lat_dec") %in% names(targeted_points))) {
+    stop(
+      "The targeted points file must contain 'Lon_dec' and 'Lat_dec' columns."
+    )
+  }
 
   pcp_list <- vector(
     mode = "list", # blank list for future alocation
@@ -45,6 +55,13 @@ ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
       delim = ",",
       col_types = "dcdddd"
     )
+
+    if (!all(c("pcp", "LONG", "LAT") %in% names(pcp_temp))) {
+      stop(
+        "Input time-series files must contain 'pcp', 'LONG', and 'LAT' ",
+        "columns."
+      )
+    }
 
     # o polynomio do modelo
     my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))
@@ -130,9 +147,15 @@ ts_to_area <- function(
   poly_degree = 2,
   resolution = 0.01
 ) {
-  bassin_limit <- sf::read_sf(bassin_limit_path)
+  validate_input_dir(my_folder, "my_folder")
+  validate_input_file(bassin_limit_path, "bassin_limit_path")
+  validate_positive_whole_number(poly_degree, "poly_degree")
+  validate_positive_number(resolution, "resolution")
 
   var_files <- list.files(my_folder, full.names = TRUE, pattern = ".csv$")
+  validate_files_found(var_files, my_folder, ".csv$", "time-series files")
+
+  bassin_limit <- sf::read_sf(bassin_limit_path)
 
   # temp_name <- list.files(my_folder,
   #                         full.names = FALSE)
@@ -169,6 +192,13 @@ ts_to_area <- function(
       delim = ",",
       col_types = "dcdddd"
     )
+
+    if (!all(c("pcp", "LONG", "LAT") %in% names(pcp_temp))) {
+      stop(
+        "Input time-series files must contain 'pcp', 'LONG', and 'LAT' ",
+        "columns."
+      )
+    }
 
     # o polynomio do modelo
     my_formula <- as.formula(pcp ~ poly(LONG, LAT, degree = poly_degree))

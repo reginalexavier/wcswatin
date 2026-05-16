@@ -41,6 +41,21 @@ validate_input_dir <- function(path, arg) {
 }
 
 
+#' Validate an input file argument
+#'
+#' @param path File path.
+#' @param arg Argument name.
+#'
+#' @noRd
+#'
+validate_input_file <- function(path, arg) {
+  validate_scalar_character(path, arg)
+  if (!file.exists(path)) {
+    stop("The file provided in '", arg, "' does not exist: ", path)
+  }
+}
+
+
 #' Validate a positive whole-number argument
 #'
 #' @param value Argument value.
@@ -57,6 +72,26 @@ validate_positive_whole_number <- function(value, arg) {
       value != as.integer(value)
   ) {
     stop("The argument '", arg, "' must be a positive whole number.")
+  }
+}
+
+
+#' Validate a positive numeric argument
+#'
+#' @param value Argument value.
+#' @param arg Argument name.
+#'
+#' @noRd
+#'
+validate_positive_number <- function(value, arg) {
+  if (
+    !is.numeric(value) ||
+      length(value) != 1 ||
+      is.na(value) ||
+      !is.finite(value) ||
+      value <= 0
+  ) {
+    stop("The argument '", arg, "' must be a positive number.")
   }
 }
 

@@ -23,6 +23,8 @@ utils::globalVariables(c(
   "validate_files_found",
   "validate_function",
   "validate_input_dir",
+  "validate_input_file",
+  "validate_positive_number",
   "validate_positive_whole_number",
   "validate_scalar_character",
   "validate_scalar_logical",
