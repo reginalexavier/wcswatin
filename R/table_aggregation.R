@@ -21,7 +21,12 @@
 #' @param aggregation_function The function to use on the hourly groups like
 #'   mean, sum, mode, etc
 #' @param mode The mode of aggregation. The options are \code{agg_fun},
-#' \code{max_min} or \code{last_value}.
+#' \code{max_min} or \code{value_at_hour}.
+#' @param value_hour Integer hour between 0 and 23 used when
+#'   \code{mode = "value_at_hour"}. The default is 0, which matches products
+#'   whose daily accumulated value is timestamped at 00:00 at the end of the
+#'   accumulation period. In this case, users should include the following
+#'   day's 00:00 record in the requested period.
 #' @param na.rm a logical value indicating whether NA values should be removed
 #'   before the computation proceeds.
 #' @details The function will create a daily aggregation from an hourly dataset.
@@ -30,12 +35,11 @@
 #'   argument. The default function is \code{\link[base]{mean}}, so a daily
 #'   average is returned. Alternatively, the user can choose the \code{mode}
 #'   parameter to inform the function to use choosing between the agg_fun,
-#'   max_min, and last_value. The \code{agg_fun} will use the function informed
-#'   in the \code{aggregation_function} parameter. The \code{max_min} will
-#'   return the maximum and minimum values of the day. The \code{last_value}
-#'   will return the last value of the day, which is useful for some variables
-#'   like precipitation where the last value of the day is the accumulated
-#'   precipitation.
+#'   max_min, and value_at_hour. The \code{agg_fun} will use the function
+#'   informed in the \code{aggregation_function} parameter. The \code{max_min}
+#'   will return the maximum and minimum values of the day. The
+#'   \code{value_at_hour} mode will return the value timestamped at
+#'   \code{value_hour}.
 #'
 #' @return Files with a daily resolution
 #' @export
@@ -49,10 +53,11 @@ daily_aggregation <- function(
   to = "2021-05-31 23",
   take_out_first_record = TRUE,
   aggregation_function = mean,
-  mode = c("agg_fun", "max_min", "last_value")[1],
+  mode = c("agg_fun", "max_min", "value_at_hour")[1],
+  value_hour = 0,
   na.rm = FALSE # nolint: object_name_linter
 ) {
-  mode <- match.arg(mode, c("agg_fun", "max_min", "last_value"))
+  mode <- match.arg(mode, c("agg_fun", "max_min", "value_at_hour"))
 
   validate_input_dir(folder_in, "folder_in")
   validate_scalar_character(folder_out, "folder_out")
@@ -60,6 +65,17 @@ daily_aggregation <- function(
   validate_scalar_logical(take_out_first_record, "take_out_first_record")
   validate_function(aggregation_function, "aggregation_function")
   validate_scalar_logical(na.rm, "na.rm")
+  if (
+    !is.numeric(value_hour) ||
+      length(value_hour) != 1 ||
+      is.na(value_hour) ||
+      value_hour != as.integer(value_hour) ||
+      value_hour < 0 ||
+      value_hour > 23
+  ) {
+    stop("The argument 'value_hour' must be a whole number from 0 to 23.")
+  }
+  value_hour <- as.integer(value_hour)
 
   from_date <- suppressWarnings(lubridate::ymd_h(from, quiet = TRUE))
   to_date <- suppressWarnings(lubridate::ymd_h(to, quiet = TRUE))
@@ -139,11 +155,16 @@ daily_aggregation <- function(
       ]
 
       daily_agg <- temp_tbl[, list(max_min)]
-    } else if (mode == "last_value") {
-      temp_tbl[, hours := as.factor(lubridate::hour(date))]
+    } else if (mode == "value_at_hour") {
+      temp_tbl[, hours := lubridate::hour(date)]
 
-      # TODO: last value of the day is 23 or 0?
-      daily_agg <- temp_tbl[hours == 23, 1]
+      daily_agg <- temp_tbl[hours == value_hour, 1]
+      if (nrow(daily_agg) == 0) {
+        stop(
+          "No records were found at value_hour = ", value_hour,
+          " in file '", hourly_files[i], "'."
+        )
+      }
     }
 
     data.table::setnames(daily_agg, 1, col_name)

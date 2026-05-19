@@ -123,6 +123,19 @@ test_that("daily_aggregation validates input parameters", {
     },
     "folder_in"
   )
+
+  expect_error(
+    {
+      daily_aggregation(
+        folder_in = temp_dir_in,
+        folder_out = temp_dir_out,
+        from = "2020-01-01 00",
+        to = "2020-01-01 23",
+        value_hour = 24
+      )
+    },
+    "value_hour"
+  )
 })
 
 test_that("daily_aggregation validates hourly record count", {
@@ -146,10 +159,11 @@ test_that("daily_aggregation validates hourly record count", {
   )
 })
 
-test_that("daily_aggregation supports max-min and last-value modes", {
+test_that("daily_aggregation supports max-min and value-at-hour modes", {
   input_dir <- local_test_dir("daily_modes_input")
   max_min_dir <- local_test_dir("daily_modes_max_min")
-  last_value_dir <- local_test_dir("daily_modes_last_value")
+  value_at_zero_dir <- local_test_dir("daily_modes_value_at_zero")
+  value_at_23_dir <- local_test_dir("daily_modes_value_at_23")
 
   data.table::fwrite(
     data.frame(value = 1:24),
@@ -169,14 +183,30 @@ test_that("daily_aggregation supports max-min and last-value modes", {
 
   daily_aggregation(
     folder_in = input_dir,
-    folder_out = last_value_dir,
+    folder_out = value_at_zero_dir,
+    from = "2020-01-01 01",
+    to = "2020-01-02 00",
+    take_out_first_record = FALSE,
+    mode = "value_at_hour"
+  )
+  value_at_zero <- data.table::fread(
+    file.path(value_at_zero_dir, "tas_20200101.txt")
+  )
+  expect_equal(value_at_zero[[1]], 24L)
+
+  daily_aggregation(
+    folder_in = input_dir,
+    folder_out = value_at_23_dir,
     from = "2020-01-01 00",
     to = "2020-01-01 23",
     take_out_first_record = FALSE,
-    mode = "last_value"
+    mode = "value_at_hour",
+    value_hour = 23
   )
-  last_value <- data.table::fread(file.path(last_value_dir, "tas_20200101.txt"))
-  expect_equal(last_value[[1]], 24L)
+  value_at_23 <- data.table::fread(
+    file.path(value_at_23_dir, "tas_20200101.txt")
+  )
+  expect_equal(value_at_23[[1]], 24L)
 })
 
 test_that("daily_aggregation drops the first record when requested", {
