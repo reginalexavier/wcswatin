@@ -231,11 +231,6 @@ windspeed_calculator <- function(
     )
   }
 
-  # FIXME: use the name function from utils to avoid duplication
-  file_name <- function(x) {
-    stringr::str_extract(x, "[a-z_]+[0-9]+")
-  }
-
   # transformation
   pb <- txtProgressBar(min = 0, max = length(uas_files), style = 3)
 
