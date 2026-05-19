@@ -50,11 +50,7 @@ ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
   # iteration with progress bar
   pb <- txtProgressBar(min = 0, max = length(pcp_list), style = 3)
   for (i in seq_along(var_files)) {
-    pcp_temp <- vroom::vroom(
-      (var_files[i]),
-      delim = ",",
-      col_types = "dcdddd"
-    )
+    pcp_temp <- data.table::fread(var_files[i], header = TRUE)
 
     if (!all(c("pcp", "LON", "LAT") %in% names(pcp_temp))) {
       stop(
@@ -187,11 +183,7 @@ ts_to_area <- function(
   # iteration with progress bar
   pb <- txtProgressBar(min = 0, max = length(raster_list), style = 3)
   for (i in seq_along(var_files)) {
-    pcp_temp <- vroom::vroom(
-      (var_files[i]),
-      delim = ",",
-      col_types = "dcdddd"
-    )
+    pcp_temp <- data.table::fread(var_files[i], header = TRUE)
 
     if (!all(c("pcp", "LON", "LAT") %in% names(pcp_temp))) {
       stop(

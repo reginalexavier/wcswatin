@@ -2,7 +2,6 @@
 
 test_that("ts_to_point returns one time series per target point", {
   skip_if_not_installed("sf")
-  skip_if_not_installed("vroom")
 
   input_dir <- local_test_dir("ts_point_input")
   target_file <- local_test_file("ts_point_targets", ".gpkg")
@@ -48,7 +47,6 @@ test_that("ts_to_point returns one time series per target point", {
 
 test_that("ts_to_point validates input files and arguments", {
   skip_if_not_installed("sf")
-  skip_if_not_installed("vroom")
 
   input_dir <- local_test_dir("ts_point_validation_input")
   target_file <- local_test_file("ts_point_validation_target", ".gpkg")
@@ -141,7 +139,6 @@ test_that("ts_to_point validates input files and arguments", {
 test_that("trend surface interpolation can create a raster brick", {
   skip_if_not_installed("sf")
   skip_if_not_installed("raster")
-  skip_if_not_installed("vroom")
 
   input_dir <- local_test_dir("ts_area_input")
   basin_file <- local_test_file("ts_area_basin", ".gpkg")
@@ -188,7 +185,6 @@ test_that("trend surface interpolation can create a raster brick", {
 
 test_that("ts_to_area validates input files and arguments", {
   skip_if_not_installed("sf")
-  skip_if_not_installed("vroom")
 
   input_dir <- local_test_dir("ts_area_validation_input")
   basin_file <- local_test_file("ts_area_validation_basin", ".gpkg")
