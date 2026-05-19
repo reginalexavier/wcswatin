@@ -20,7 +20,7 @@ test_that("daily_aggregation creates proper file structure", {
     pattern = ".txt$",
     from = "2020-01-01 01",
     to = "2020-01-02 00",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     aggregation_function = mean,
     mode = "agg_fun"
   )
@@ -59,7 +59,7 @@ test_that("daily_aggregation handles different aggregation modes", {
     folder_out = temp_dir_out,
     from = "2020-01-01 00",
     to = "2020-01-01 23",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     aggregation_function = sum
   )
 
@@ -84,7 +84,7 @@ test_that("daily_aggregation handles missing data appropriately", {
     folder_out = temp_dir_out,
     from = "2020-01-01 00",
     to = "2020-01-01 23",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     aggregation_function = mean,
     na.rm = TRUE
   )
@@ -118,7 +118,7 @@ test_that("daily_aggregation validates input parameters", {
         folder_out = temp_dir_out,
         from = "2020-01-01 00",
         to = "2020-01-01 23",
-        take_out_first_record = FALSE
+        drop_first_record = FALSE
       )
     },
     "folder_in"
@@ -153,7 +153,7 @@ test_that("daily_aggregation validates hourly record count", {
       folder_out = output_dir,
       from = "2020-01-01 00",
       to = "2020-01-01 23",
-      take_out_first_record = FALSE
+      drop_first_record = FALSE
     ),
     "date range has 24 hours"
   )
@@ -163,6 +163,7 @@ test_that("daily_aggregation supports max-min and value-at-hour modes", {
   input_dir <- local_test_dir("daily_modes_input")
   max_min_dir <- local_test_dir("daily_modes_max_min")
   value_at_zero_dir <- local_test_dir("daily_modes_value_at_zero")
+  value_at_zero_drop_dir <- local_test_dir("daily_modes_value_at_zero_drop")
   value_at_23_dir <- local_test_dir("daily_modes_value_at_23")
 
   data.table::fwrite(
@@ -175,7 +176,7 @@ test_that("daily_aggregation supports max-min and value-at-hour modes", {
     folder_out = max_min_dir,
     from = "2020-01-01 00",
     to = "2020-01-01 23",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     mode = "max_min"
   )
   max_min_lines <- readLines(file.path(max_min_dir, "tas_20200101.txt"))
@@ -186,7 +187,7 @@ test_that("daily_aggregation supports max-min and value-at-hour modes", {
     folder_out = value_at_zero_dir,
     from = "2020-01-01 01",
     to = "2020-01-02 00",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     mode = "value_at_hour"
   )
   value_at_zero <- data.table::fread(
@@ -194,12 +195,32 @@ test_that("daily_aggregation supports max-min and value-at-hour modes", {
   )
   expect_equal(value_at_zero[[1]], 24L)
 
+  data.table::fwrite(
+    data.frame(value = c(999, 1:24)),
+    file.path(input_dir, "pcp_20200101.txt")
+  )
+
+  daily_aggregation(
+    folder_in = input_dir,
+    folder_out = value_at_zero_drop_dir,
+    pattern = "^pcp_.*\\.txt$",
+    from = "2020-01-01 01",
+    to = "2020-01-02 00",
+    drop_first_record = TRUE,
+    mode = "value_at_hour"
+  )
+  value_at_zero_drop <- data.table::fread(
+    file.path(value_at_zero_drop_dir, "pcp_20200101.txt")
+  )
+  expect_equal(value_at_zero_drop[[1]], 24L)
+
   daily_aggregation(
     folder_in = input_dir,
     folder_out = value_at_23_dir,
+    pattern = "^tas_.*\\.txt$",
     from = "2020-01-01 00",
     to = "2020-01-01 23",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     mode = "value_at_hour",
     value_hour = 23
   )
@@ -223,7 +244,7 @@ test_that("daily_aggregation drops the first record when requested", {
     folder_out = output_dir,
     from = "2020-01-01 00",
     to = "2020-01-01 23",
-    take_out_first_record = TRUE,
+    drop_first_record = TRUE,
     aggregation_function = sum
   )
 
@@ -249,7 +270,7 @@ test_that("temporal aggregation handles edge cases", {
     folder_out = temp_dir_out,
     from = "2020-01-01 00",
     to = "2020-01-01 00",
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     aggregation_function = mean
   )
 
@@ -314,7 +335,7 @@ test_that("aggregation works with different statistical functions", {
       folder_out = output_subdir,
       from = "2020-01-01 00",
       to = "2020-01-01 23",
-      take_out_first_record = FALSE,
+      drop_first_record = FALSE,
       aggregation_function = func,
       na.rm = TRUE
     )
@@ -361,7 +382,7 @@ test_that("aggregation respects file patterns", {
     pattern = "temp_.*\\.txt$",
     from = "2020-01-01 00",
     to = "2020-01-01 23",
-    take_out_first_record = FALSE
+    drop_first_record = FALSE
   )
 
   expect_equal(list.files(temp_dir_out), "temp_20200101.txt")
@@ -386,7 +407,7 @@ test_that("aggregation integrates well with other package functions", {
   daily_aggregation(
     folder_in = temp_dir_in,
     folder_out = temp_dir_out,
-    take_out_first_record = FALSE,
+    drop_first_record = FALSE,
     from = "2020-01-01 00",
     to = "2020-01-01 23"
   )

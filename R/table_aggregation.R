@@ -14,10 +14,12 @@
 #'   file names which match the regular expression will be returned.
 #' @param from The first date of the series, including the hour part.
 #' @param to The last date of the series, including the hour part.
-#' @param take_out_first_record Logical. If TRUE, the first record of the input
-#'   file will be removed. This is useful when the first record is the hour
-#'   00:00, that corresponds to the previous day. The length in hour between the
-#'   from and to must be the same as the length of the hours in the input files.
+#' @param drop_first_record Logical. If TRUE, the first row of each input
+#'   file is removed before the date sequence is assigned. This is useful when
+#'   the input file contains a leading 00:00 record that belongs to the previous
+#'   day and should not be part of the requested \code{from}/\code{to} range.
+#'   After this optional removal, the number of rows in each input file must
+#'   match the number of hours between \code{from} and \code{to}.
 #' @param aggregation_function The function to use on the hourly groups like
 #'   mean, sum, mode, etc
 #' @param mode The mode of aggregation. The options are \code{agg_fun},
@@ -39,7 +41,12 @@
 #'   informed in the \code{aggregation_function} parameter. The \code{max_min}
 #'   will return the maximum and minimum values of the day. The
 #'   \code{value_at_hour} mode will return the value timestamped at
-#'   \code{value_hour}.
+#'   \code{value_hour}. For daily accumulated products timestamped at 00:00,
+#'   set \code{mode = "value_at_hour"}, keep \code{value_hour = 0}, and define
+#'   \code{from}/\code{to} so that the 00:00 record ending the accumulation
+#'   period is included. Use \code{drop_first_record = TRUE} only when the file
+#'   also contains an extra leading row that must be discarded before assigning
+#'   this date range.
 #'
 #' @return Files with a daily resolution
 #' @export
@@ -51,7 +58,7 @@ daily_aggregation <- function(
   pattern = ".txt$",
   from = "2002-01-01 00",
   to = "2021-05-31 23",
-  take_out_first_record = TRUE,
+  drop_first_record = TRUE,
   aggregation_function = mean,
   mode = c("agg_fun", "max_min", "value_at_hour")[1],
   value_hour = 0,
@@ -62,7 +69,7 @@ daily_aggregation <- function(
   validate_input_dir(folder_in, "folder_in")
   validate_scalar_character(folder_out, "folder_out")
   validate_scalar_character(pattern, "pattern")
-  validate_scalar_logical(take_out_first_record, "take_out_first_record")
+  validate_scalar_logical(drop_first_record, "drop_first_record")
   validate_function(aggregation_function, "aggregation_function")
   validate_scalar_logical(na.rm, "na.rm")
   if (
@@ -109,7 +116,7 @@ daily_aggregation <- function(
   pb <- txtProgressBar(min = 0, max = length(hourly_files), style = 3)
 
   for (i in seq_along(hourly_files)) {
-    if (take_out_first_record) {
+    if (drop_first_record) {
       temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)[-1, ]
     } else {
       temp_tbl <- data.table::fread(hourly_files[i], header = TRUE)

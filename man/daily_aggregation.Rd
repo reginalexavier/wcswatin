@@ -10,7 +10,7 @@ daily_aggregation(
   pattern = ".txt$",
   from = "2002-01-01 00",
   to = "2021-05-31 23",
-  take_out_first_record = TRUE,
+  drop_first_record = TRUE,
   aggregation_function = mean,
   mode = c("agg_fun", "max_min", "value_at_hour")[1],
   value_hour = 0,
@@ -29,10 +29,12 @@ file names which match the regular expression will be returned.}
 
 \item{to}{The last date of the series, including the hour part.}
 
-\item{take_out_first_record}{Logical. If TRUE, the first record of the input
-file will be removed. This is useful when the first record is the hour
-00:00, that corresponds to the previous day. The length in hour between the
-from and to must be the same as the length of the hours in the input files.}
+\item{drop_first_record}{Logical. If TRUE, the first row of each input
+file is removed before the date sequence is assigned. This is useful when
+the input file contains a leading 00:00 record that belongs to the previous
+day and should not be part of the requested \code{from}/\code{to} range.
+After this optional removal, the number of rows in each input file must
+match the number of hours between \code{from} and \code{to}.}
 
 \item{aggregation_function}{The function to use on the hourly groups like
 mean, sum, mode, etc}
@@ -72,5 +74,10 @@ max_min, and value_at_hour. The \code{agg_fun} will use the function
 informed in the \code{aggregation_function} parameter. The \code{max_min}
 will return the maximum and minimum values of the day. The
 \code{value_at_hour} mode will return the value timestamped at
-\code{value_hour}.
+\code{value_hour}. For daily accumulated products timestamped at 00:00,
+set \code{mode = "value_at_hour"}, keep \code{value_hour = 0}, and define
+\code{from}/\code{to} so that the 00:00 record ending the accumulation
+period is included. Use \code{drop_first_record = TRUE} only when the file
+also contains an extra leading row that must be discarded before assigning
+this date range.
 }
