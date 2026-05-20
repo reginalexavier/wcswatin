@@ -2,7 +2,7 @@
 % Please edit documentation in R/raster_metadata.R
 \name{var_names}
 \alias{var_names}
-\title{Shows the variables present in a netcdf}
+\title{Shows raster variables present in a NetCDF}
 \usage{
 var_names(path)
 }
@@ -10,8 +10,8 @@ var_names(path)
 \item{path}{Path where the netcdf file is located}
 }
 \value{
-List of variable names
+Character vector of raster variable names
 }
 \description{
-Shows the variables present in a netcdf
+Shows raster variables present in a NetCDF
 }
