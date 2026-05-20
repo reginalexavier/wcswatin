@@ -9,7 +9,7 @@
 [![License: GPL
 v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Codecov test
-coverage](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg)](https://codecov.io/gh/reginalexavier/wcswatin?branch=main)
+coverage](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg)](https://app.codecov.io/gh/reginalexavier/wcswatin?branch=main)
 <!-- badges: end -->
 
 ## Overview
