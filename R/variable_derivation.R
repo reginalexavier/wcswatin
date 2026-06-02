@@ -126,7 +126,10 @@ rh_calculator <- function(
     if (nrow(temp_dpt) != nrow(temp_tas)) {
       stop(
         "Paired files must have the same number of rows: '",
-        dpt_files[i], "' and '", tas_files[i], "'."
+        dpt_files[i],
+        "' and '",
+        tas_files[i],
+        "'."
       )
     }
 
@@ -161,7 +164,7 @@ rh_calculator <- function(
       file.path(
         folder_out,
         glue::glue(
-          '{sub("[^0-9]+", file_name_output, file_name(dpt_files[i]))}.txt'
+          '{sub("^[^_]+", file_name_output, file_name(dpt_files[i]))}.txt'
         )
       ),
       row.names = FALSE,
@@ -242,7 +245,10 @@ windspeed_calculator <- function(
     if (nrow(temp_uas) != nrow(temp_vas)) {
       stop(
         "Paired files must have the same number of rows: '",
-        uas_files[i], "' and '", vas_files[i], "'."
+        uas_files[i],
+        "' and '",
+        vas_files[i],
+        "'."
       )
     }
 
@@ -263,7 +269,7 @@ windspeed_calculator <- function(
       file.path(
         folder_out,
         glue::glue(
-          '{sub("[^0-9]+", file_name_output, file_name(uas_files[i]))}.txt'
+          '{sub("^[^_]+", file_name_output, file_name(uas_files[i]))}.txt'
         )
       ),
       row.names = FALSE,

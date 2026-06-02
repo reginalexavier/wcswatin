@@ -52,7 +52,6 @@ test_that("unit_converter works correctly", {
   expect_equal(result$temperature[1], 0, tolerance = 0.01)
   expect_equal(result$temperature[2], 10, tolerance = 0.01)
   expect_equal(result$temperature[3], 20, tolerance = 0.01)
-
 })
 
 test_that("unit_converter validates input files and transformation function", {
@@ -88,7 +87,7 @@ test_that("rh_calculator writes relative humidity from paired files", {
   rh_calculator(dpt_dir, tas_dir, output_dir, file_name_output = "rh")
 
   expect_true(dir.exists(output_dir))
-  output <- data.table::fread(file.path(output_dir, "rh20200101.txt"))
+  output <- data.table::fread(file.path(output_dir, "rh_20200101.txt"))
   expect_equal(names(output), "temp")
   expect_equal(output[[1]][1], 100)
   expect_lt(output[[1]][2], 100)
