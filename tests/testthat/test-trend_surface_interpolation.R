@@ -136,6 +136,82 @@ test_that("ts_to_point validates input files and arguments", {
   )
 })
 
+test_that("ts_point_to_files writes one file per target point", {
+  output_dir <- local_test_dir("ts_point_files")
+  manual_date_dir <- local_test_dir("ts_point_files_manual_date")
+  points_list <- list(
+    `198` = data.frame(
+      ID = c(198L, 198L),
+      date = c("day_2017-03-01", "day_2017-03-02"),
+      value = c(1.53, 5.14)
+    ),
+    `199` = data.frame(
+      ID = c(199L, 199L),
+      date = c("day_2017-03-01", "day_2017-03-02"),
+      value = c(4.05, 0.909)
+    )
+  )
+
+  result <- ts_point_to_files(
+    points_list = points_list,
+    output_folder = output_dir,
+    file_prefix = "pcp"
+  )
+
+  expect_null(result)
+  expect_equal(
+    sort(list.files(output_dir)),
+    c("pcp_198.txt", "pcp_199.txt")
+  )
+  expect_equal(
+    readLines(file.path(output_dir, "pcp_198.txt")),
+    c("20170301", "1.53", "5.14")
+  )
+  expect_equal(
+    readLines(file.path(output_dir, "pcp_199.txt")),
+    c("20170301", "4.05", "0.909")
+  )
+
+  ts_point_to_files(
+    points_list = points_list[1],
+    output_folder = manual_date_dir,
+    file_prefix = "pcp",
+    start_date = "20170315"
+  )
+  expect_equal(
+    readLines(file.path(manual_date_dir, "pcp_198.txt")),
+    c("20170315", "1.53", "5.14")
+  )
+})
+
+test_that("ts_point_to_files validates input", {
+  output_dir <- local_test_dir("ts_point_invalid_files")
+
+  expect_error(
+    ts_point_to_files(list(), output_dir),
+    "non-empty list"
+  )
+  expect_error(
+    ts_point_to_files(list(data.frame(ID = 1, value = 1)), output_dir),
+    "must contain 'ID', 'date', and 'value'"
+  )
+  expect_error(
+    ts_point_to_files(
+      list(data.frame(ID = 1, date = "day_without_digits", value = 1)),
+      output_dir
+    ),
+    "at least one digit"
+  )
+  expect_error(
+    ts_point_to_files(
+      list(data.frame(ID = 1, date = "day_2017-03-01", value = 1)),
+      output_dir,
+      start_date = NA_character_
+    ),
+    "start_date"
+  )
+})
+
 test_that("trend surface interpolation can create a raster brick", {
   skip_if_not_installed("sf")
   skip_if_not_installed("raster")

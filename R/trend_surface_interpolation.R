@@ -112,6 +112,92 @@ ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
 }
 
 
+#' Save trend-surface point time series to files
+#'
+#' Save the list returned by \code{ts_to_point()} as one file per target point.
+#' Each output file has a single column named with the first date of the time
+#' series in \code{YYYYMMDD} format.
+#'
+#' @param points_list A list of tables returned by \code{ts_to_point()}.
+#' @param output_folder Path where output files will be saved.
+#' @param file_prefix Prefix used in output file names. It is separated from
+#'   the point ID by an underscore.
+#' @param start_date Optional column name to use in all output files. If
+#'   \code{NULL}, the first date found in each point table is used.
+#'
+#' @return NULL. Called for side effects.
+#' @export
+#'
+ts_point_to_files <- function(
+  points_list,
+  output_folder,
+  file_prefix = "pcp",
+  start_date = NULL
+) {
+  if (!is.list(points_list) || length(points_list) == 0) {
+    stop("The argument 'points_list' must be a non-empty list.")
+  }
+  validate_scalar_character(output_folder, "output_folder")
+  validate_scalar_character(file_prefix, "file_prefix")
+  if (!is.null(start_date)) {
+    validate_scalar_character(start_date, "start_date")
+  }
+
+  touch_dir(output_folder)
+
+  pb <- txtProgressBar(min = 0, max = length(points_list), style = 3)
+  for (i in seq_along(points_list)) {
+    point_tbl <- points_list[[i]]
+    validate_ts_point_table(point_tbl, i)
+
+    point_id <- point_tbl$ID[1]
+    start_date_i <- ts_point_start_date(point_tbl$date[1], start_date)
+    point_values <- data.frame(value = point_tbl$value)
+    names(point_values) <- start_date_i
+
+    data.table::fwrite(
+      point_values,
+      file.path(output_folder, glue::glue("{file_prefix}_{point_id}.txt"))
+    )
+    setTxtProgressBar(pb, i)
+  }
+  close(pb)
+
+  invisible(NULL)
+}
+
+validate_ts_point_table <- function(point_tbl, position) {
+  if (!is.data.frame(point_tbl)) {
+    stop(
+      "Element ", position, " of 'points_list' must be a data.frame or tibble."
+    )
+  }
+  if (!all(c("ID", "date", "value") %in% names(point_tbl))) {
+    stop(
+      "Element ", position,
+      " of 'points_list' must contain 'ID', 'date', and 'value' columns."
+    )
+  }
+  if (nrow(point_tbl) == 0) {
+    stop("Element ", position, " of 'points_list' must not be empty.")
+  }
+}
+
+ts_point_start_date <- function(date, start_date = NULL) {
+  if (is.null(start_date)) {
+    start_date <- date
+  }
+
+  date_digits <- gsub("[^0-9]", "", as.character(start_date))
+
+  if (nchar(date_digits) == 0) {
+    stop("The first 'date' value must contain at least one digit.")
+  }
+
+  date_digits
+}
+
+
 #' Trend Surface Interpolation into Raster
 #'
 #' This function make an interpolation whith the trend surface method where the
