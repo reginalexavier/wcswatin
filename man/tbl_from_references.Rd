@@ -7,17 +7,17 @@
 tbl_from_references(raster_file, ref_points, prefix_colname = NULL, ...)
 }
 \arguments{
-\item{raster_file}{Raster object accepted by \code{\link[raster]{extract}}.}
+\item{raster_file}{Raster object accepted by \code{\link{input_raster}}.}
 
-\item{ref_points}{A table or sf object containing the field station reference
-points. This input can be a character string informing the address of a
-.txt or .csv file, a data.frame or an sf object. The table must have NAME,
-LAT and LON fields/columns.}
+\item{ref_points}{Reference point locations. This input can be a
+data.frame-like table with NAME, LAT and LON columns, a .txt or .csv file
+path, an sf object, a SpatVector object or a vector file path accepted by
+\code{\link{input_vector}}.}
 
 \item{prefix_colname}{If not null, a character string used to prefix the
 station column names.}
 
-\item{...}{further arguments from \code{\link[raster]{extract}}. These
+\item{...}{further arguments passed to \code{\link[terra]{extract}}. These
 arguments concern only extracting the data in the rasters.}
 }
 \value{
@@ -44,7 +44,7 @@ with observed data, make sure raster layers and observation rows represent
 the same dates or time steps in the same order.
 
 Additional arguments passed through \code{...} are forwarded to
-\code{\link[raster]{extract}}, allowing options such as \code{method},
+\code{\link[terra]{extract}}, allowing options such as \code{method},
 \code{buffer} and \code{fun}.
 }
 \examples{

@@ -69,6 +69,27 @@ test_that("tbl_from_references works with sf input", {
   expect_true(all(paste0("station_", 1:3) %in% names(result_sf)))
 })
 
+test_that("tbl_from_references works with SpatVector input", {
+  skip_if_not_installed("terra")
+  skip_if_not_installed("sf")
+
+  test_raster <- create_test_raster()
+  test_points <- create_test_points()
+
+  spat_points <- test_points |>
+    sf::st_as_sf(coords = c("LON", "LAT"), crs = "EPSG:4326") |>
+    terra::vect()
+
+  result_spat <- tbl_from_references(
+    raster_file = test_raster,
+    ref_points = spat_points
+  )
+
+  expect_s3_class(result_spat, "data.frame")
+  expect_equal(ncol(result_spat), 3)
+  expect_true(all(paste0("station_", 1:3) %in% names(result_spat)))
+})
+
 test_that("tbl_from_references works with file input", {
   skip_if_not_installed("terra")
 
@@ -138,6 +159,22 @@ test_that("tbl_from_references validates input", {
       ref_points = "/non/existent/file.csv"
     )
   )
+
+  expect_error(
+    tbl_from_references(
+      raster_file = test_raster,
+      ref_points = data.frame(NAME = "station_1", LAT = 0)
+    ),
+    "must contain the columns"
+  )
+
+  expect_error(
+    tbl_from_references(
+      raster_file = test_raster,
+      ref_points = data.frame(LAT = 0, LON = 0)
+    ),
+    "must contain the columns"
+  )
 })
 
 # Test layerValues2pixel function
@@ -160,6 +197,42 @@ test_that("tbl_from_references works with multi-layer rasters", {
   expect_s3_class(result, "data.frame")
   expect_equal(nrow(result), 2) # 2 layers
   expect_equal(ncol(result), 3) # 3 stations
+})
+
+test_that("tbl_from_references works with legacy raster objects", {
+  skip_if_not_installed("raster")
+  skip_if_not_installed("terra")
+
+  test_points <- create_test_points()
+  raster_layer <- raster::raster(
+    nrows = 10,
+    ncols = 10,
+    vals = 1:100,
+    crs = "+proj=longlat +datum=WGS84 +no_defs",
+    xmn = -1,
+    xmx = 1,
+    ymn = -1,
+    ymx = 1
+  )
+  raster_stack <- raster::stack(raster_layer, raster_layer + 100)
+
+  result_layer <- tbl_from_references(
+    raster_file = raster_layer,
+    ref_points = test_points
+  )
+  result_stack <- tbl_from_references(
+    raster_file = raster_stack,
+    ref_points = test_points
+  )
+
+  expect_s3_class(result_layer, "data.frame")
+  expect_equal(nrow(result_layer), 1)
+  expect_equal(ncol(result_layer), 3)
+
+  expect_s3_class(result_stack, "data.frame")
+  expect_equal(nrow(result_stack), 2)
+  expect_equal(ncol(result_stack), 3)
+  expect_equal(names(result_stack), test_points$NAME)
 })
 
 # Test raster extraction with different methods
