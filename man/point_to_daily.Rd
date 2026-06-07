@@ -12,7 +12,7 @@ point_to_daily(
   end_date = "20170331",
   interval = "day",
   na_value = -99,
-  negatif_number = TRUE,
+  neg_to_zero = TRUE,
   prefix = "day_"
 )
 }
@@ -37,7 +37,8 @@ the function x}
 \item{na_value}{numeric. Value encoded as not available, use \code{NA} for
 NA.}
 
-\item{negatif_number}{logical. Inform if negative values should be kept.}
+\item{neg_to_zero}{logical. Inform whether negative values should be
+corrected to zero after applying \code{na_value}.}
 
 \item{prefix}{character. A prefix for naming the table in the format of
 "prefix+date". for more detail.}

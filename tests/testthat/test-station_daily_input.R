@@ -59,6 +59,34 @@ test_that("point_to_daily validates input files and dates", {
   )
 })
 
+test_that("point_to_daily handles missing codes before clamping negatives", {
+  input_dir <- local_test_dir("point_to_daily_negative_values")
+
+  data.table::fwrite(
+    data.frame(ID = 1:2, NAME = c("a", "b"), LAT = 0, LON = 0, ELEVATION = 1),
+    file.path(input_dir, "pcp.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(-99, -5)),
+    file.path(input_dir, "p-a.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(2, 3)),
+    file.path(input_dir, "p-b.txt")
+  )
+
+  result <- point_to_daily(
+    my_folder = input_dir,
+    start_date = "20170301",
+    end_date = "20170302",
+    na_value = -99,
+    neg_to_zero = TRUE
+  )
+
+  expect_true(is.na(result[[1]]$pcp[1]))
+  expect_equal(result[[2]]$pcp[1], 0)
+})
+
 test_that("save_daily_tbl saves files correctly", {
   # Create test data
   test_list <- list(

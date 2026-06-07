@@ -18,7 +18,8 @@
 #'   the function x
 #' @param prefix character. A prefix for naming the table in the format of
 #'   "prefix+date". for more detail.
-#' @param negatif_number logical. Inform if negative values should be kept.
+#' @param neg_to_zero logical. Inform whether negative values should be
+#' corrected to zero after applying \code{na_value}.
 #'
 #' @return A list of table
 #' @export
@@ -39,7 +40,7 @@ point_to_daily <- function(
   end_date = "20170331",
   interval = "day",
   na_value = -99,
-  negatif_number = TRUE,
+  neg_to_zero = TRUE,
   prefix = "day_"
 ) {
   validate_input_dir(my_folder, "my_folder")
@@ -48,7 +49,7 @@ point_to_daily <- function(
   validate_scalar_character(start_date, "start_date")
   validate_scalar_character(end_date, "end_date")
   validate_scalar_character(interval, "interval")
-  validate_scalar_logical(negatif_number, "negatif_number")
+  validate_scalar_logical(neg_to_zero, "neg_to_zero")
   validate_scalar_character(prefix, "prefix")
 
   start_date_i <- as.Date(start_date, format = "%Y%m%d")
@@ -114,17 +115,17 @@ point_to_daily <- function(
   }
   cplt_tbl <- dplyr::as_tibble(cplt_tbl) %>% dplyr::mutate(ymd = datas)
 
-  # setar valores inferios a -99 para Nan
+  # Missing-value codes are applied before clamping negative values.
   if (!is.na(na_value)) {
     cplt_tbl <- dplyr::mutate_if(cplt_tbl, is.numeric, function(x) {
-      ifelse(x == na_value, NaN, x)
+      ifelse(x == na_value, NA_real_, x)
     })
   } else {
     cplt_tbl
   }
 
   # setar valores inferios a 0 para zero
-  if (negatif_number) {
+  if (neg_to_zero) {
     cplt_tbl <- dplyr::mutate_if(cplt_tbl, is.numeric, function(x) {
       ifelse(x < 0, 0.0, x)
     })
