@@ -62,5 +62,5 @@ function can either apply an aggregation function to each day of the datacube
 or select the layer timestamped at a given hour.
 }
 \seealso{
-\code{\link[terra:tapp]{terra::tapp()}}, \code{\link[=names_to_date]{names_to_date()}}, \href{https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation}{ERA5 family post-processed daily statistics documentation}
+\code{\link[terra:tapp]{terra::tapp()}}, \code{\link[=names_to_date]{names_to_date()}}, \href{https://confluence.ecmwf.int/display/CKB/ERA5+family+post-processed+daily+statistics+documentation}{ERA5 family post-processed daily statistics documentation} # nolint: line_length_linter
 }
