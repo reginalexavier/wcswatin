@@ -114,7 +114,6 @@ test_that("save_daily_tbl saves files correctly", {
   file1_content <- read.csv(file.path(temp_dir, "day_2020-01-01.csv"))
   expect_equal(nrow(file1_content), 3)
   expect_equal(file1_content$value, c(1, 2, 3))
-
 })
 
 # Error handling tests

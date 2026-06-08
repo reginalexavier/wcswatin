@@ -130,14 +130,15 @@ nc_var_has_time_dim <- function(variable) {
 nc_var_layer_count <- function(variable) {
   dim_names <- nc_var_dim_names(variable)
   dim_lengths <- vapply(variable$dim, `[[`, integer(1), "len")
-  non_spatial <- !dim_names %in% c(
-    "x",
-    "y",
-    "lon",
-    "lat",
-    "longitude",
-    "latitude"
-  )
+  non_spatial <- !dim_names %in%
+    c(
+      "x",
+      "y",
+      "lon",
+      "lat",
+      "longitude",
+      "latitude"
+    )
 
   if (!any(non_spatial)) {
     return(1L)

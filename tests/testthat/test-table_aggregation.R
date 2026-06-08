@@ -39,7 +39,6 @@ test_that("daily_aggregation creates proper file structure", {
     expect_s3_class(output_data, "data.frame")
     expect_gt(nrow(output_data), 0)
   }
-
 })
 
 test_that("daily_aggregation handles different aggregation modes", {
@@ -345,7 +344,6 @@ test_that("aggregation works with different statistical functions", {
     )
     expect_equal(result[[1]], func(test_values, na.rm = TRUE))
   }
-
 })
 
 # Test file pattern matching

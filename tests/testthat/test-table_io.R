@@ -23,7 +23,6 @@ test_that("files_to_table works correctly", {
   expect_equal(nrow(result), 3)
   expect_equal(ncol(result), 3) # date + 2 files
   expect_true("date" %in% names(result))
-
 })
 
 test_that("files_to_table handles missing files gracefully", {
@@ -57,7 +56,6 @@ test_that("files_to_table handles NA values correctly", {
   )
 
   expect_true(is.na(result[2, 2]))
-
 })
 
 # Test table_to_files function
@@ -85,7 +83,6 @@ test_that("table_to_files works correctly", {
   col1_content <- read.table(file.path(temp_dir, "col1.txt"), header = TRUE)
   expect_equal(names(col1_content), "X20200101")
   expect_equal(nrow(col1_content), 3)
-
 })
 
 # Test count_na function

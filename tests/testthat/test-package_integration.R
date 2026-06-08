@@ -96,7 +96,6 @@ test_that("complete file processing workflow works", {
       expect_s3_class(read_back, "data.frame")
       expect_gt(nrow(read_back), 0)
     }
-
   } else {
     skip("Example precipitation data not available")
   }
@@ -156,7 +155,6 @@ test_that("unit conversion workflow works", {
     expected_celsius <- c(0, 10, 20, 30)
     expect_equal(celsius_data$temperature, expected_celsius)
   }
-
 })
 
 # Test integration workflow: summary statistics
@@ -194,7 +192,6 @@ test_that("summary statistics workflow works", {
   )
 
   expect_s3_class(plot_result, "ggplot")
-
 })
 
 # Test error handling across package functions

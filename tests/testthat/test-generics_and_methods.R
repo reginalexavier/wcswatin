@@ -185,7 +185,6 @@ test_that("input_table works with character input", {
   bad_file <- file.path(temp_dir, "test.bad")
   writeLines("some text", bad_file)
   expect_error(input_table(bad_file), "file extension is not supported")
-
 })
 
 test_that("input_table works with data.table input", {
@@ -259,7 +258,6 @@ test_that("methods work together in workflow", {
   r <- terra::rast(nrows = 10, ncols = 10, vals = 1:100)
   raster_result <- input_raster(r)
   expect_s4_class(raster_result, "SpatRaster")
-
 })
 
 # Error handling and edge cases

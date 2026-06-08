@@ -169,12 +169,15 @@ ts_point_to_files <- function(
 validate_ts_point_table <- function(point_tbl, position) {
   if (!is.data.frame(point_tbl)) {
     stop(
-      "Element ", position, " of 'points_list' must be a data.frame or tibble."
+      "Element ",
+      position,
+      " of 'points_list' must be a data.frame or tibble."
     )
   }
   if (!all(c("ID", "date", "value") %in% names(point_tbl))) {
     stop(
-      "Element ", position,
+      "Element ",
+      position,
       " of 'points_list' must contain 'ID', 'date', and 'value' columns."
     )
   }

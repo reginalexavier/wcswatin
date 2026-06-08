@@ -118,7 +118,6 @@ test_that("tbl_from_references works with file input", {
   )
 
   expect_s3_class(result_txt, "data.frame")
-
 })
 
 test_that("tbl_from_references handles prefix correctly", {
@@ -322,7 +321,6 @@ test_that("raster functions handle errors gracefully", {
       ref_points = test_points
     )
   )
-
 })
 
 # Test integration with other package functions
@@ -356,7 +354,6 @@ test_that("raster functions integrate with other package components", {
 
   read_back <- input_table(temp_file)
   expect_s3_class(read_back, "data.table")
-
 })
 
 # Test edge cases

@@ -124,9 +124,13 @@ daily_aggregation <- function(
 
     if (nrow(temp_tbl) != length(my_ymdh)) {
       stop(
-        "The file '", hourly_files[i], "' has ", nrow(temp_tbl),
+        "The file '",
+        hourly_files[i],
+        "' has ",
+        nrow(temp_tbl),
         " records after preprocessing, but the date range has ",
-        length(my_ymdh), " hours."
+        length(my_ymdh),
+        " hours."
       )
     }
 
@@ -168,8 +172,11 @@ daily_aggregation <- function(
       daily_agg <- temp_tbl[hours == value_hour, 1]
       if (nrow(daily_agg) == 0) {
         stop(
-          "No records were found at value_hour = ", value_hour,
-          " in file '", hourly_files[i], "'."
+          "No records were found at value_hour = ",
+          value_hour,
+          " in file '",
+          hourly_files[i],
+          "'."
         )
       }
     }

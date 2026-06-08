@@ -122,7 +122,13 @@ validate_function <- function(value, arg) {
 validate_files_found <- function(files, folder, pattern, label = "files") {
   if (length(files) == 0) {
     stop(
-      "No ", label, " found in '", folder, "' matching pattern '", pattern, "'."
+      "No ",
+      label,
+      " found in '",
+      folder,
+      "' matching pattern '",
+      pattern,
+      "'."
     )
   }
 }

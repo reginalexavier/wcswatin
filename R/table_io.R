@@ -90,8 +90,11 @@ files_to_table <- function(
 
   if (nrow(points_tbl) != length(date)) {
     stop(
-      "The matched files have ", nrow(points_tbl),
-      " records, but the date range has ", length(date), " dates."
+      "The matched files have ",
+      nrow(points_tbl),
+      " records, but the date range has ",
+      length(date),
+      " dates."
     )
   }
 

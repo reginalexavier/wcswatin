@@ -109,8 +109,11 @@ point_to_daily <- function(
   colnames(cplt_tbl) <- names_sans_ext
   if (nrow(cplt_tbl) != length(datas)) {
     stop(
-      "The variable files have ", nrow(cplt_tbl),
-      " records, but the date range has ", length(datas), " dates."
+      "The variable files have ",
+      nrow(cplt_tbl),
+      " records, but the date range has ",
+      length(datas),
+      " dates."
     )
   }
   cplt_tbl <- dplyr::as_tibble(cplt_tbl) %>% dplyr::mutate(ymd = datas)

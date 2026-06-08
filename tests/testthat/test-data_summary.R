@@ -79,7 +79,6 @@ test_that("summary_table works with test data", {
   expect_s3_class(result, "data.frame")
   expect_equal(ncol(result), 5) # min, max, mean, sd, n
   expect_true(all(c("min", "max", "mean", "sd", "n") %in% names(result)))
-
 })
 
 # Test summary_plot function
@@ -105,7 +104,6 @@ test_that("summary_plot creates ggplot object", {
   )
 
   expect_s3_class(p, "ggplot")
-
 })
 
 # Test with real package data
