@@ -34,7 +34,7 @@ var_main_creator(targeted_points_path = system.file("extdata/sl_centroides",
   package = "wcswatin"
 ))
 #> # A tibble: 258 × 5
-#>       ID NAME    LAT  LONG ELEVATION
+#>       ID NAME    LAT   LON ELEVATION
 #>    <dbl> <chr> <dbl> <dbl>     <dbl>
 #>  1     1 pcp1  -15.5 -54.9       556
 #>  2     2 pcp2  -15.6 -55.1       587

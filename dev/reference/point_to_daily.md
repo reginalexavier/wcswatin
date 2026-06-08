@@ -15,7 +15,7 @@ point_to_daily(
   end_date = "20170331",
   interval = "day",
   na_value = -99,
-  negatif_number = TRUE,
+  neg_to_zero = TRUE,
   prefix = "day_"
 )
 ```
@@ -33,7 +33,7 @@ point_to_daily(
 - main_pattern:
 
   character. A pattern for the main file containing all the points with
-  ID, NAME, LAT, LONG and ELEVATION.
+  ID, NAME, LAT, LON and ELEVATION.
 
 - start_date:
 
@@ -52,9 +52,10 @@ point_to_daily(
 
   numeric. Value encoded as not available, use `NA` for NA.
 
-- negatif_number:
+- neg_to_zero:
 
-  logical. Inform if negative values should be kept.
+  logical. Inform whether negative values should be corrected to zero
+  after applying `na_value`.
 
 - prefix:
 

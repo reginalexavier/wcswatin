@@ -3,34 +3,46 @@
 ## Overview
 
 **wcswatin** (Weather & Climate SWAT Input) is an open-source R package
-for preparing weather and climate data from different sources for input
-in the [Soil & Water Assessment Tool (SWAT)](https://swat.tamu.edu/).
+for preparing gridded climate data and weather station observations as
+inputs for the [Soil & Water Assessment Tool
+(SWAT)](https://swat.tamu.edu/).
 
-The package provides two main workflows:
+The package provides two complementary workflows:
 
-- **Raster/NetCDF Processing**: Extract and process climate data from
-  global gridded datasets (ERA5-Land, GPM IMERG, PERSIANN, etc.)
-- **Station Data Interpolation**: Upscale point measurements from
-  weather stations using trend surface interpolation
+- **Raster/NetCDF processing**: inspect NetCDF or GeoTIFF files, define
+  study-area cells, extract gridded values, aggregate hourly or daily
+  data, and write SWAT-style time-series files.
+- **Station data interpolation**: read station files, fill gaps,
+  reorganize daily observations, interpolate values with trend surfaces,
+  and write point-based SWAT inputs.
 
 Developed with funding from the [Critical Ecosystem Partnership Fund
 (CEPF)](https://www.cepf.net/).
 
 ## Key Features
 
-- Process NetCDF and GeoTIFF raster files from multiple climate data
-  providers
-- Spatial and temporal data extraction for specific watersheds
-- Trend surface interpolation for station data upscaling
-- Gap-filling routines for station data
-- Direct output formatting for SWAT model input files
-- Optimized for large datasets with parallel processing support
+- Inspect NetCDF variables, units, extents, layer counts, and time
+  resolution with
+  [`raster_info()`](https://reginalexavier.github.io/wcswatin/dev/reference/raster_info.md)
+  and
+  [`var_names()`](https://reginalexavier.github.io/wcswatin/dev/reference/var_names.md)
+- Process NetCDF and GeoTIFF raster files from climate data providers
+  such as ERA5-Land, GPM IMERG and PERSIANN
+- Extract gridded data for watershed cells or reference points
+- Support hourly workflows, daily NetCDF products, and local datacube
+  aggregation with
+  [`datacube_aggregation()`](https://reginalexavier.github.io/wcswatin/dev/reference/datacube_aggregation.md)
+- Use `future`-based parallel extraction through
+  [`cube2table()`](https://reginalexavier.github.io/wcswatin/dev/reference/cube2table.md)
+- Prepare SWAT-style weather files and station interpolation outputs
+- Fill gaps and summarize station or gridded time series
 
 ## Installation
 
 Install the development version from GitHub:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("reginalexavier/wcswatin")
 ```
@@ -38,20 +50,47 @@ devtools::install_github("reginalexavier/wcswatin")
 ## Quick Start
 
 ``` r
+
 library(wcswatin)
 
-# Process NetCDF climate data
-climate_data <- input_raster(
-  raster_file = "path/to/climate_data.nc",
-  watershed = "path/to/watershed.shp",
-  var_name = "precipitation"
+# Inspect a downloaded NetCDF file before choosing the processing route
+nc_file <- system.file(
+  "extdata/nc_data/hourly_multi_2days_2025.nc",
+  package = "wcswatin"
 )
 
-# Interpolate station data
-station_data <- ts_to_point(
+raster_info(nc_file)
+var_names(nc_file)
+
+# Load a raster cube and extract values at reference stations
+daily_nc <- system.file(
+  "extdata/nc_data/daily_2m_temperature_daily_maximum_2025.nc",
+  package = "wcswatin"
+)
+stations_file <- system.file(
+  "extdata/pcp_stations/pcp.txt",
+  package = "wcswatin"
+)
+
+station_values <- tbl_from_references(
+  raster_file = input_raster(daily_nc),
+  ref_points = stations_file,
+  prefix_colname = "t2m"
+)
+
+head(station_values)
+
+# Interpolate daily station tables to target points
+interpolated_points <- ts_to_point(
   my_folder = "path/to/station_files",
   targeted_points_path = "path/to/centroids.shp",
   poly_degree = 2
+)
+
+ts_point_to_files(
+  points_list = interpolated_points,
+  output_folder = "path/to/swat_pcp",
+  file_prefix = "pcp"
 )
 ```
 
@@ -64,7 +103,7 @@ Conceptual workflow of the wcswatin package
 
 ## Main Functions
 
-### Data Input & Loading
+### Data Input & Inspection
 
 - [`input_raster()`](https://reginalexavier.github.io/wcswatin/dev/reference/input_raster.md):
   Load NetCDF or GeoTIFF files as SpatRaster objects
@@ -72,6 +111,8 @@ Conceptual workflow of the wcswatin package
   Load tabular data with validation
 - [`input_vector()`](https://reginalexavier.github.io/wcswatin/dev/reference/input_vector.md):
   Load spatial vector data (shapefiles, etc.)
+- [`raster_info()`](https://reginalexavier.github.io/wcswatin/dev/reference/raster_info.md):
+  Summarize raster variables, units, dates, and dimensions
 - [`var_names()`](https://reginalexavier.github.io/wcswatin/dev/reference/var_names.md):
   List available variables in NetCDF files
 
@@ -79,31 +120,39 @@ Conceptual workflow of the wcswatin package
 
 - [`study_area_records()`](https://reginalexavier.github.io/wcswatin/dev/reference/study_area_records.md):
   Extract grid points within watershed boundaries
-- [`layervalues2pixel()`](https://reginalexavier.github.io/wcswatin/dev/reference/layervalues2pixel.md):
-  Extract time series for each grid cell
+- [`main_input_var()`](https://reginalexavier.github.io/wcswatin/dev/reference/main_input_var.md):
+  Create SWAT main files for gridded variables
 - [`cube2table()`](https://reginalexavier.github.io/wcswatin/dev/reference/cube2table.md):
   Convert raster data cube to tabular format
+- [`layervalues2pixel()`](https://reginalexavier.github.io/wcswatin/dev/reference/layervalues2pixel.md):
+  Write one time series for each grid cell
+- [`datacube_aggregation()`](https://reginalexavier.github.io/wcswatin/dev/reference/datacube_aggregation.md):
+  Aggregate or select daily layers before extraction
 - [`daily_aggregation()`](https://reginalexavier.github.io/wcswatin/dev/reference/daily_aggregation.md):
-  Aggregate raster data to daily time steps
+  Aggregate hourly SWAT-style files to daily files
 - [`tbl_from_references()`](https://reginalexavier.github.io/wcswatin/dev/reference/tbl_from_references.md):
   Extract raster values at reference points
 
 ### Station Data Processing
 
-- [`point_to_daily()`](https://reginalexavier.github.io/wcswatin/dev/reference/point_to_daily.md):
-  Import and organize daily station data
 - [`files_to_table()`](https://reginalexavier.github.io/wcswatin/dev/reference/files_to_table.md):
   Consolidate multiple station files into a single table
 - [`table_to_files()`](https://reginalexavier.github.io/wcswatin/dev/reference/table_to_files.md):
   Split consolidated data back into individual files
 - [`fill_gap()`](https://reginalexavier.github.io/wcswatin/dev/reference/fill_gap.md):
   Fill missing data using correlation methods
-- [`ts_to_point()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_point.md):
-  Trend surface interpolation to specific points (watershed centroids)
-- [`ts_to_area()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_area.md):
-  Trend surface interpolation to create continuous raster surfaces
+- [`point_to_daily()`](https://reginalexavier.github.io/wcswatin/dev/reference/point_to_daily.md):
+  Import and organize daily station data
 - [`save_daily_tbl()`](https://reginalexavier.github.io/wcswatin/dev/reference/save_daily_tbl.md):
   Save daily tables in SWAT format
+- [`ts_to_point()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_point.md):
+  Trend surface interpolation to specific points (watershed centroids)
+- [`ts_point_to_files()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_point_to_files.md):
+  Save
+  [`ts_to_point()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_point.md)
+  outputs as SWAT-style files
+- [`ts_to_area()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_area.md):
+  Trend surface interpolation to create continuous raster surfaces
 
 ### SWAT-Specific Functions
 
@@ -131,7 +180,20 @@ Conceptual workflow of the wcswatin package
 
 The package works with spatial data in **WGS 84** geographic coordinate
 system (EPSG:4326), which is the standard format for most climate
-datasets.
+datasets. Reference point tables should include `NAME`, `LAT`, and `LON`
+columns. When possible, vector reference points are projected to the
+raster CRS before extraction.
+
+For NetCDF inputs, inspect time metadata before processing. Hourly files
+can be processed through
+[`cube2table()`](https://reginalexavier.github.io/wcswatin/dev/reference/cube2table.md)
+and later aggregated with
+[`daily_aggregation()`](https://reginalexavier.github.io/wcswatin/dev/reference/daily_aggregation.md),
+while daily NetCDF products can often be extracted directly. For
+accumulated products timestamped at a specific hour,
+`datacube_aggregation(mode = "value_at_hour")` and
+`daily_aggregation(mode = "value_at_hour")` make that convention
+explicit.
 
 ### Supported Data Sources
 
@@ -141,10 +203,21 @@ datasets.
 
 ## Documentation
 
-- **Vignettes**: Detailed tutorials and workflows
-- **Function Reference**: `?function_name` or visit package
-  documentation
-- **Examples**: Run `example(function_name)` for usage examples
+- **Get started**:
+  <https://reginalexavier.github.io/wcswatin/articles/wcswatin.html>
+- **ERA5-Land hourly to SWAT case study**:
+  <https://reginalexavier.github.io/wcswatin/articles/era5-land-hourly-to-swat.html>
+- **Station interpolation workflow**:
+  <https://reginalexavier.github.io/wcswatin/articles/station-interpolation-workflow.html>
+- **Running a similar case study**:
+  <https://reginalexavier.github.io/wcswatin/articles/reproducing-the-case.html>
+- **Function reference**:
+  <https://reginalexavier.github.io/wcswatin/reference/index.html>
+
+NetCDF files can be downloaded with any CDS workflow. The optional
+[`cds-downloader`](https://github.com/reginalexavier/cds-downloader) CLI
+can help create repeatable CDS download requests, but it is not required
+by `wcswatin`.
 
 ## Getting Help
 

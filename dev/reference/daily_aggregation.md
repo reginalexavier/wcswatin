@@ -12,9 +12,10 @@ daily_aggregation(
   pattern = ".txt$",
   from = "2002-01-01 00",
   to = "2021-05-31 23",
-  take_out_first_record = TRUE,
+  drop_first_record = TRUE,
   aggregation_function = mean,
-  mode = c("agg_fun", "max_min", "last_value")[1],
+  mode = c("agg_fun", "max_min", "value_at_hour")[1],
+  value_hour = 0,
   na.rm = FALSE
 )
 ```
@@ -42,12 +43,14 @@ daily_aggregation(
 
   The last date of the series, including the hour part.
 
-- take_out_first_record:
+- drop_first_record:
 
-  Logical. If TRUE, the first record of the input file will be removed.
-  This is useful when the first record is the hour 00:00, that
-  corresponds to the previous day. The length in hour between the from
-  and to must be the same as the length of the hours in the input files.
+  Logical. If TRUE, the first row of each input file is removed before
+  the date sequence is assigned. This is useful when the input file
+  contains a leading 00:00 record that belongs to the previous day and
+  should not be part of the requested `from`/`to` range. After this
+  optional removal, the number of rows in each input file must match the
+  number of hours between `from` and `to`.
 
 - aggregation_function:
 
@@ -56,7 +59,15 @@ daily_aggregation(
 - mode:
 
   The mode of aggregation. The options are `agg_fun`, `max_min` or
-  `last_value`.
+  `value_at_hour`.
+
+- value_hour:
+
+  Integer hour between 0 and 23 used when `mode = "value_at_hour"`. The
+  default is 0, which matches products whose daily accumulated value is
+  timestamped at 00:00 at the end of the accumulation period. In this
+  case, users should include the following day's 00:00 record in the
+  requested period.
 
 - na.rm:
 
@@ -82,9 +93,12 @@ parameter, this parameter takes a function as argument. The default
 function is [`mean`](https://rdrr.io/r/base/mean.html), so a daily
 average is returned. Alternatively, the user can choose the `mode`
 parameter to inform the function to use choosing between the agg_fun,
-max_min, and last_value. The `agg_fun` will use the function informed in
-the `aggregation_function` parameter. The `max_min` will return the
-maximum and minimum values of the day. The `last_value` will return the
-last value of the day, which is useful for some variables like
-precipitation where the last value of the day is the accumulated
-precipitation.
+max_min, and value_at_hour. The `agg_fun` will use the function informed
+in the `aggregation_function` parameter. The `max_min` will return the
+maximum and minimum values of the day. The `value_at_hour` mode will
+return the value timestamped at `value_hour`. For daily accumulated
+products timestamped at 00:00, set `mode = "value_at_hour"`, keep
+`value_hour = 0`, and define `from`/`to` so that the 00:00 record ending
+the accumulation period is included. Use `drop_first_record = TRUE` only
+when the file also contains an extra leading row that must be discarded
+before assigning this date range.

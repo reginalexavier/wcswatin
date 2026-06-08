@@ -18,8 +18,10 @@ Functions for loading different data types
   : Input Table
 - [`input_vector()`](https://reginalexavier.github.io/wcswatin/dev/reference/input_vector.md)
   : Input Vector
+- [`raster_info()`](https://reginalexavier.github.io/wcswatin/dev/reference/raster_info.md)
+  : Summarize raster file metadata
 - [`var_names()`](https://reginalexavier.github.io/wcswatin/dev/reference/var_names.md)
-  : Shows the variables present in a netcdf
+  : Shows raster variables present in a NetCDF
 
 ## Raster/NetCDF Processing
 
@@ -36,7 +38,7 @@ Functions for processing gridded climate data
 - [`daily_aggregation()`](https://reginalexavier.github.io/wcswatin/dev/reference/daily_aggregation.md)
   : Create a daily aggregation from an hourly dataset
 - [`tbl_from_references()`](https://reginalexavier.github.io/wcswatin/dev/reference/tbl_from_references.md)
-  : Create a table with the values extracted from the reference points
+  : Extract gridded values at station or reference points
 
 ## Station Data Processing
 
@@ -59,6 +61,9 @@ Functions for processing weather station data
 
 - [`ts_to_point()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_point.md)
   : Trend Surface Interpolation into Targeded Points
+
+- [`ts_point_to_files()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_point_to_files.md)
+  : Save trend-surface point time series to files
 
 - [`ts_to_area()`](https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_area.md)
   : Trend Surface Interpolation into Raster

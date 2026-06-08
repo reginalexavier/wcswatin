@@ -1,7 +1,10 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/LICENSE.html</loc></url>
+<url><loc>https://reginalexavier.github.io/wcswatin/dev/articles/era5-land-hourly-to-swat.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/articles/index.html</loc></url>
-<url><loc>https://reginalexavier.github.io/wcswatin/dev/articles/wcswatin1.html</loc></url>
+<url><loc>https://reginalexavier.github.io/wcswatin/dev/articles/reproducing-the-case.html</loc></url>
+<url><loc>https://reginalexavier.github.io/wcswatin/dev/articles/station-interpolation-workflow.html</loc></url>
+<url><loc>https://reginalexavier.github.io/wcswatin/dev/articles/wcswatin.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/authors.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/index.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/news/index.html</loc></url>
@@ -21,6 +24,7 @@
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/main_input_var.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/names_to_date.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/point_to_daily.html</loc></url>
+<url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/raster_info.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/rh_calculator.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/save_daily_tbl.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/study_area_records.html</loc></url>
@@ -29,6 +33,7 @@
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/table_to_files.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/tbl_from_references.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/touch_dir.html</loc></url>
+<url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/ts_point_to_files.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_area.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/ts_to_point.html</loc></url>
 <url><loc>https://reginalexavier.github.io/wcswatin/dev/reference/unit_converter.html</loc></url>
