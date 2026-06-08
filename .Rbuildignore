@@ -16,4 +16,9 @@
 ^pkgdown$
 ^renv$
 ^renv\.lock$
+^vignettes/archive$
+^vignettes/articles$
+^vignettes/wcswatin_vignette1[.]Rmd$
+^vignettes/wcswatin_vignette[.]Rmd$
+^vignettes/wcswatin_vignette[.]html$
 ^wcswatin\.Rproj$

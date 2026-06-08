@@ -61,10 +61,17 @@ build:
 install:
     Rscript -e "devtools::install()"
 
-# Build vignettes
-vignettes:
+# Render the CRAN-safe vignette
+vignette:
+    Rscript -e "rmarkdown::render('vignettes/wcswatin.Rmd')"
+
+# Build pkgdown articles
+articles:
     Rscript -e "if (!require('pkgdown', quietly = TRUE)) install.packages('pkgdown', repos='https://cran.r-project.org/')"
-    Rscript -e "pkgdown::build_article(name = 'wcswatin_vignette')"
+    Rscript -e "pkgdown::build_articles(lazy = FALSE, preview = FALSE)"
+
+# Build vignettes and articles for visual inspection
+vignettes: vignette articles
 
 # Clean build artifacts
 clean:
