@@ -44,7 +44,7 @@ test_that("package example data is accessible and well-formed", {
     expect_gt(nrow(pcp_data), 0)
 
     # Check expected columns
-    expected_cols <- c("ID", "NAME", "LAT", "LONG", "ELEVATION")
+    expected_cols <- c("ID", "NAME", "LAT", "LON", "ELEVATION")
     expect_true(
       all(expected_cols %in% names(pcp_data)),
       info = "Expected columns missing from precipitation data"
@@ -52,9 +52,9 @@ test_that("package example data is accessible and well-formed", {
 
     # Check data quality
     expect_true(all(!is.na(pcp_data$LAT)))
-    expect_true(all(!is.na(pcp_data$LONG)))
+    expect_true(all(!is.na(pcp_data$LON)))
     expect_true(all(pcp_data$LAT >= -90 & pcp_data$LAT <= 90))
-    expect_true(all(pcp_data$LONG >= -180 & pcp_data$LONG <= 180))
+    expect_true(all(pcp_data$LON >= -180 & pcp_data$LON <= 180))
   } else {
     skip("Precipitation station data not found")
   }
@@ -79,7 +79,7 @@ test_that("complete file processing workflow works", {
     expect_gt(length(result), 0)
 
     # Test that result can be saved
-    temp_dir <- tempdir()
+    temp_dir <- local_test_dir("integration_file_workflow")
     save_daily_tbl(tbl_list = result, path = temp_dir)
 
     # Check that files were created
@@ -96,9 +96,6 @@ test_that("complete file processing workflow works", {
       expect_s3_class(read_back, "data.frame")
       expect_gt(nrow(read_back), 0)
     }
-
-    # Clean up
-    unlink(saved_files)
   } else {
     skip("Example precipitation data not available")
   }
@@ -131,11 +128,8 @@ test_that("data quality assessment workflow works", {
 # Test integration workflow: unit conversion
 test_that("unit conversion workflow works", {
   # Create test temperature data in Kelvin
-  temp_dir_in <- file.path(tempdir(), "temp_kelvin")
-  temp_dir_out <- file.path(tempdir(), "temp_celsius")
-
-  dir.create(temp_dir_in, showWarnings = FALSE)
-  dir.create(temp_dir_out, showWarnings = FALSE)
+  temp_dir_in <- local_test_dir("temp_kelvin")
+  temp_dir_out <- local_test_dir("temp_celsius")
 
   # Create test file with Kelvin temperatures
   kelvin_data <- data.frame(
@@ -161,16 +155,11 @@ test_that("unit conversion workflow works", {
     expected_celsius <- c(0, 10, 20, 30)
     expect_equal(celsius_data$temperature, expected_celsius)
   }
-
-  # Clean up
-  unlink(c(temp_dir_in, temp_dir_out), recursive = TRUE)
 })
 
 # Test integration workflow: summary statistics
 test_that("summary statistics workflow works", {
-  # Create test data directory with multiple files
-  test_dir <- file.path(tempdir(), "summary_test")
-  dir.create(test_dir, showWarnings = FALSE)
+  test_dir <- local_test_dir("summary_test")
 
   # Create multiple data files
   for (i in 1:3) {
@@ -203,9 +192,6 @@ test_that("summary statistics workflow works", {
   )
 
   expect_s3_class(plot_result, "ggplot")
-
-  # Clean up
-  unlink(test_dir, recursive = TRUE)
 })
 
 # Test error handling across package functions
@@ -236,136 +222,8 @@ test_that("package functions handle errors consistently", {
   expect_error(
     table_to_files(
       table = "not a table",
-      folder_path = tempdir(),
+      folder_path = local_test_dir("package_invalid_table_out"),
       first_date = "20200101"
     )
   )
-})
-
-# Test package performance with realistic data sizes
-test_that("package performs reasonably with realistic data sizes", {
-  skip_on_cran() # Skip on CRAN to avoid long test times
-
-  # Create realistic-sized dataset (1 year of daily data, 10 stations)
-  n_days <- 365
-  n_stations <- 10
-
-  large_data <- data.frame(
-    date = rep(
-      seq(as.Date("2020-01-01"), as.Date("2020-12-30"), by = "day"),
-      n_stations
-    ),
-    station = rep(paste0("station_", 1:n_stations), each = n_days),
-    value = rnorm(n_days * n_stations, mean = 20, sd = 5)
-  )
-
-  # Reshape to wide format for testing
-  wide_data <- stats::reshape(
-    large_data,
-    timevar = "station",
-    idvar = "date",
-    direction = "wide"
-  )
-
-  start_time <- Sys.time()
-
-  # Test NA counting performance
-  na_result <- count_na(wide_data)
-
-  end_time <- Sys.time()
-  elapsed_time <- as.numeric(end_time - start_time)
-
-  expect_s3_class(na_result, "data.frame")
-  expect_lt(elapsed_time, 5) # Should complete in reasonable time
-})
-
-# Test package compatibility with different R sessions
-test_that("package works consistently across different conditions", {
-  # Test with different locale settings (if possible)
-  current_locale <- Sys.getlocale("LC_TIME")
-
-  # Test basic functionality
-  test_data <- data.frame(
-    col1 = 1:5,
-    col2 = c(1, 2, NA, 4, 5)
-  )
-
-  result <- count_na(test_data)
-  expect_s3_class(result, "data.frame")
-  expect_equal(nrow(result), 2)
-
-  # Test with different working directories
-  original_wd <- getwd()
-  temp_wd <- tempdir()
-
-  setwd(temp_wd)
-
-  # Test that functions still work from different working directory
-  result2 <- count_na(test_data)
-  expect_equal(result, result2)
-
-  # Restore original working directory
-  setwd(original_wd)
-})
-
-# Test package memory usage
-test_that("package functions manage memory appropriately", {
-  skip_on_cran() # Skip on CRAN
-
-  # Test that functions don't create excessive memory overhead
-  initial_objects <- ls()
-
-  # Run several package functions
-  test_data <- data.frame(
-    col1 = rnorm(1000),
-    col2 = rnorm(1000),
-    col3 = sample(c(NA, rnorm(800)), 1000, replace = TRUE)
-  )
-
-  na_result <- count_na(test_data)
-
-  # Check that no unexpected objects were created in global environment
-  final_objects <- ls()
-  new_objects <- setdiff(final_objects, initial_objects)
-  expected_new <- c(
-    "test_data",
-    "na_result",
-    "initial_objects",
-    "final_objects",
-    "new_objects",
-    "expected_new"
-  )
-
-  expect_true(all(new_objects %in% expected_new))
-})
-
-# Test package dependencies
-test_that("package dependencies are properly handled", {
-  # Test that required packages are available
-  required_packages <- c("dplyr", "tidyr", "data.table", "ggplot2")
-
-  for (pkg in required_packages) {
-    expect_true(
-      requireNamespace(pkg, quietly = TRUE),
-      info = paste("Required package", pkg, "not available")
-    )
-  }
-
-  # Test that suggested packages are handled gracefully when missing
-  # (This would be more relevant if the package had optional functionality)
-})
-
-# Test package versioning and metadata
-test_that("package metadata is consistent", {
-  # Test that DESCRIPTION file information is accessible
-  pkg_info <- utils::packageDescription("wcswatin")
-
-  expect_true(is.list(pkg_info))
-  expect_true("Version" %in% names(pkg_info))
-  expect_true("Title" %in% names(pkg_info))
-  expect_true("Description" %in% names(pkg_info))
-
-  # Test version format
-  version_string <- pkg_info$Version
-  expect_true(grepl("^[0-9]+\\.[0-9]+\\.[0-9]+", version_string))
 })

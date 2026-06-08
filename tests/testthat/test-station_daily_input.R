@@ -1,0 +1,119 @@
+# Tests for station_daily_input.R
+
+test_that("point_to_daily works with package example data", {
+  # Use the example data included in the package
+  folder <- system.file("extdata/pcp_stations", package = "wcswatin")
+
+  # Skip if no example data is available
+  skip_if_not(dir.exists(folder), "Example data not available")
+
+  result <- point_to_daily(
+    my_folder = folder,
+    start_date = "20170301",
+    end_date = "20170331" # Small date range for testing
+  )
+
+  expect_type(result, "list")
+  expect_gt(length(result), 0)
+  expect_true(all(sapply(result, is.data.frame)))
+
+  # Check that all tables have the expected structure
+  first_table <- result[[1]]
+  expect_true("NAME" %in% names(first_table))
+  expect_true("pcp" %in% names(first_table))
+})
+
+test_that("point_to_daily validates input files and dates", {
+  input_dir <- local_test_dir("point_to_daily_invalid")
+
+  expect_error(
+    point_to_daily(
+      my_folder = input_dir,
+      start_date = "2017-03-01",
+      end_date = "20170331"
+    ),
+    "YYYYMMDD"
+  )
+
+  expect_error(
+    point_to_daily(
+      my_folder = input_dir,
+      start_date = "20170301",
+      end_date = "20170331"
+    ),
+    "main_pattern"
+  )
+
+  data.table::fwrite(
+    data.frame(ID = 1, NAME = "station_1", LAT = 0, LON = 0, ELEVATION = 1),
+    file.path(input_dir, "pcp.txt")
+  )
+
+  expect_error(
+    point_to_daily(
+      my_folder = input_dir,
+      start_date = "20170301",
+      end_date = "20170331"
+    ),
+    "No variable files found"
+  )
+})
+
+test_that("point_to_daily handles missing codes before clamping negatives", {
+  input_dir <- local_test_dir("point_to_daily_negative_values")
+
+  data.table::fwrite(
+    data.frame(ID = 1:2, NAME = c("a", "b"), LAT = 0, LON = 0, ELEVATION = 1),
+    file.path(input_dir, "pcp.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(-99, -5)),
+    file.path(input_dir, "p-a.txt")
+  )
+  data.table::fwrite(
+    data.frame(value = c(2, 3)),
+    file.path(input_dir, "p-b.txt")
+  )
+
+  result <- point_to_daily(
+    my_folder = input_dir,
+    start_date = "20170301",
+    end_date = "20170302",
+    na_value = -99,
+    neg_to_zero = TRUE
+  )
+
+  expect_true(is.na(result[[1]]$pcp[1]))
+  expect_equal(result[[2]]$pcp[1], 0)
+})
+
+test_that("save_daily_tbl saves files correctly", {
+  # Create test data
+  test_list <- list(
+    "day_2020-01-01" = data.frame(
+      ID = 1:3,
+      NAME = paste0("station_", 1:3),
+      value = c(1, 2, 3)
+    ),
+    "day_2020-01-02" = data.frame(
+      ID = 1:3,
+      NAME = paste0("station_", 1:3),
+      value = c(4, 5, 6)
+    )
+  )
+
+  temp_dir <- local_test_dir("save_daily_tbl")
+
+  save_daily_tbl(tbl_list = test_list, path = temp_dir)
+
+  # Check files were created
+  expect_true(file.exists(file.path(temp_dir, "day_2020-01-01.csv")))
+  expect_true(file.exists(file.path(temp_dir, "day_2020-01-02.csv")))
+
+  # Check file contents
+  file1_content <- read.csv(file.path(temp_dir, "day_2020-01-01.csv"))
+  expect_equal(nrow(file1_content), 3)
+  expect_equal(file1_content$value, c(1, 2, 3))
+})
+
+# Error handling tests

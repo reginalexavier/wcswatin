@@ -1,2 +1,4 @@
 *.html
 *.R
+!articles/precompile.R
+archive/

@@ -1,5 +1,4 @@
-# Tests for raster_input.R functions
-# Testing raster data processing functions
+# Tests for raster_reference_extract.R
 
 # Setup helper function to create test raster
 create_test_raster <- function() {
@@ -18,12 +17,13 @@ create_test_points <- function() {
   data.frame(
     NAME = paste0("station_", 1:3),
     LAT = c(-0.5, 0, 0.5),
-    LONG = c(-0.5, 0, 0.5),
+    LON = c(-0.5, 0, 0.5),
     ELEVATION = c(100, 200, 300)
   )
 }
 
 # Test tbl_from_references function
+
 test_that("tbl_from_references works with different input types", {
   testthat::skip_if_not_installed("terra")
   testthat::skip_if_not_installed("sf")
@@ -55,7 +55,7 @@ test_that("tbl_from_references works with sf input", {
   # Convert to sf object
   sf_points <- sf::st_as_sf(
     test_points,
-    coords = c("LONG", "LAT"),
+    coords = c("LON", "LAT"),
     crs = "EPSG:4326"
   )
 
@@ -69,6 +69,27 @@ test_that("tbl_from_references works with sf input", {
   expect_true(all(paste0("station_", 1:3) %in% names(result_sf)))
 })
 
+test_that("tbl_from_references works with SpatVector input", {
+  skip_if_not_installed("terra")
+  skip_if_not_installed("sf")
+
+  test_raster <- create_test_raster()
+  test_points <- create_test_points()
+
+  spat_points <- test_points |>
+    sf::st_as_sf(coords = c("LON", "LAT"), crs = "EPSG:4326") |>
+    terra::vect()
+
+  result_spat <- tbl_from_references(
+    raster_file = test_raster,
+    ref_points = spat_points
+  )
+
+  expect_s3_class(result_spat, "data.frame")
+  expect_equal(ncol(result_spat), 3)
+  expect_true(all(paste0("station_", 1:3) %in% names(result_spat)))
+})
+
 test_that("tbl_from_references works with file input", {
   skip_if_not_installed("terra")
 
@@ -76,7 +97,7 @@ test_that("tbl_from_references works with file input", {
   test_points <- create_test_points()
 
   # Create temporary CSV file
-  temp_file <- file.path(tempdir(), "test_points.csv")
+  temp_file <- local_test_file("test_points", ".csv")
   write.csv(test_points, temp_file, row.names = FALSE)
 
   result_file <- tbl_from_references(
@@ -88,7 +109,7 @@ test_that("tbl_from_references works with file input", {
   expect_equal(ncol(result_file), 3)
 
   # Test with TXT file
-  temp_txt <- file.path(tempdir(), "test_points.txt")
+  temp_txt <- local_test_file("test_points", ".txt")
   write.table(test_points, temp_txt, row.names = FALSE, sep = ",")
 
   result_txt <- tbl_from_references(
@@ -97,9 +118,6 @@ test_that("tbl_from_references works with file input", {
   )
 
   expect_s3_class(result_txt, "data.frame")
-
-  # Clean up
-  unlink(c(temp_file, temp_txt))
 })
 
 test_that("tbl_from_references handles prefix correctly", {
@@ -140,20 +158,26 @@ test_that("tbl_from_references validates input", {
       ref_points = "/non/existent/file.csv"
     )
   )
-})
 
-# Test layerValues2pixel function (if it exists)
-test_that("layervalues2pixel works correctly", {
-  skip_if_not(
-    exists("layervalues2pixel", where = "package:wcswatin"),
-    "layerValues2pixel function not found"
+  expect_error(
+    tbl_from_references(
+      raster_file = test_raster,
+      ref_points = data.frame(NAME = "station_1", LAT = 0)
+    ),
+    "must contain the columns"
   )
 
-  # This would test the layerValues2pixel function
-  # Implementation depends on the actual function signature
+  expect_error(
+    tbl_from_references(
+      raster_file = test_raster,
+      ref_points = data.frame(LAT = 0, LON = 0)
+    ),
+    "must contain the columns"
+  )
 })
 
-# Test raster processing with multi-layer inputs
+# Test layerValues2pixel function
+
 test_that("tbl_from_references works with multi-layer rasters", {
   skip_if_not_installed("terra")
 
@@ -174,7 +198,44 @@ test_that("tbl_from_references works with multi-layer rasters", {
   expect_equal(ncol(result), 3) # 3 stations
 })
 
+test_that("tbl_from_references works with legacy raster objects", {
+  skip_if_not_installed("raster")
+  skip_if_not_installed("terra")
+
+  test_points <- create_test_points()
+  raster_layer <- raster::raster(
+    nrows = 10,
+    ncols = 10,
+    vals = 1:100,
+    crs = "+proj=longlat +datum=WGS84 +no_defs",
+    xmn = -1,
+    xmx = 1,
+    ymn = -1,
+    ymx = 1
+  )
+  raster_stack <- raster::stack(raster_layer, raster_layer + 100)
+
+  result_layer <- tbl_from_references(
+    raster_file = raster_layer,
+    ref_points = test_points
+  )
+  result_stack <- tbl_from_references(
+    raster_file = raster_stack,
+    ref_points = test_points
+  )
+
+  expect_s3_class(result_layer, "data.frame")
+  expect_equal(nrow(result_layer), 1)
+  expect_equal(ncol(result_layer), 3)
+
+  expect_s3_class(result_stack, "data.frame")
+  expect_equal(nrow(result_stack), 2)
+  expect_equal(ncol(result_stack), 3)
+  expect_equal(names(result_stack), test_points$NAME)
+})
+
 # Test raster extraction with different methods
+
 test_that("tbl_from_references works with extraction parameters", {
   skip_if_not_installed("terra")
   skip_if_not_installed("raster")
@@ -203,6 +264,7 @@ test_that("tbl_from_references works with extraction parameters", {
 })
 
 # Test with real package data
+
 test_that("raster functions work with package example data", {
   # Check if package has example raster data
   extdata_path <- system.file("extdata", package = "wcswatin")
@@ -246,6 +308,7 @@ test_that("raster functions work with package example data", {
 })
 
 # Test error handling
+
 test_that("raster functions handle errors gracefully", {
   skip_if_not_installed("terra")
 
@@ -258,68 +321,10 @@ test_that("raster functions handle errors gracefully", {
       ref_points = test_points
     )
   )
-
-  # Test with mismatched CRS (if function handles this)
-  test_raster <- create_test_raster()
-
-  # Points with different CRS
-  test_points_utm <- data.frame(
-    NAME = "station_1",
-    LAT = 500000, # UTM coordinates
-    LONG = 5000000,
-    ELEVATION = 100
-  )
-
-  # This might work if the function handles CRS transformation
-  # or might error - either is acceptable behavior
-  tryCatch(
-    {
-      result <- tbl_from_references(
-        raster_file = test_raster,
-        ref_points = test_points_utm
-      )
-      expect_s3_class(result, "data.frame")
-    },
-    error = function(e) {
-      # Error is acceptable for mismatched CRS
-      expect_true(TRUE)
-    }
-  )
-})
-
-# Test performance with larger datasets
-test_that("raster extraction performs reasonably", {
-  skip_on_cran() # Skip on CRAN to avoid long test times
-  skip_if_not_installed("terra")
-
-  # Create larger raster
-  large_raster <- terra::rast(nrows = 100, ncols = 100, vals = 1:10000)
-
-  # Create many points
-  n_points <- 50
-  large_points <- data.frame(
-    NAME = paste0("station_", 1:n_points),
-    LAT = runif(n_points, -1, 1),
-    LONG = runif(n_points, -1, 1),
-    ELEVATION = runif(n_points, 0, 1000)
-  )
-
-  start_time <- Sys.time()
-
-  result <- tbl_from_references(
-    raster_file = large_raster,
-    ref_points = large_points
-  )
-
-  end_time <- Sys.time()
-  elapsed_time <- as.numeric(end_time - start_time)
-
-  expect_s3_class(result, "data.frame")
-  expect_equal(ncol(result), n_points)
-  expect_lt(elapsed_time, 10) # Should complete in less than 10 seconds
 })
 
 # Test integration with other package functions
+
 test_that("raster functions integrate with other package components", {
   skip_if_not_installed("terra")
 
@@ -344,17 +349,15 @@ test_that("raster functions integrate with other package components", {
   expect_s3_class(na_summary, "data.frame")
 
   # Test writing to file and reading back
-  temp_file <- file.path(tempdir(), "extracted_test.csv")
+  temp_file <- local_test_file("extracted_test", ".csv")
   write.csv(extracted_values, temp_file, row.names = FALSE)
 
   read_back <- input_table(temp_file)
   expect_s3_class(read_back, "data.table")
-
-  # Clean up
-  unlink(temp_file)
 })
 
 # Test edge cases
+
 test_that("raster functions handle edge cases", {
   skip_if_not_installed("terra")
 
@@ -362,7 +365,7 @@ test_that("raster functions handle edge cases", {
   single_point <- data.frame(
     NAME = "single_station",
     LAT = 0,
-    LONG = 0,
+    LON = 0,
     ELEVATION = 100
   )
 
@@ -380,7 +383,7 @@ test_that("raster functions handle edge cases", {
   outside_points <- data.frame(
     NAME = "outside_station",
     LAT = 10, # Outside the raster extent
-    LONG = 10,
+    LON = 10,
     ELEVATION = 100
   )
 

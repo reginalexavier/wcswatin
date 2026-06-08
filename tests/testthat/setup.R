@@ -11,7 +11,7 @@ create_test_dir <- function(name = "test") {
     paste0(name, "_", Sys.getpid(), "_", sample(1000, 1))
   )
   dir.create(test_dir, showWarnings = FALSE, recursive = TRUE)
-  return(test_dir)
+  test_dir
 }
 
 # Helper function to clean up test directories
@@ -19,6 +19,22 @@ cleanup_test_dir <- function(test_dir) {
   if (dir.exists(test_dir)) {
     unlink(test_dir, recursive = TRUE)
   }
+}
+
+local_test_dir <- function(name = "test", .local_envir = parent.frame()) {
+  test_dir <- create_test_dir(name)
+  withr::defer(cleanup_test_dir(test_dir), envir = .local_envir)
+  test_dir
+}
+
+local_test_file <- function(
+  name = "test",
+  ext = "",
+  .local_envir = parent.frame()
+) {
+  test_file <- tempfile(pattern = paste0(name, "_"), fileext = ext)
+  withr::defer(unlink(test_file, recursive = TRUE), envir = .local_envir)
+  test_file
 }
 
 # Helper function to skip tests based on package availability
@@ -33,7 +49,7 @@ generate_test_points <- function(n = 5) {
   data.frame(
     NAME = paste0("station_", 1:n),
     LAT = runif(n, -1, 1),
-    LONG = runif(n, -1, 1),
+    LON = runif(n, -1, 1),
     ELEVATION = runif(n, 0, 1000)
   )
 }
