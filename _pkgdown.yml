@@ -12,6 +12,17 @@ code:
 downlit:
   autolink: false
 
+articles:
+  - title: "Get started"
+    contents:
+      - wcswatin
+
+  - title: "Case study"
+    contents:
+      - articles/era5-land-hourly-to-swat
+      - articles/station-interpolation-workflow
+      - articles/reproducing-the-case
+
 reference:
   - title: "Package Overview"
     desc: "Package documentation"
@@ -24,6 +35,7 @@ reference:
     - input_raster
     - input_table
     - input_vector
+    - raster_info
     - var_names
 
   - title: "Raster/NetCDF Processing"
@@ -44,6 +56,7 @@ reference:
     - table_to_files
     - fill_gap
     - ts_to_point
+    - ts_point_to_files
     - ts_to_area
     - save_daily_tbl
 

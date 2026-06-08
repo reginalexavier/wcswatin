@@ -17,8 +17,7 @@ test_that("input_raster works with character input", {
 })
 
 test_that("input_raster accepts supported file extensions", {
-  # Create temporary files with supported extensions
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("input_raster_extensions")
 
   # Test file extension validation (without actually creating the files)
   # since creating valid raster files is complex
@@ -101,7 +100,7 @@ test_that("input_raster works with RasterStack input", {
 
 # Test input_vector generic and methods
 test_that("input_vector works with character input", {
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("input_vector_character")
   # Test with non-existent file
   expect_error(
     input_vector("non_existent_file.shp"),
@@ -110,6 +109,7 @@ test_that("input_vector works with character input", {
 
   # Test with unsupported file extension
   bad_file <- file.path(temp_dir, "test.bad")
+  invisible(file.create(bad_file))
   expect_error(
     input_vector(bad_file),
     "file extension is not supported"
@@ -117,7 +117,7 @@ test_that("input_vector works with character input", {
 })
 
 test_that("input_vector accepts supported file extensions", {
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("input_vector_extensions")
 
   # Test file extension validation
   shp_file <- file.path(temp_dir, "test.shp")
@@ -130,6 +130,7 @@ test_that("input_vector accepts supported file extensions", {
 
   # Test unsupported extension
   bad_file <- file.path(temp_dir, "test.bad")
+  invisible(file.create(bad_file))
   expect_error(input_vector(bad_file), "file extension is not supported")
 })
 
@@ -164,8 +165,7 @@ test_that("input_vector works with sf input", {
 
 # Test input_table generic and methods
 test_that("input_table works with character input", {
-  # Create a test CSV file
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("input_table_character")
   test_file <- file.path(temp_dir, "test.csv")
   write.csv(data.frame(a = 1:3, b = 4:6), test_file, row.names = FALSE)
 
@@ -185,9 +185,6 @@ test_that("input_table works with character input", {
   bad_file <- file.path(temp_dir, "test.bad")
   writeLines("some text", bad_file)
   expect_error(input_table(bad_file), "file extension is not supported")
-
-  # Clean up
-  unlink(c(test_file, test_file_txt, bad_file))
 })
 
 test_that("input_table works with data.table input", {
@@ -249,8 +246,7 @@ test_that("methods work together in workflow", {
   skip_if_not_installed("terra")
   skip_if_not_installed("data.table")
 
-  # Create test data
-  temp_dir <- tempdir()
+  temp_dir <- local_test_dir("methods_workflow")
   test_file <- file.path(temp_dir, "integration_test.csv")
   write.csv(data.frame(x = 1:5, y = 6:10), test_file, row.names = FALSE)
 
@@ -262,9 +258,6 @@ test_that("methods work together in workflow", {
   r <- terra::rast(nrows = 10, ncols = 10, vals = 1:100)
   raster_result <- input_raster(r)
   expect_s4_class(raster_result, "SpatRaster")
-
-  # Clean up
-  unlink(test_file)
 })
 
 # Error handling and edge cases

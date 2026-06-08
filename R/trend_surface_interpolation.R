@@ -1,0 +1,315 @@
+#' Trend Surface Interpolation into Targeded Points
+#'
+#' This function make an interpolation whith the trend surface method where the
+#' user have to inform the polynome degree. The interpolation is made over the
+#' tageded points for all the serie on the input.
+#'
+#' @param my_folder Folder containing the ts input files.
+#' @param targeted_points_path A shapefile containing the targeted points where
+#'  the trend suface function have to predict values.
+#' @param poly_degree The degree to be used in the polynomial function for the
+#' trend surface.
+#'
+#' @return A list of tibles by day
+#' @export
+#'
+#' @importFrom stats as.formula lm predict
+#'
+# @examples
+# ts_to_point(my_folder = system.file("extdata/ts_input", package =
+#           "wcswatin"), targeted_points_path =
+#           system.file("extdata/sl_centroides/centroide_watershed_wgs84.txt",
+#           package = "wcswatin"), poly_degree = 2)
+ts_to_point <- function(my_folder, targeted_points_path, poly_degree = 2) {
+  validate_input_dir(my_folder, "my_folder")
+  validate_input_file(targeted_points_path, "targeted_points_path")
+  validate_positive_whole_number(poly_degree, "poly_degree")
+
+  var_files <- list.files(my_folder, full.names = TRUE, pattern = ".csv$")
+  validate_files_found(var_files, my_folder, ".csv$", "time-series files")
+
+  temp_name <- list.files(my_folder, full.names = FALSE)
+
+  names_sans_ext <- tools::file_path_sans_ext(temp_name)
+
+  targeted_points <- sf::read_sf(targeted_points_path)
+  if (!all(c("Lon_dec", "Lat_dec") %in% names(targeted_points))) {
+    stop(
+      "The targeted points file must contain 'Lon_dec' and 'Lat_dec' columns."
+    )
+  }
+
+  pcp_list <- vector(
+    mode = "list", # blank list for future alocation
+    length = length(var_files)
+  )
+  non_zero <- function(x) {
+    ifelse(x < 0, 0, x)
+  }
+
+  # iteration with progress bar
+  pb <- txtProgressBar(min = 0, max = length(pcp_list), style = 3)
+  for (i in seq_along(var_files)) {
+    pcp_temp <- data.table::fread(var_files[i], header = TRUE)
+
+    if (!all(c("pcp", "LON", "LAT") %in% names(pcp_temp))) {
+      stop(
+        "Input time-series files must contain 'pcp', 'LON', and 'LAT' ",
+        "columns."
+      )
+    }
+
+    # o polynomio do modelo
+    my_formula <- as.formula(pcp ~ poly(LON, LAT, degree = poly_degree))
+
+    # ajuste do modelo
+    fit_lm <- lm(my_formula, data = pcp_temp)
+
+    # estimando para os pontos de referencia
+    target_temp <- dplyr::tibble(
+      LON = targeted_points$Lon_dec,
+      LAT = targeted_points$Lat_dec
+    )
+    interpolation <- dplyr::mutate(
+      target_temp,
+      Z = non_zero(predict(
+        fit_lm,
+        target_temp
+      ))
+    )
+
+    names(interpolation)[3] <- names_sans_ext[i] # renaming the column
+
+    pcp_list[[i]] <- interpolation[3]
+
+    setTxtProgressBar(pb, i)
+  }
+
+  close(pb) # fim do bloco
+
+  # renaming the objects list by the date
+  names(pcp_list) <- names_sans_ext
+
+  # function allowing transformation from a dailly(horizontal) perspective to a
+  # centroide(vertical) perspective
+  to_centroide <- function(x) {
+    all_pcp <- dplyr::mutate(
+      do.call(cbind, x),
+      ID = seq_len(dplyr::n())
+    )
+
+    long_table <- tidyr::pivot_longer(
+      all_pcp,
+      cols = seq_along(all_pcp[-1]),
+      names_to = "date",
+      values_to = "value"
+    )
+    split(long_table, long_table$ID)
+  }
+
+  ## tabela final ----
+  to_centroide(pcp_list)
+}
+
+
+#' Save trend-surface point time series to files
+#'
+#' Save the list returned by \code{ts_to_point()} as one file per target point.
+#' Each output file has a single column named with the first date of the time
+#' series in \code{YYYYMMDD} format.
+#'
+#' @param points_list A list of tables returned by \code{ts_to_point()}.
+#' @param output_folder Path where output files will be saved.
+#' @param file_prefix Prefix used in output file names. It is separated from
+#'   the point ID by an underscore.
+#' @param start_date Optional column name to use in all output files. If
+#'   \code{NULL}, the first date found in each point table is used.
+#'
+#' @return NULL. Called for side effects.
+#' @export
+#'
+ts_point_to_files <- function(
+  points_list,
+  output_folder,
+  file_prefix = "pcp",
+  start_date = NULL
+) {
+  if (!is.list(points_list) || length(points_list) == 0) {
+    stop("The argument 'points_list' must be a non-empty list.")
+  }
+  validate_scalar_character(output_folder, "output_folder")
+  validate_scalar_character(file_prefix, "file_prefix")
+  if (!is.null(start_date)) {
+    validate_scalar_character(start_date, "start_date")
+  }
+
+  touch_dir(output_folder)
+
+  pb <- txtProgressBar(min = 0, max = length(points_list), style = 3)
+  for (i in seq_along(points_list)) {
+    point_tbl <- points_list[[i]]
+    validate_ts_point_table(point_tbl, i)
+
+    point_id <- point_tbl$ID[1]
+    start_date_i <- ts_point_start_date(point_tbl$date[1], start_date)
+    point_values <- data.frame(value = point_tbl$value)
+    names(point_values) <- start_date_i
+
+    data.table::fwrite(
+      point_values,
+      file.path(output_folder, glue::glue("{file_prefix}_{point_id}.txt"))
+    )
+    setTxtProgressBar(pb, i)
+  }
+  close(pb)
+
+  invisible(NULL)
+}
+
+validate_ts_point_table <- function(point_tbl, position) {
+  if (!is.data.frame(point_tbl)) {
+    stop(
+      "Element ",
+      position,
+      " of 'points_list' must be a data.frame or tibble."
+    )
+  }
+  if (!all(c("ID", "date", "value") %in% names(point_tbl))) {
+    stop(
+      "Element ",
+      position,
+      " of 'points_list' must contain 'ID', 'date', and 'value' columns."
+    )
+  }
+  if (nrow(point_tbl) == 0) {
+    stop("Element ", position, " of 'points_list' must not be empty.")
+  }
+}
+
+ts_point_start_date <- function(date, start_date = NULL) {
+  if (is.null(start_date)) {
+    start_date <- date
+  }
+
+  date_digits <- gsub("[^0-9]", "", as.character(start_date))
+
+  if (nchar(date_digits) == 0) {
+    stop("The first 'date' value must contain at least one digit.")
+  }
+
+  date_digits
+}
+
+
+#' Trend Surface Interpolation into Raster
+#'
+#' This function make an interpolation whith the trend surface method where the
+#' user have to inform the polynome degree. The interpolation is made over the
+#' tageded points for all the serie on the input.
+#'
+#' @param my_folder Folder containing the ts input files.
+#' @param bassin_limit_path A shapefile containing the bassin limit where the
+#' trend suface function have to be predicted.
+#' @param poly_degree The degree to be used in the polynomial function for the
+#' trend surface.
+#' @param resolution The resolution for the output raster in degree.
+#'
+#' @return A rasterbrick
+#' @export
+#'
+#' @examples
+#' ts_to_area(
+#'   my_folder = system.file("extdata/ts_input", package = "wcswatin"),
+#'   bassin_limit_path = system.file("extdata/sl_bassin/sl_bassin_limit.shp",
+#'     package = "wcswatin"
+#'   ),
+#'   poly_degree = 2,
+#'   resolution = 0.5
+#' )
+ts_to_area <- function(
+  my_folder,
+  bassin_limit_path,
+  poly_degree = 2,
+  resolution = 0.01
+) {
+  validate_input_dir(my_folder, "my_folder")
+  validate_input_file(bassin_limit_path, "bassin_limit_path")
+  validate_positive_whole_number(poly_degree, "poly_degree")
+  validate_positive_number(resolution, "resolution")
+
+  var_files <- list.files(my_folder, full.names = TRUE, pattern = ".csv$")
+  validate_files_found(var_files, my_folder, ".csv$", "time-series files")
+
+  bassin_limit <- sf::read_sf(bassin_limit_path)
+
+  # temp_name <- list.files(my_folder,
+  #                         full.names = FALSE)
+
+  names_sans_ext <- tools::file_path_sans_ext(list.files(
+    my_folder,
+    full.names = FALSE
+  ))
+
+  # blank list for future alocation
+  raster_list <- vector(mode = "list", length = length(var_files))
+  non_zero <- function(x) {
+    ifelse(x < 0, 0, x)
+  }
+
+  # template grid
+  bbox <- c(
+    "xmin" = sf::st_bbox(bassin_limit)[[1]],
+    "ymin" = sf::st_bbox(bassin_limit)[[2]],
+    "xmax" = sf::st_bbox(bassin_limit)[[3]],
+    "ymax" = sf::st_bbox(bassin_limit)[[4]]
+  )
+
+  grd_template_sl <- expand.grid(
+    LON = seq(from = bbox["xmin"], to = bbox["xmax"], by = resolution),
+    LAT = seq(from = bbox["ymin"], to = bbox["ymax"], by = resolution)
+  )
+
+  # iteration with progress bar
+  pb <- txtProgressBar(min = 0, max = length(raster_list), style = 3)
+  for (i in seq_along(var_files)) {
+    pcp_temp <- data.table::fread(var_files[i], header = TRUE)
+
+    if (!all(c("pcp", "LON", "LAT") %in% names(pcp_temp))) {
+      stop(
+        "Input time-series files must contain 'pcp', 'LON', and 'LAT' ",
+        "columns."
+      )
+    }
+
+    # o polynomio do modelo
+    my_formula <- as.formula(pcp ~ poly(LON, LAT, degree = poly_degree))
+
+    # ajuste do modelo
+    fit_lm <- lm(my_formula, data = pcp_temp)
+
+    # estimando para os grids
+    interpolation <- dplyr::mutate(
+      grd_template_sl,
+      Z = non_zero(predict(
+        fit_lm,
+        grd_template_sl
+      ))
+    )
+    point_2_raster <- raster::rasterFromXYZ(
+      interpolation,
+      crs = "+proj=longlat +datum=WGS84 +no_defs"
+    )
+
+    raster_list[[i]] <- point_2_raster
+
+    setTxtProgressBar(pb, i)
+  }
+
+  close(pb) # fim do bloco
+
+  # renaming the objects list by the date
+  names(raster_list) <- names_sans_ext
+
+  # creating a raster brick
+  raster::brick(raster_list)
+}

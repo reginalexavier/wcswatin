@@ -1,0 +1,313 @@
+---
+title: "ERA5-Land hourly data to SWAT inputs"
+---
+
+
+
+This article documents a production-style workflow for preparing ERA5-Land
+hourly NetCDF data as SWAT-ready weather input files with `wcswatin`. The test
+area is the São Lourenço basin region in Mato Grosso, Brazil, used here as a
+compact region of interest for demonstrating the full data path. The gridded
+case covers 2025-10-01 to 2025-12-31.
+
+The workflow is shown with representative code, compact summaries, and
+precomputed results from the case run.
+
+## Case data
+
+The case was run with six ERA5-Land hourly NetCDF files:
+
+| File | Size |
+|---|---:|
+| `hourly_10m_u_component_of_wind_2025.nc` | 2.5 MB |
+| `hourly_10m_v_component_of_wind_2025.nc` | 2.5 MB |
+| `hourly_2m_dewpoint_temperature_2025.nc` | 2.0 MB |
+| `hourly_2m_temperature_2025.nc` | 2.0 MB |
+| `hourly_surface_solar_radiation_downwards_2025.nc` | 1.8 MB |
+| `hourly_total_precipitation_2025.nc` | 1.8 MB |
+
+The processed study area has 229 grid cells and each hourly cube has 2,208
+layers. The expected long table created by `cube2table()` has 505,632 rows per
+variable.
+
+```r
+case_root <- Sys.getenv("WCSWATIN_CASE_ROOT")
+input_dir <- file.path(case_root, "data/input")
+output_dir <- file.path(case_root, "data/output")
+```
+
+Before choosing the extraction path, inspect downloaded files with
+`raster_info()`. The number of layers and the time resolution make it clear
+whether the file is hourly, daily, or a multi-variable cube.
+
+```r
+raster_info(file.path(input_dir, "nc_files/hourly/hourly_2m_temperature_2025.nc"))
+raster_info(file.path(input_dir, "nc_files/daily/daily_2m_temperature_2025.nc"))
+```
+
+## Step 1: define the study area
+
+`study_area_records()` combines one raster model layer, a basin boundary, and a
+DEM to create the table used by the extraction workflow.
+
+```r
+study_area_tbl <- study_area_records(
+  raster_model = nc_file,
+  roi = basin_limit,
+  dem = dem_raster
+)
+
+data.table::fwrite(
+  study_area_tbl,
+  file.path(output_dir, "study_area.csv")
+)
+```
+
+Precomputed result:
+
+| LON | LAT | ID | ROW | COL | ELEVATION |
+|---:|---:|---:|---:|---:|---:|
+| -55.2 | -15.5 | 36 | 2 | 8 | 698 |
+| -55.1 | -15.5 | 37 | 2 | 9 | 716 |
+| -55.0 | -15.5 | 38 | 2 | 10 | 660 |
+
+## Step 2: create SWAT main files
+
+`main_input_var()` creates a `mainFile.csv` for each target variable. The case
+creates main files for the original variables and the derived variables.
+
+```r
+variables <- c("u10", "v10", "d2m", "t2m", "ssrd", "tp", "ws10", "rh2m")
+
+for (var in variables) {
+  main_tbl <- main_input_var(
+    study_area = file.path(output_dir, "study_area.csv"),
+    var_name = var
+  )
+
+  data.table::fwrite(
+    main_tbl,
+    file.path(output_dir, var, "mainFile.csv")
+  )
+}
+```
+
+Example `mainFile.csv` rows for `u10`:
+
+| ID | NAME | LAT | LON | ELEVATION |
+|---:|---|---:|---:|---:|
+| 36 | u10_36 | -15.5 | -55.2 | 698 |
+| 37 | u10_37 | -15.5 | -55.1 | 716 |
+| 38 | u10_38 | -15.5 | -55.0 | 660 |
+
+## Step 3: extract hourly cubes
+
+`cube2table()` converts each NetCDF cube to one long table containing extracted
+values for the study area cells. This is where the `future` integration is most
+useful: raster layers can be extracted independently, while the high-level
+`cube2table()` call stays the same. Users choose the execution strategy with
+`future::plan()` before calling the function, so the workflow can run
+sequentially, in local parallel workers, or with another compatible `future`
+backend.
+
+```r
+future::plan(future::multicore, workers = 10)
+
+cube2table(
+  input_path = nc_file,
+  n_layers = 2208,
+  study_area = file.path(output_dir, "study_area.csv"),
+  future_scheduling = 1,
+  final_dir = file.path(output_dir, "u10/intermediate/layer_h"),
+  side_effect = "only"
+)
+
+future::plan(future::sequential)
+```
+
+In the benchmarked run, extracting one variable took about 6.6 to 7.1 minutes
+with 8-10 local workers, compared with about 39.5 minutes sequentially. The
+performance gain comes from changing the `future` plan, not from rewriting the
+extraction code. For example, `sequential` is useful for debugging,
+`multisession` is portable across operating systems, `multicore` can be faster
+on Unix-like systems outside GUI sessions, and other `future` backends can be
+used when the user's environment supports them. See the `future` overview for
+backend options:
+<https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html>.
+
+## Step 4: write one series per pixel
+
+`layervalues2pixel()` transforms the long layer table into SWAT-style
+time-series files, one file per grid cell.
+
+```r
+layervalues2pixel(
+  layer_values = file.path(output_dir, "u10/intermediate/layer_h/tbls.csv"),
+  main_tbl = file.path(output_dir, "u10/mainFile.csv"),
+  col_name = "20251001",
+  inline_output = TRUE,
+  path_output = file.path(output_dir, "u10/intermediate/pixel_h"),
+  append = FALSE
+)
+```
+
+The case created 229 hourly files per original variable.
+
+## Step 5: aggregate hourly values to daily values
+
+Daily aggregation depends on the variable semantics.
+
+| Variable | Original unit | SWAT unit | Daily operation |
+|---|---|---|---|
+| `u10` | m s^-1 | m s^-1 | mean |
+| `v10` | m s^-1 | m s^-1 | mean |
+| `d2m` | K | deg C | convert to deg C, then daily min/max |
+| `t2m` | K | deg C | convert to deg C, then daily min/max |
+| `ssrd` | J m^-2 | MJ m^-2 | convert to MJ m^-2, then value at 00:00 |
+| `tp` | m | mm | convert to mm, then value at 00:00 |
+| `ws10` | m s^-1 | m s^-1 | derived from `u10` and `v10` |
+| `rh2m` | % | % | derived from `d2m` and `t2m`, then mean |
+
+Mean aggregation:
+
+```r
+daily_aggregation(
+  folder_in = file.path(output_dir, "u10/intermediate/pixel_h"),
+  folder_out = file.path(output_dir, "u10/pixel_d"),
+  pattern = ".txt$",
+  from = "2025-10-01 01",
+  to = "2025-12-31 23",
+  drop_first_record = FALSE,
+  aggregation_function = mean,
+  na.rm = FALSE
+)
+```
+
+Accumulated variables use the hour that stores the completed accumulation
+period. For ERA5-Land daily accumulated values timestamped at midnight, this is
+`value_hour = 0`.
+
+```r
+daily_aggregation(
+  folder_in = file.path(output_dir, "tp/intermediate/pixel_h_mm"),
+  folder_out = file.path(output_dir, "tp/pixel_d"),
+  pattern = ".txt$",
+  from = "2025-10-01 01",
+  to = "2025-12-31 23",
+  drop_first_record = FALSE,
+  mode = "value_at_hour",
+  value_hour = 0,
+  na.rm = FALSE
+)
+```
+
+## Daily NetCDF shortcut
+
+If the source product is already daily, the workflow can skip the hourly
+intermediate files and `daily_aggregation()`. In that case, use `raster_info()`
+to confirm the variable, unit, layer count, and date range, then run
+`cube2table()` on the daily cube and pass the result directly to
+`layervalues2pixel()`.
+
+```r
+daily_info <- raster_info(
+  file.path(input_dir, "nc_files/daily/daily_2m_temperature_2025.nc")
+)
+
+cube2table(
+  input_path = file.path(input_dir, "nc_files/daily/daily_2m_temperature_2025.nc"),
+  n_layers = daily_info$n_layers,
+  study_area = file.path(output_dir, "study_area.csv"),
+  final_dir = file.path(output_dir, "t2m/intermediate/layer_d"),
+  side_effect = "only"
+)
+
+layervalues2pixel(
+  layer_values = file.path(output_dir, "t2m/intermediate/layer_d/tbls.csv"),
+  main_tbl = file.path(output_dir, "t2m/mainFile.csv"),
+  col_name = "20251001",
+  inline_output = FALSE,
+  path_output = file.path(output_dir, "t2m/pixel_d"),
+  append = FALSE
+)
+```
+
+Another option is to reduce the hourly NetCDF locally before extraction.
+`datacube_aggregation()` can apply a daily aggregation function, or it can
+select the layer timestamped at a specific hour before `cube2table()` runs.
+
+```r
+datacube_aggregation(
+  input_path = file.path(input_dir, "nc_files/hourly/hourly_2m_temperature_2025.nc"),
+  output_filename = file.path(output_dir, "t2m_daily_mean.tif"),
+  fun = mean,
+  cores = 4
+)
+```
+
+For accumulated products whose daily value is stored at a specific timestamp,
+use `mode = "value_at_hour"`. ERA5-Land accumulated values timestamped at
+`00:00` represent the previous day, so the output dates can be shifted back one
+day. If the first selected `00:00` layer belongs to the day before the requested
+period, drop it before writing the daily cube.
+
+```r
+datacube_aggregation(
+  input_path = file.path(input_dir, "nc_files/hourly/hourly_total_precipitation_2025.nc"),
+  output_filename = file.path(output_dir, "tp_daily_value_at_00.tif"),
+  mode = "value_at_hour",
+  value_hour = 0,
+  date_shift_days = -1,
+  drop_first_layer = TRUE
+)
+```
+
+## Step 6: derive wind speed and relative humidity
+
+`windspeed_calculator()` derives wind speed from daily `u10` and `v10`.
+
+```r
+windspeed_calculator(
+  folder_uas = file.path(output_dir, "u10/pixel_d"),
+  folder_vas = file.path(output_dir, "v10/pixel_d"),
+  folder_out = file.path(output_dir, "ws10/pixel_d"),
+  col_name = "20251001",
+  file_name_output = "ws10",
+  pattern = ".txt$"
+)
+```
+
+`rh_calculator()` derives hourly relative humidity from dewpoint and air
+temperature, followed by daily mean aggregation.
+
+```r
+rh_calculator(
+  folder_dpt = file.path(output_dir, "d2m/intermediate/pixel_h"),
+  folder_tas = file.path(output_dir, "t2m/intermediate/pixel_h"),
+  folder_out = file.path(output_dir, "rh2m/intermediate/pixel_h"),
+  file_name_output = "rh2m",
+  m_value = 7.591386,
+  Tn_value = 240.7263,
+  pattern = ".txt$"
+)
+```
+
+## Final output
+
+The final daily SWAT-style outputs are compact enough to inspect and archive.
+
+| Variable | Main file | Daily files | Daily output size |
+|---|---:|---:|---:|
+| `u10` | yes | 229 | 381.0 KB |
+| `v10` | yes | 229 | 375.7 KB |
+| `d2m` | yes | 229 | 284.4 KB |
+| `t2m` | yes | 229 | 285.5 KB |
+| `ssrd` | yes | 229 | 200.0 KB |
+| `tp` | yes | 229 | 360.2 KB |
+| `ws10` | yes | 229 | 357.1 KB |
+| `rh2m` | yes | 229 | 349.5 KB |
+
+The complete output directory from this run was about 193 MB because it also
+kept hourly intermediate tables and interpolation artifacts. Those intermediates
+are useful for auditing, while the final daily files are the main SWAT-ready
+products.

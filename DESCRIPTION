@@ -11,7 +11,7 @@ Authors@R: c(
            family = "Zeilhofer",
            role = "aut",
            email = "zeilhoferpeter@gmail.com"))
-Description: wcswatin (Weather & Climate SWAT INput) is an open-source R package
+Description: Weather & Climate SWAT INput (wcswatin) is an open-source R package
     for preparing weather and climate data from different sources for input in the
     Soil & Water Assessment Tool (SWAT), funded by the Critical Ecosystem
     Partnership Fund (CEPF).
@@ -19,14 +19,14 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 4.1.0)
 Suggests:
     future,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
 Imports:
     dplyr,
@@ -36,7 +36,6 @@ Imports:
     data.table,
     glue,
     stringr,
-    vroom,
     sf,
     lubridate,
     hyfo,
@@ -48,3 +47,4 @@ Imports:
 URL: https://github.com/reginalexavier/wcswatin, https://reginalexavier.github.io/wcswatin/
 BugReports: https://github.com/reginalexavier/wcswatin/issues
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
