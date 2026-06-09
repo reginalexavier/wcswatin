@@ -215,11 +215,16 @@ by `wcswatin`.
 
 If you use wcswatin in your research, please cite:
 
-    @software{wcswatin2025,
-      author = {Exavier, Reginal and Zeilhofer, Peter},
-      title = {wcswatin: Weather & Climate SWAT Input},
-      year = {2025},
-      url = {https://github.com/reginalexavier/wcswatin}
+Exavier R, Kawakubo F, Zeilhofer P (2026). wcswatin: Weather & Climate
+SWAT INput (WCSWATIN). R package version 0.1.0,
+<https://github.com/reginalexavier/wcswatin>
+
+    @software{
+      title = {wcswatin: Weather & Climate SWAT INput (WCSWATIN)},
+      author = {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},
+      year = {2026},
+      note = {R package version 0.1.0},
+      url = {https://github.com/reginalexavier/wcswatin},
     }
 
 ## License

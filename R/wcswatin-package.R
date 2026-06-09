@@ -14,8 +14,9 @@
 #'
 #'
 #'
-#' @author Reginal Exavier \email{reginalexavier@@rocketmail.com}, Peter
-#'   Zeilhofer \email{zeilhoferpeter@@gmail.com}
+#' @author Reginal Exavier \email{reginalexavier@@rocketmail.com}, Fernando
+#'   Shinji Kawakubo \email{fskgeo@@gmail.com},  Peter Zeilhofer
+#'   \email{zeilhoferpeter@@gmail.com}
 #' @name wcswatin-package
 #' @aliases wcswatin
 #'
