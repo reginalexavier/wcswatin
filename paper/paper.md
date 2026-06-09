@@ -14,6 +14,9 @@ authors:
     orcid: 0000-0002-5237-523X
     affiliation: 1
     corresponding: true
+  - name: Fernando Shinji Kawakubo
+    orcid: 0000-0002-2045-6318
+    affiliation: 1
   - name: Peter Zeilhofer
     orcid: 0000-0002-7579-6408
     affiliation: 2
@@ -22,7 +25,7 @@ affiliations:
     index: 1
   - name: Federal University of Mato Grosso (UFMT), Postgraduate Program in Geography, Cuiabá - MT, Brazil.
     index: 2
-date: 28 December 2025
+date: 09 June 2026
 bibliography: paper.bib
 ---
 
@@ -63,6 +66,12 @@ Several existing tools partially support the preparation of weather and climate 
 
 Web-based tools like the NCEP Climate Forecast System Reanalysis portal (https://globalweather.tamu.edu/) are restricted to specific time periods (1979-2014) and have demonstrated weak performance in discharge simulations [@senent2021]. In contrast, `wcswatin` emphasizes integrated preprocessing, validation, and formatting of multisource weather and climate data, supporting both gridded and station-based inputs within a unified and extensible workflow tailored to SWAT modeling.
 
+
+# AI usage disclosure
+
+Generative AI tools were used during the development of `wcswatin` and the preparation of its documentation. Codex was used to assist with code review, debugging, test design, documentation drafting, and language editing.
+
+All AI-assisted outputs were reviewed, edited, tested, and validated by the authors before inclusion. The authors made the software design decisions, validated the scientific and technical content, and take full responsibility for the accuracy, originality, and integrity of the submitted work.
 
 # Acknowledgements
 The authors would like to acknowledge the Critical Ecosystem Partnership Fund (CEPF) for partially funding the software development under grant CEPF-104254.
