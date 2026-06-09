@@ -1,6 +1,6 @@
-# Shows the variables present in a netcdf
+# Shows raster variables present in a NetCDF
 
-Shows the variables present in a netcdf
+Shows raster variables present in a NetCDF
 
 ## Usage
 
@@ -16,4 +16,4 @@ var_names(path)
 
 ## Value
 
-List of variable names
+Character vector of raster variable names

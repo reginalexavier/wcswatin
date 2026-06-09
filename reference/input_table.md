@@ -26,7 +26,7 @@ input_table(x, ...)
 - ...:
 
   additional arguments to
-  [`data.table::fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html).
+  [`data.table::fread`](https://rdrr.io/pkg/data.table/man/fread.html).
 
 ## Value
 
@@ -34,4 +34,4 @@ data.table
 
 ## See also
 
-[`data.table::fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html)
+[`data.table::fread`](https://rdrr.io/pkg/data.table/man/fread.html)

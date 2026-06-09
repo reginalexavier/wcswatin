@@ -1,0 +1,175 @@
+# Station interpolation workflow
+
+This article documents the station-data side of the same test-area
+workflow. The region of interest is the São Lourenço basin area in Mato
+Grosso, Brazil. The station workflow uses daily precipitation
+observations from March 2017. It is presented as an interpolation and
+validation-preparation workflow, not as a scientific validation against
+the ERA5-Land 2025 data used in the gridded case.
+
+## Station observations
+
+The input folder contains one precipitation file per station and a
+`pcp.txt` main file with station metadata.
+
+``` r
+
+station_folder <- file.path(case_root, "data/input/weather-station-data/pcp_stations")
+
+pcp_table <- files_to_table(
+  files_path = station_folder,
+  files_pattern = "p-",
+  start_date = "2017-03-01",
+  end_date = "2017-03-31",
+  na_value = -99,
+  neg_to_zero = FALSE
+)
+```
+
+The case has 14 stations and 31 daily records. A daily station table has
+the shape expected by the interpolation functions:
+
+|  ID | NAME      |     LAT |     LON | ELEVATION | pcp |
+|----:|-----------|--------:|--------:|----------:|----:|
+|   1 | p-1553003 | -15.940 | -53.450 |       597 | 0.0 |
+|   2 | p-1554006 | -15.989 | -54.968 |       256 | 8.4 |
+|   3 | p-1555005 | -15.840 | -55.320 |       783 | 0.0 |
+
+## Gap filling
+
+[`count_na()`](https://reginalexavier.github.io/wcswatin/reference/count_na.md)
+identifies missing values and
+[`fill_gap()`](https://reginalexavier.github.io/wcswatin/reference/fill_gap.md)
+fills station gaps using the configured temporal correlation period.
+
+``` r
+
+count_na(pcp_table[-1], percent = TRUE)
+
+gap_filled <- fill_gap(
+  dataset = pcp_table,
+  corPeriod = "daily"
+)
+
+count_na(gap_filled[-1], percent = TRUE)
+```
+
+The filled table can be written back to SWAT-style station files.
+
+``` r
+
+table_to_files(
+  table = gap_filled,
+  folder_path = gap_filled_output,
+  first_date = "2017-03-01",
+  file_extension = "txt"
+)
+```
+
+## Daily tables for interpolation
+
+[`point_to_daily()`](https://reginalexavier.github.io/wcswatin/reference/point_to_daily.md)
+changes the perspective from one file per station to one table per day.
+[`save_daily_tbl()`](https://reginalexavier.github.io/wcswatin/reference/save_daily_tbl.md)
+writes those daily tables to disk.
+
+``` r
+
+daily_tables <- point_to_daily(
+  my_folder = gap_filled_output,
+  var_pattern = "p-",
+  main_pattern = "pcp",
+  start_date = "20170301",
+  end_date = "20170331",
+  interval = "day",
+  na_value = -99,
+  neg_to_zero = TRUE,
+  prefix = "day_"
+)
+
+save_daily_tbl(
+  tbl_list = daily_tables,
+  path = daily_tbl_output
+)
+```
+
+The precomputed run created 31 daily tables.
+
+## Interpolation to an area
+
+[`ts_to_area()`](https://reginalexavier.github.io/wcswatin/reference/ts_to_area.md)
+applies trend-surface interpolation to each daily station table and
+returns a multi-layer raster. The case wrote selected days to GeoTIFF
+for mapping and inspection.
+
+``` r
+
+raster_interpolated <- ts_to_area(
+  my_folder = daily_tbl_output,
+  bassin_limit_path = basin_limit,
+  poly_degree = 2,
+  resolution = 0.001
+)
+
+terra::writeRaster(
+  terra::rast(raster_interpolated)[[18]],
+  file.path(output_dir, "interpolation/raster_interpolated/interpolated_2017-03-18.tif"),
+  overwrite = TRUE
+)
+```
+
+The generated GeoTIFF for 2017-03-18 is about 11.4 MB and is treated as
+a case output artifact.
+
+## Interpolation to SWAT target points
+
+[`ts_to_point()`](https://reginalexavier.github.io/wcswatin/reference/ts_to_point.md)
+estimates the station-derived precipitation series at target points such
+as sub-basin centroids.
+[`ts_point_to_files()`](https://reginalexavier.github.io/wcswatin/reference/ts_point_to_files.md)
+writes one SWAT-style file per target point.
+
+``` r
+
+points_interpolated <- ts_to_point(
+  my_folder = daily_tbl_output,
+  targeted_points_path = centroid_points,
+  poly_degree = 2
+)
+
+ts_point_to_files(
+  points_list = points_interpolated,
+  output_folder = file.path(output_dir, "interpolation/pcp/pixel_d"),
+  file_prefix = "pcp",
+  start_date = "2017-03-01"
+)
+
+main_tbl <- var_main_creator(
+  targeted_points_path = centroid_points,
+  var_name = "pcp",
+  col_elev = "Elev"
+)
+```
+
+The precomputed run produced 258 point files plus a precipitation
+`mainFile.csv`.
+
+## Validation preparation
+
+[`tbl_from_references()`](https://reginalexavier.github.io/wcswatin/reference/tbl_from_references.md)
+can extract values from a raster at station or centroid locations,
+producing the wide table needed by validation tools.
+
+``` r
+
+simulated_at_stations <- tbl_from_references(
+  raster_file = raster_file,
+  ref_points = file.path(gap_filled_output, "pcp.txt"),
+  prefix_colname = "sim"
+)
+```
+
+This prepares the data for packages such as `hydroGOF`, but it does not
+compute validation metrics itself. A scientific validation requires
+matching variable, period, spatial reference points, and time-step
+ordering between observed and simulated data.

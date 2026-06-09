@@ -13,5 +13,5 @@ processing all used datasets MUST have geographic coordinates using WGS
 
 ## Author
 
-Reginal Exavier <reginalexavier@rocketmail.com>, Peter Zeilhofer
-<zeilhoferpeter@gmail.com>
+Reginal Exavier <reginalexavier@rocketmail.com>, Fernando Shinji
+Kawakubo <fskgeo@gmail.com>, Peter Zeilhofer <zeilhoferpeter@gmail.com>

@@ -1,5 +1,74 @@
 # Changelog
 
+## wcswatin 0.1.0
+
+### Package workflows and structure
+
+- Reorganized R source files by logical domain, making the package
+  structure match the main workflows more closely.
+- Reorganized the test suite by the same logical domains and added
+  shared test helpers for temporary files and directories.
+- Added compact NetCDF example files to support runnable examples,
+  metadata inspection, and raster workflow tests.
+- Replaced the previous Makefile-based workflow with a `justfile` for
+  common development tasks.
+
+### New features
+
+- Added
+  [`raster_info()`](https://reginalexavier.github.io/wcswatin/reference/raster_info.md)
+  to summarize raster and NetCDF metadata, including variables, units,
+  layer counts, spatial extent, CRS, and time range.
+- Added
+  [`ts_point_to_files()`](https://reginalexavier.github.io/wcswatin/reference/ts_point_to_files.md)
+  to save
+  [`ts_to_point()`](https://reginalexavier.github.io/wcswatin/reference/ts_to_point.md)
+  outputs as individual SWAT-style point files.
+- Added `value_at_hour` support to
+  [`daily_aggregation()`](https://reginalexavier.github.io/wcswatin/reference/daily_aggregation.md)
+  for products whose daily value is stored at a specific hour.
+- Added `value_at_hour`, `date_shift_days`, and `drop_first_layer`
+  support to
+  [`datacube_aggregation()`](https://reginalexavier.github.io/wcswatin/reference/datacube_aggregation.md)
+  so hourly raster cubes can be reduced before extraction.
+- Improved
+  [`tbl_from_references()`](https://reginalexavier.github.io/wcswatin/reference/tbl_from_references.md)
+  so reference points can be supplied using the package’s standard
+  table, vector, and path input patterns.
+
+### Breaking changes
+
+- Standardized longitude column names to `LON`.
+- Renamed the `take_out_first_record` argument in
+  [`daily_aggregation()`](https://reginalexavier.github.io/wcswatin/reference/daily_aggregation.md)
+  to `drop_first_record`.
+- Renamed the `negatif_number` argument in station/table preprocessing
+  to `neg_to_zero`.
+
+### Bug fixes and validation
+
+- Added reusable input validation helpers and clearer error messages
+  across raster, table, station, and interpolation workflows.
+- Ensured variable derivation helpers create output directories
+  consistently.
+- Removed a duplicate internal
+  [`file_name()`](https://reginalexavier.github.io/wcswatin/reference/file_name.md)
+  implementation.
+- Removed the `vroom` dependency from the main file-reading workflow.
+- Expanded test coverage for raster aggregation, cube extraction,
+  metadata, reference extraction, station input, table aggregation,
+  table I/O, variable derivation, and trend-surface interpolation.
+
+### Documentation
+
+- Added a lightweight executable vignette using bundled example data.
+- Added precomputed pkgdown articles for:
+  - ERA5-Land hourly data to SWAT inputs;
+  - station interpolation workflow;
+  - running a similar external case study.
+- Updated README and pkgdown navigation to reflect the current package
+  workflows.
+
 ## wcswatin 0.0.1
 
 ### First Release

@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Weather &amp; Climate SWAT INput (WCSWATIN) • wcswatin</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Weather &amp; Climate SWAT INput (WCSWATIN)">
-<meta name="description" content="wcswatin (Weather &amp; Climate SWAT INput) is an open-source R package for preparing weather and climate data from different sources for input in the Soil &amp; Water Assessment Tool (SWAT), funded by the Critical Ecosystem Partnership Fund (CEPF).">
-<meta property="og:description" content="wcswatin (Weather &amp; Climate SWAT INput) is an open-source R package for preparing weather and climate data from different sources for input in the Soil &amp; Water Assessment Tool (SWAT), funded by the Critical Ecosystem Partnership Fund (CEPF).">
+<meta name="description" content="Weather &amp; Climate SWAT INput (wcswatin) is an open-source R package for preparing weather and climate data from different sources for input in the Soil &amp; Water Assessment Tool (SWAT), funded by the Critical Ecosystem Partnership Fund (CEPF).">
+<meta property="og:description" content="Weather &amp; Climate SWAT INput (wcswatin) is an open-source R package for preparing weather and climate data from different sources for input in the Soil &amp; Water Assessment Tool (SWAT), funded by the Critical Ecosystem Partnership Fund (CEPF).">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">wcswatin</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,13 +31,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/wcswatin.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/wcswatin1.html">Quick Intro for wcswatin Package</a></li>
-  </ul>
-</li>
+<li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -60,13 +56,13 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><strong>wcswatin</strong> (Weather &amp; Climate SWAT Input) is an open-source R package for preparing weather and climate data from different sources for input in the <a href="https://swat.tamu.edu/" class="external-link">Soil &amp; Water Assessment Tool (SWAT)</a>.</p>
-<p>The package provides two main workflows:</p>
+<p><strong>wcswatin</strong> (Weather &amp; Climate SWAT Input) is an open-source R package for preparing gridded climate data and weather station observations as inputs for the <a href="https://swat.tamu.edu/" class="external-link">Soil &amp; Water Assessment Tool (SWAT)</a>.</p>
+<p>The package provides two complementary workflows:</p>
 <ul>
 <li>
-<strong>Raster/NetCDF Processing</strong>: Extract and process climate data from global gridded datasets (ERA5-Land, GPM IMERG, PERSIANN, etc.)</li>
+<strong>Raster/NetCDF processing</strong>: inspect NetCDF or GeoTIFF files, define study-area cells, extract gridded values, aggregate hourly or daily data, and write SWAT-style time-series files.</li>
 <li>
-<strong>Station Data Interpolation</strong>: Upscale point measurements from weather stations using trend surface interpolation</li>
+<strong>Station data interpolation</strong>: read station files, fill gaps, reorganize daily observations, interpolate values with trend surfaces, and write point-based SWAT inputs.</li>
 </ul>
 <p>Developed with funding from the <a href="https://www.cepf.net/" class="external-link">Critical Ecosystem Partnership Fund (CEPF)</a>.</p>
 </div>
@@ -74,12 +70,16 @@
 <h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
 </h2>
 <ul>
-<li>Process NetCDF and GeoTIFF raster files from multiple climate data providers</li>
-<li>Spatial and temporal data extraction for specific watersheds</li>
-<li>Trend surface interpolation for station data upscaling</li>
-<li>Gap-filling routines for station data</li>
-<li>Direct output formatting for SWAT model input files</li>
-<li>Optimized for large datasets with parallel processing support</li>
+<li>Inspect NetCDF variables, units, extents, layer counts, and time resolution with <code><a href="reference/raster_info.html">raster_info()</a></code> and <code><a href="reference/var_names.html">var_names()</a></code>
+</li>
+<li>Process NetCDF and GeoTIFF raster files from climate data providers such as ERA5-Land, GPM IMERG and PERSIANN</li>
+<li>Extract gridded data for watershed cells or reference points</li>
+<li>Support hourly workflows, daily NetCDF products, and local datacube aggregation with <code><a href="reference/datacube_aggregation.html">datacube_aggregation()</a></code>
+</li>
+<li>Use <code>future</code>-based parallel extraction through <code><a href="reference/cube2table.html">cube2table()</a></code>
+</li>
+<li>Prepare SWAT-style weather files and station interpolation outputs</li>
+<li>Fill gaps and summarize station or gridded time series</li>
 </ul>
 </div>
 <div class="section level2">
@@ -96,18 +96,44 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/reginalexavier/wcswatin" class="external-link">wcswatin</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Process NetCDF climate data</span></span>
-<span><span class="va">climate_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/input_raster.html">input_raster</a></span><span class="op">(</span></span>
-<span>  raster_file <span class="op">=</span> <span class="st">"path/to/climate_data.nc"</span>,</span>
-<span>  watershed <span class="op">=</span> <span class="st">"path/to/watershed.shp"</span>,</span>
-<span>  var_name <span class="op">=</span> <span class="st">"precipitation"</span></span>
+<span><span class="co"># Inspect a downloaded NetCDF file before choosing the processing route</span></span>
+<span><span class="va">nc_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
+<span>  <span class="st">"extdata/nc_data/hourly_multi_2days_2025.nc"</span>,</span>
+<span>  package <span class="op">=</span> <span class="st">"wcswatin"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Interpolate station data</span></span>
-<span><span class="va">station_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ts_to_point.html">ts_to_point</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="reference/raster_info.html">raster_info</a></span><span class="op">(</span><span class="va">nc_file</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/var_names.html">var_names</a></span><span class="op">(</span><span class="va">nc_file</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load a raster cube and extract values at reference stations</span></span>
+<span><span class="va">daily_nc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
+<span>  <span class="st">"extdata/nc_data/daily_2m_temperature_daily_maximum_2025.nc"</span>,</span>
+<span>  package <span class="op">=</span> <span class="st">"wcswatin"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">stations_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
+<span>  <span class="st">"extdata/pcp_stations/pcp.txt"</span>,</span>
+<span>  package <span class="op">=</span> <span class="st">"wcswatin"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">station_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_from_references.html">tbl_from_references</a></span><span class="op">(</span></span>
+<span>  raster_file <span class="op">=</span> <span class="fu"><a href="reference/input_raster.html">input_raster</a></span><span class="op">(</span><span class="va">daily_nc</span><span class="op">)</span>,</span>
+<span>  ref_points <span class="op">=</span> <span class="va">stations_file</span>,</span>
+<span>  prefix_colname <span class="op">=</span> <span class="st">"t2m"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">station_values</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Interpolate daily station tables to target points</span></span>
+<span><span class="va">interpolated_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ts_to_point.html">ts_to_point</a></span><span class="op">(</span></span>
 <span>  my_folder <span class="op">=</span> <span class="st">"path/to/station_files"</span>,</span>
 <span>  targeted_points_path <span class="op">=</span> <span class="st">"path/to/centroids.shp"</span>,</span>
 <span>  poly_degree <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/ts_point_to_files.html">ts_point_to_files</a></span><span class="op">(</span></span>
+<span>  points_list <span class="op">=</span> <span class="va">interpolated_points</span>,</span>
+<span>  output_folder <span class="op">=</span> <span class="st">"path/to/swat_pcp"</span>,</span>
+<span>  file_prefix <span class="op">=</span> <span class="st">"pcp"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -123,7 +149,7 @@ Conceptual workflow of the wcswatin package
 <h2 id="main-functions">Main Functions<a class="anchor" aria-label="anchor" href="#main-functions"></a>
 </h2>
 <div class="section level3">
-<h3 id="data-input--loading">Data Input &amp; Loading<a class="anchor" aria-label="anchor" href="#data-input--loading"></a>
+<h3 id="data-input--inspection">Data Input &amp; Inspection<a class="anchor" aria-label="anchor" href="#data-input--inspection"></a>
 </h3>
 <ul>
 <li>
@@ -132,6 +158,8 @@ Conceptual workflow of the wcswatin package
 <code><a href="reference/input_table.html">input_table()</a></code>: Load tabular data with validation</li>
 <li>
 <code><a href="reference/input_vector.html">input_vector()</a></code>: Load spatial vector data (shapefiles, etc.)</li>
+<li>
+<code><a href="reference/raster_info.html">raster_info()</a></code>: Summarize raster variables, units, dates, and dimensions</li>
 <li>
 <code><a href="reference/var_names.html">var_names()</a></code>: List available variables in NetCDF files</li>
 </ul>
@@ -143,11 +171,15 @@ Conceptual workflow of the wcswatin package
 <li>
 <code><a href="reference/study_area_records.html">study_area_records()</a></code>: Extract grid points within watershed boundaries</li>
 <li>
-<code><a href="reference/layervalues2pixel.html">layervalues2pixel()</a></code>: Extract time series for each grid cell</li>
+<code><a href="reference/main_input_var.html">main_input_var()</a></code>: Create SWAT main files for gridded variables</li>
 <li>
 <code><a href="reference/cube2table.html">cube2table()</a></code>: Convert raster data cube to tabular format</li>
 <li>
-<code><a href="reference/daily_aggregation.html">daily_aggregation()</a></code>: Aggregate raster data to daily time steps</li>
+<code><a href="reference/layervalues2pixel.html">layervalues2pixel()</a></code>: Write one time series for each grid cell</li>
+<li>
+<code><a href="reference/datacube_aggregation.html">datacube_aggregation()</a></code>: Aggregate or select daily layers before extraction</li>
+<li>
+<code><a href="reference/daily_aggregation.html">daily_aggregation()</a></code>: Aggregate hourly SWAT-style files to daily files</li>
 <li>
 <code><a href="reference/tbl_from_references.html">tbl_from_references()</a></code>: Extract raster values at reference points</li>
 </ul>
@@ -157,19 +189,21 @@ Conceptual workflow of the wcswatin package
 </h3>
 <ul>
 <li>
-<code><a href="reference/point_to_daily.html">point_to_daily()</a></code>: Import and organize daily station data</li>
-<li>
 <code><a href="reference/files_to_table.html">files_to_table()</a></code>: Consolidate multiple station files into a single table</li>
 <li>
 <code><a href="reference/table_to_files.html">table_to_files()</a></code>: Split consolidated data back into individual files</li>
 <li>
 <code><a href="reference/fill_gap.html">fill_gap()</a></code>: Fill missing data using correlation methods</li>
 <li>
-<code><a href="reference/ts_to_point.html">ts_to_point()</a></code>: Trend surface interpolation to specific points (watershed centroids)</li>
-<li>
-<code><a href="reference/ts_to_area.html">ts_to_area()</a></code>: Trend surface interpolation to create continuous raster surfaces</li>
+<code><a href="reference/point_to_daily.html">point_to_daily()</a></code>: Import and organize daily station data</li>
 <li>
 <code><a href="reference/save_daily_tbl.html">save_daily_tbl()</a></code>: Save daily tables in SWAT format</li>
+<li>
+<code><a href="reference/ts_to_point.html">ts_to_point()</a></code>: Trend surface interpolation to specific points (watershed centroids)</li>
+<li>
+<code><a href="reference/ts_point_to_files.html">ts_point_to_files()</a></code>: Save <code><a href="reference/ts_to_point.html">ts_to_point()</a></code> outputs as SWAT-style files</li>
+<li>
+<code><a href="reference/ts_to_area.html">ts_to_area()</a></code>: Trend surface interpolation to create continuous raster surfaces</li>
 </ul>
 </div>
 <div class="section level3">
@@ -204,7 +238,8 @@ Conceptual workflow of the wcswatin package
 <div class="section level2">
 <h2 id="data-requirements">Data Requirements<a class="anchor" aria-label="anchor" href="#data-requirements"></a>
 </h2>
-<p>The package works with spatial data in <strong>WGS 84</strong> geographic coordinate system (EPSG:4326), which is the standard format for most climate datasets.</p>
+<p>The package works with spatial data in <strong>WGS 84</strong> geographic coordinate system (EPSG:4326), which is the standard format for most climate datasets. Reference point tables should include <code>NAME</code>, <code>LAT</code>, and <code>LON</code> columns. When possible, vector reference points are projected to the raster CRS before extraction.</p>
+<p>For NetCDF inputs, inspect time metadata before processing. Hourly files can be processed through <code><a href="reference/cube2table.html">cube2table()</a></code> and later aggregated with <code><a href="reference/daily_aggregation.html">daily_aggregation()</a></code>, while daily NetCDF products can often be extracted directly. For accumulated products timestamped at a specific hour, <code>datacube_aggregation(mode = "value_at_hour")</code> and <code>daily_aggregation(mode = "value_at_hour")</code> make that convention explicit.</p>
 <div class="section level3">
 <h3 id="supported-data-sources">Supported Data Sources<a class="anchor" aria-label="anchor" href="#supported-data-sources"></a>
 </h3>
@@ -223,12 +258,22 @@ Conceptual workflow of the wcswatin package
 </h2>
 <ul>
 <li>
-<strong>Vignettes</strong>: Detailed tutorials and workflows</li>
+<strong>Get started</strong>: <a href="https://reginalexavier.github.io/wcswatin/articles/wcswatin.html" class="uri">https://reginalexavier.github.io/wcswatin/articles/wcswatin.html</a>
+</li>
 <li>
-<strong>Function Reference</strong>: <code>?function_name</code> or visit package documentation</li>
+<strong>ERA5-Land hourly to SWAT case study</strong>: <a href="https://reginalexavier.github.io/wcswatin/articles/era5-land-hourly-to-swat.html" class="uri">https://reginalexavier.github.io/wcswatin/articles/era5-land-hourly-to-swat.html</a>
+</li>
 <li>
-<strong>Examples</strong>: Run <code>example(function_name)</code> for usage examples</li>
+<strong>Station interpolation workflow</strong>: <a href="https://reginalexavier.github.io/wcswatin/articles/station-interpolation-workflow.html" class="uri">https://reginalexavier.github.io/wcswatin/articles/station-interpolation-workflow.html</a>
+</li>
+<li>
+<strong>Running a similar case study</strong>: <a href="https://reginalexavier.github.io/wcswatin/articles/reproducing-the-case.html" class="uri">https://reginalexavier.github.io/wcswatin/articles/reproducing-the-case.html</a>
+</li>
+<li>
+<strong>Function reference</strong>: <a href="https://reginalexavier.github.io/wcswatin/reference/index.html" class="uri">https://reginalexavier.github.io/wcswatin/reference/index.html</a>
+</li>
 </ul>
+<p>NetCDF files can be downloaded with any CDS workflow. The optional <a href="https://github.com/reginalexavier/cds-downloader" class="external-link"><code>cds-downloader</code></a> CLI can help create repeatable CDS download requests, but it is not required by <code>wcswatin</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
@@ -252,12 +297,14 @@ Conceptual workflow of the wcswatin package
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use wcswatin in your research, please cite:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="sc">@</span>software{wcswatin2025,</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  author <span class="ot">=</span> {Exavier, Reginal and Zeilhofer, Peter},</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  title <span class="ot">=</span> {wcswatin<span class="sc">:</span> Weather <span class="sc">&amp;</span> Climate SWAT Input},</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2025</span>},</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>reginalexavier<span class="sc">/</span>wcswatin}</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>}</span></code></pre></div>
+<p>Exavier R, Kawakubo F, Zeilhofer P (2026). wcswatin: Weather &amp; Climate SWAT INput (WCSWATIN). R package version 0.1.0, <a href="https://github.com/reginalexavier/wcswatin" class="external-link uri">https://github.com/reginalexavier/wcswatin</a></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="sc">@</span>software{</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  title <span class="ot">=</span> {wcswatin<span class="sc">:</span> Weather <span class="sc">&amp;</span> Climate SWAT <span class="fu">INput</span> (WCSWATIN)},</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  author <span class="ot">=</span> {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2026</span>},</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">1.0</span>},</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>reginalexavier<span class="sc">/</span>wcswatin},</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -268,8 +315,6 @@ Conceptual workflow of the wcswatin package
 <h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
 </h2>
 <p>This project is funded by the <a href="https://www.cepf.net/" class="external-link">Critical Ecosystem Partnership Fund (CEPF)</a>.</p>
-<hr>
-<p><strong>Note</strong>: This package is under active development. Functions and features may change.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -299,8 +344,9 @@ Conceptual workflow of the wcswatin package
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Reginal Exavier <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-5237-523X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
-<li>Peter Zeilhofer <br><small class="roles"> Author </small>   </li>
+<li>Réginal Exavier <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-5237-523X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Fernando Shinji Kawakubo <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-2045-6318" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Peter Zeilhofer <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-7579-6408" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -311,7 +357,7 @@ Conceptual workflow of the wcswatin package
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Reginal Exavier, Peter Zeilhofer.</p>
+  <p>Developed by Réginal Exavier, Fernando Shinji Kawakubo, Peter Zeilhofer.</p>
 </div>
 
 <div class="pkgdown-footer-right">
