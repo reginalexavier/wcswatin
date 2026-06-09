@@ -1,16 +1,22 @@
 Package: wcswatin
 Title: Weather & Climate SWAT INput (WCSWATIN)
-Version: 0.0.1.9000
+Version: 0.1.0
 Authors@R: c(
-    person(given = "Reginal",
+    person(given = "Réginal",
            family = "Exavier",
            role = c("aut", "cre"),
            email = "reginalexavier@rocketmail.com",
            comment = c(ORCID = "0000-0002-5237-523X")),
+    person(given = "Fernando Shinji",
+           family = "Kawakubo",
+           role = "aut",
+           email = "fskgeo@gmail.com",
+           comment = c(ORCID = "0000-0002-2045-6318")),
     person(given = "Peter",
            family = "Zeilhofer",
            role = "aut",
-           email = "zeilhoferpeter@gmail.com"))
+           email = "zeilhoferpeter@gmail.com",
+           comment = c(ORCID = "0000-0002-7579-6408")))
 Description: Weather & Climate SWAT INput (wcswatin) is an open-source R package
     for preparing weather and climate data from different sources for input in the
     Soil & Water Assessment Tool (SWAT), funded by the Critical Ecosystem

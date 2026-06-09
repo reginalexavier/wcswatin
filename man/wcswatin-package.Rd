@@ -16,6 +16,7 @@ interpolation methods. For processing all used datasets MUST have geographic
 coordinates using WGS 84 as datum.
 }
 \author{
-Reginal Exavier \email{reginalexavier@rocketmail.com}, Peter
-Zeilhofer \email{zeilhoferpeter@gmail.com}
+Reginal Exavier \email{reginalexavier@rocketmail.com}, Fernando
+Shinji Kawakubo \email{fskgeo@gmail.com},  Peter Zeilhofer
+\email{zeilhoferpeter@gmail.com}
 }
