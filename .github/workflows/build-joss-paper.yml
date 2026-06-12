@@ -7,14 +7,18 @@ on:
     paths:
       - "paper/paper.md"
       - "paper/paper.bib"
+      - "paper/Makefile"
       - "paper/img/**"
+      - ".github/workflows/build-joss-paper.yml"
   pull_request:
     branches:
       - paper-joss
     paths:
       - "paper/paper.md"
       - "paper/paper.bib"
+      - "paper/Makefile"
       - "paper/img/**"
+      - ".github/workflows/build-joss-paper.yml"
   workflow_dispatch:
 
 jobs:
@@ -104,13 +108,22 @@ jobs:
           fi
           echo "YAML metadata found"
 
-          if ! grep -q "^# Summary" paper/paper.md; then
-            echo "Warning: '# Summary' section not found"
-          fi
+          REQUIRED_SECTIONS=(
+            "Summary"
+            "Statement of need"
+            "State of the field"
+            "Software design"
+            "Research impact statement"
+            "AI usage disclosure"
+          )
 
-          if ! grep -q "^# Statement of need" paper/paper.md; then
-            echo "Warning: '# Statement of need' section not found"
-          fi
+          for section in "${REQUIRED_SECTIONS[@]}"; do
+            if ! grep -q "^# ${section}$" paper/paper.md; then
+              echo "Error: '# ${section}' section not found"
+              exit 1
+            fi
+            echo "# ${section} found"
+          done
 
           echo ""
           echo "Basic validation passed"
@@ -121,21 +134,30 @@ jobs:
           WORD_COUNT=$(pandoc paper/paper.md -t plain --strip-comments | wc -w)
           echo "Word count: $WORD_COUNT"
 
-          if [ $WORD_COUNT -lt 250 ]; then
-            echo "Warning: Paper is shorter than recommended 250 words"
-          elif [ $WORD_COUNT -gt 1000 ]; then
-            echo "Warning: Paper is longer than recommended 1000 words"
+          if [ $WORD_COUNT -lt 750 ]; then
+            echo "Error: Paper is below the JOSS minimum of 750 words"
+            exit 1
+          elif [ $WORD_COUNT -gt 1750 ]; then
+            echo "Error: Paper is above the JOSS maximum of 1750 words"
+            exit 1
           else
-            echo "Word count is within recommended range (250-1000)"
+            echo "Word count is within the JOSS range (750-1750)"
           fi
-        continue-on-error: true
 
       - name: Validate BibTeX
         run: |
           echo "Validating BibTeX file..."
           if command -v biber &> /dev/null; then
-            biber --tool --validate-datamodel paper/paper.bib || true
+            biber --tool --validate-datamodel paper/paper.bib
           else
             echo "Biber not available, skipping BibTeX validation"
           fi
-        continue-on-error: true
+
+      - name: Check DOI fields
+        run: |
+          echo "Checking DOI fields..."
+          if grep -En 'doi[[:space:]]*=[[:space:]]*[{"]https?://(dx[.])?doi[.]org/' paper/paper.bib; then
+            echo "Error: DOI fields must contain DOI identifiers, not https://doi.org/ URLs"
+            exit 1
+          fi
+          echo "DOI fields look valid"

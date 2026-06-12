@@ -91,16 +91,16 @@ wc: ## Counts words in the paper (requires pandoc)
 		WORD_COUNT=$$(pandoc $(JOSS_DIR)/paper.md -t plain --strip-comments 2>/dev/null | wc -w | tr -d ' '); \
 		echo "$(GREEN)Words: $$WORD_COUNT$(NC)"; \
 		echo ""; \
-		if [ $$WORD_COUNT -lt 250 ]; then \
-			echo "$(YELLOW) Warning: Paper is below recommended minimum (250 words)$(NC)"; \
-			NEEDED=$$((250 - $$WORD_COUNT)); \
+		if [ $$WORD_COUNT -lt 750 ]; then \
+			echo "$(YELLOW) Warning: Paper is below recommended minimum (750 words)$(NC)"; \
+			NEEDED=$$((750 - $$WORD_COUNT)); \
 			echo "$(YELLOW)  Approximately $$NEEDED words needed$(NC)"; \
-		elif [ $$WORD_COUNT -gt 1000 ]; then \
-			echo "$(YELLOW) Warning: Paper is above recommended maximum (1000 words)$(NC)"; \
-			EXCESS=$$(($$WORD_COUNT - 1000)); \
+		elif [ $$WORD_COUNT -gt 1750 ]; then \
+			echo "$(YELLOW) Warning: Paper is above recommended maximum (1750 words)$(NC)"; \
+			EXCESS=$$(($$WORD_COUNT - 1750)); \
 			echo "$(YELLOW)  Approximately $$EXCESS words over limit$(NC)"; \
 		else \
-			echo "$(GREEN) Word count is within JOSS limit (250-1000)$(NC)"; \
+			echo "$(GREEN) Word count is within JOSS limit (750-1750)$(NC)"; \
 		fi; \
 		echo ""; \
 		echo "$(BLUE)Distribution by section:$(NC)"; \
