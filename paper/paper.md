@@ -25,7 +25,7 @@ affiliations:
     index: 1
   - name: Federal University of Mato Grosso (UFMT), Postgraduate Program in Geography, Cuiabá - MT, Brazil.
     index: 2
-date: 09 June 2026
+date: 12 June 2026
 bibliography: paper.bib
 ---
 
@@ -46,11 +46,17 @@ The Soil and Water Assessment Tool (SWAT) [@arnold2012swat] is widely used for w
 
 These datasets typically require multiple processing steps prior to model application, including temporal aggregation, unit conversion, spatial subsetting, validation against in situ observations, and conversion into model-specific input formats. Performing these steps manually or using multiple disconnected tools is time-consuming and increases the risk of errors, particularly when comparing alternative climate products or working with large spatio-temporal datasets.
 
-`wcswatin` addresses these challenges by providing a generalized and integrated workflow for preprocessing multisource weather and climate data for SWAT modeling. The package supports the processing of gridded datasets in common formats, offers specialized functionality for compiling complete SWAT-compatible weather datasets from ERA5-Land, and includes tools for gap-filling, spatial interpolation, and validation using measured station data. By consolidating these tasks within a single R-based environment, `wcswatin` facilitates reproducible and efficient preparation of weather and climate inputs for hydrological and ecohydrological studies
+`wcswatin` addresses these challenges by providing a generalized and integrated workflow for preprocessing multisource weather and climate data for SWAT modeling. The package supports the processing of gridded datasets in common formats, offers specialized functionality for compiling complete SWAT-compatible weather datasets from ERA5-Land, and includes tools for gap-filling, spatial interpolation, and validation using measured station data. By consolidating these tasks within a single R-based environment, `wcswatin` facilitates reproducible and efficient preparation of weather and climate inputs for hydrological and ecohydrological studies.
 
-# Functionality
+# State of the field
 
-The `wcswatin` package supports the extraction, preprocessing, exploratory analysis, spatial interpolation, and validation of weather and climate data from multiple sources, with a focus on generating SWAT-compatible inputs.
+Several existing tools partially support the preparation of weather and climate data for hydrological modeling. The NASAaccess R package [@mohammed2023nasaaccess] provides functionality for downloading and reformatting selected NASA datasets for use in models such as SWAT, but is limited to a small number of variables and data sources. The pRecipe package [@godoy2023precipe] focuses on global precipitation datasets and visualization but does not offer comprehensive workflows for generating complete SWAT weather inputs.
+
+Web-based tools like the NCEP Climate Forecast System Reanalysis portal (https://globalweather.tamu.edu/) are restricted to specific time periods (1979-2014) and have demonstrated weak performance in discharge simulations [@senent2021]. In contrast, `wcswatin` emphasizes integrated preprocessing, validation, and formatting of multisource weather and climate data, supporting both gridded and station-based inputs within a unified and extensible workflow tailored to SWAT modeling.
+
+# Software design
+
+The `wcswatin` package is organized around two complementary pipelines: raster/NetCDF preprocessing and station-data interpolation. The main raster pipeline normalizes NetCDF, GeoTIFF, and legacy `raster` inputs to `terra` objects for spatial extraction and aggregation, while extracted time series are stored as explicit tabular intermediates handled with `data.table`. This design favors auditability, restartable processing, and compatibility with SWAT text inputs over a purely in-memory workflow, which is important when processing large hourly NetCDF cubes. Layer-wise extraction uses `future.apply`, allowing users to choose a `future` backend while keeping the high-level extraction call unchanged. The package also separates raster aggregation from table aggregation, allowing users to work either from hourly products, daily products, or locally reduced datacubes. The station pipeline reads SWAT-style observations, performs gap filling and daily reshaping, and applies trend surface interpolation to generate point-based or gridded outputs, including legacy `raster` outputs where required by existing interpolation routines.
 
 For gridded datasets, the package provides functions to process Global Weather and Climate Grids supplied in NetCDF or GeoTIFF formats. This includes automated handling of temporal resolution, aggregation of hourly data to daily values, unit conversion, and derivation of additional variables required by SWAT, such as wind speed and relative humidity. These capabilities have been applied to multi-parameter reanalysis products including ERA5-Land.
 
@@ -60,16 +66,13 @@ In addition to gridded data, `wcswatin` supports the use of measured in situ sta
 
 The package also includes tools for validating gridded climate products against station measurements through statistical metrics and visual inspection, enabling users to compare alternative weather and climate datasets prior to hydrological modeling. Performance optimizations, including parallel processing and reduced memory overhead, allow `wcswatin` to handle large spatio-temporal datasets efficiently on standard computing systems.
 
-# Related work
+# Research impact statement
 
-Several existing tools partially support the preparation of weather and climate data for hydrological modeling. The NASAaccess R package [@mohammed2023nasaaccess] provides functionality for downloading and reformatting selected NASA datasets for use in models such as SWAT, but is limited to a small number of variables and data sources. The pRecipe package [@godoy2023precipe] focuses on global precipitation datasets and visualization but does not offer comprehensive workflows for generating complete SWAT weather inputs.
-
-Web-based tools like the NCEP Climate Forecast System Reanalysis portal (https://globalweather.tamu.edu/) are restricted to specific time periods (1979-2014) and have demonstrated weak performance in discharge simulations [@senent2021]. In contrast, `wcswatin` emphasizes integrated preprocessing, validation, and formatting of multisource weather and climate data, supporting both gridded and station-based inputs within a unified and extensible workflow tailored to SWAT modeling.
-
+`wcswatin` is intended to support reproducible hydrological and ecohydrological research workflows, particularly in data-scarce regions where multiple gridded climate products must be evaluated alongside station observations. The current release includes compact NetCDF examples, an executable vignette, and precomputed case-study articles covering ERA5-Land preprocessing and station interpolation workflows. These materials provide reproducible entry points for users who need to inspect downloaded climate products, compare temporal aggregation choices, and prepare weather inputs for SWAT. Continuous integration, expanded tests, and versioned documentation provide community-readiness signals for use in research settings where observed weather networks are sparse and multiple global gridded datasets must be evaluated before model calibration.
 
 # AI usage disclosure
 
-Generative AI tools were used during the development of `wcswatin` and the preparation of its documentation. Codex was used to assist with code review, debugging, test design, documentation drafting, and language editing.
+Generative AI tools were used during the development of `wcswatin` and the preparation of its documentation. OpenAI Codex was used to assist with code review, debugging, test design, documentation drafting, and language editing.
 
 All AI-assisted outputs were reviewed, edited, tested, and validated by the authors before inclusion. The authors made the software design decisions, validated the scientific and technical content, and take full responsibility for the accuracy, originality, and integrity of the submitted work.
 
