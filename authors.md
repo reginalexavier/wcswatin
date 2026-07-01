@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/reginalexavier/wcswatin/blob/v0.1.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/reginalexavier/wcswatin/blob/main/DESCRIPTION)
 
 Exavier R, Kawakubo F, Zeilhofer P (2026). *wcswatin: Weather & Climate
 SWAT INput (WCSWATIN)*. R package version 0.1.0,
