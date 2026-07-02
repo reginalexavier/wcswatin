@@ -9,11 +9,13 @@
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 notes
 
 ## Submission notes
 
-This is a new submission.
+This is a new submission. The only NOTE reported by `R CMD check` is:
+
+* New submission
 
 ## Downstream dependencies
 
