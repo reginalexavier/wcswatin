@@ -1,5 +1,15 @@
 # Changelog
 
+## wcswatin 0.1.1
+
+### Maintenance
+
+- Minor maintenance release following CRAN pre-submission checks.
+- Added package-specific terms to `inst/WORDLIST`.
+- Excluded `cran-comments.md` from the source package.
+- Updated package metadata and README citation examples to version
+  0.1.1.
+
 ## wcswatin 0.1.0
 
 ### Package workflows and structure

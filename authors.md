@@ -16,13 +16,13 @@ Source:
 [`DESCRIPTION`](https://github.com/reginalexavier/wcswatin/blob/main/DESCRIPTION)
 
 Exavier R, Kawakubo F, Zeilhofer P (2026). *wcswatin: Weather & Climate
-SWAT INput (WCSWATIN)*. R package version 0.1.0,
+SWAT INput (WCSWATIN)*. R package version 0.1.1,
 <https://github.com/reginalexavier/wcswatin>.
 
     @Manual{,
       title = {wcswatin: Weather & Climate SWAT INput (WCSWATIN)},
       author = {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 0.1.1},
       url = {https://github.com/reginalexavier/wcswatin},
     }
