@@ -23,10 +23,11 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-**wcswatin** (Weather & Climate SWAT Input) is an open-source R package
-for preparing gridded climate data and weather station observations as
-inputs for the [Soil & Water Assessment Tool
-(SWAT)](https://swat.tamu.edu/).
+**wcswatin** provides workflows to prepare weather and climate time series
+from gridded and station data for the [Soil and Water Assessment Tool
+(SWAT)](https://swat.tamu.edu/). It supports data extraction, aggregation,
+interpolation, quality control, unit conversion, and export of per-location
+model input files.
 
 The package provides two complementary workflows:
 
