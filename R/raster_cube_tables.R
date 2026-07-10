@@ -57,6 +57,24 @@
 #'
 #' @export
 #'
+#' @examples
+#' cube_file <- tempfile("wcswatin-cube-", fileext = ".tif")
+#' cube <- terra::rast(
+#'   nrows = 1,
+#'   ncols = 2,
+#'   nlyrs = 2,
+#'   vals = c(10, 20, 11, 21)
+#' )
+#' names(cube) <- c("X20200101", "X20200102")
+#' terra::writeRaster(cube, cube_file, overwrite = TRUE)
+#' cube2table(
+#'   input_path = cube_file,
+#'   var = NULL,
+#'   n_layers = 2,
+#'   study_area = data.frame(ID = 1:2),
+#'   side_effect = "none"
+#' )
+#' unlink(cube_file)
 cube2table <- function(
   input_path, # cube2table_by_layer
   var = NA,
@@ -218,13 +236,17 @@ cube2table <- function(
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # Example (pseudo-code):
-#' # lv <- cube2table(input_path, var = "tmin", n_layers = 10, study_area)
-#' # mt <- main_input_var(study_area, var_name = "tmin")
-#' # out <- layervalues2pixel(lv, mt, col_name = "20220101",
-#' #                         inline_output = TRUE)
-#' }
+#' layer_values <- data.frame(
+#'   ID = c(1, 2, 1, 2),
+#'   values = c(10, 20, 11, 21),
+#'   layer_name = c("day_1", "day_1", "day_2", "day_2")
+#' )
+#' main_tbl <- data.frame(NAME = c("tmin_1", "tmin_2"))
+#' layervalues2pixel(
+#'   layer_values = layer_values,
+#'   main_tbl = main_tbl,
+#'   col_name = "20200101"
+#' )
 layervalues2pixel <- function(
   # nolint: object_name_linter
   layer_values,

@@ -39,3 +39,24 @@ A \code{dataframe}.
 \description{
 Turns multiple time series files into a single table
 }
+\examples{
+series_dir <- tempfile("wcswatin-series-")
+dir.create(series_dir)
+utils::write.csv(
+  data.frame(value = c(1, 2)),
+  file.path(series_dir, "station_a.csv"),
+  row.names = FALSE
+)
+utils::write.csv(
+  data.frame(value = c(3, 4)),
+  file.path(series_dir, "station_b.csv"),
+  row.names = FALSE
+)
+files_to_table(
+  files_path = series_dir,
+  files_pattern = "station",
+  start_date = "2020-01-01",
+  end_date = "2020-01-02"
+)
+unlink(series_dir, recursive = TRUE)
+}

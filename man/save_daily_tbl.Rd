@@ -11,18 +11,21 @@ save_daily_tbl(tbl_list, path)
 
 \item{path}{The path where the files must be saved}
 }
+\value{
+No return value (\code{NULL}), called for side effects. Writes one CSV
+file for every named element of \code{tbl_list} to \code{path}; output files are
+named \verb{<element-name>.csv} and retain the element table structure.
+}
 \description{
 Save the csv files after transformation to daily form
 }
 \examples{
-\dontrun{
-temp <- tempdir()
-folder <- system.file("extdata/pcp_stations", package = "wcswatin")
-test01 <- point_to_daily(my_folder = folder)
-save_daily_tbl(
-  tbl_list = test01,
-  path = temp
+daily_dir <- tempfile("wcswatin-daily-")
+dir.create(daily_dir)
+daily_tables <- list(
+  day_20200101 = data.frame(ID = 1:2, pcp = c(1.2, 0))
 )
-unlink(temp, recursive = TRUE)
-}
+save_daily_tbl(daily_tables, daily_dir)
+list.files(daily_dir)
+unlink(daily_dir, recursive = TRUE)
 }

@@ -9,6 +9,14 @@
 #' @return A table
 #' @export
 #'
+#' @examples
+#' study_area <- data.frame(
+#'   ID = 1:2,
+#'   LAT = c(-15.0, -15.5),
+#'   LON = c(-56.0, -56.5),
+#'   ELEVATION = c(100, 120)
+#' )
+#' main_input_var(study_area, var_name = "tmin")
 main_input_var <- function(study_area, var_name = "temp") {
   main_tbl <- data.table::copy(input_table(study_area))
 

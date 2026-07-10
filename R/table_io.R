@@ -15,6 +15,26 @@
 #' @return A `dataframe`.
 #' @export
 #'
+#' @examples
+#' series_dir <- tempfile("wcswatin-series-")
+#' dir.create(series_dir)
+#' utils::write.csv(
+#'   data.frame(value = c(1, 2)),
+#'   file.path(series_dir, "station_a.csv"),
+#'   row.names = FALSE
+#' )
+#' utils::write.csv(
+#'   data.frame(value = c(3, 4)),
+#'   file.path(series_dir, "station_b.csv"),
+#'   row.names = FALSE
+#' )
+#' files_to_table(
+#'   files_path = series_dir,
+#'   files_pattern = "station",
+#'   start_date = "2020-01-01",
+#'   end_date = "2020-01-02"
+#' )
+#' unlink(series_dir, recursive = TRUE)
 
 files_to_table <- function(
   files_path,
@@ -113,7 +133,10 @@ files_to_table <- function(
 #'   \code{\%y\%m\%d}
 #' @param file_extension Character. `txt` or `csv`.
 #'
-#' @return NULL
+#' @return No return value (`NULL`), called for side effects. Writes one
+#'   single-column `txt` or `csv` file per column in `table` to `folder_path`.
+#'   Each file is named after its input column and uses `first_date` as its
+#'   column name.
 #'
 #' @export
 #'

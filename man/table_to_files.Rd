@@ -19,6 +19,12 @@ saving. The actual name is used as the file names. The suggested format is
 
 \item{file_extension}{Character. \code{txt} or \code{csv}.}
 }
+\value{
+No return value (\code{NULL}), called for side effects. Writes one
+single-column \code{txt} or \code{csv} file per column in \code{table} to \code{folder_path}.
+Each file is named after its input column and uses \code{first_date} as its
+column name.
+}
 \description{
 Export tables to \code{txt} or \code{csv} files
 }

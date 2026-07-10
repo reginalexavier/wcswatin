@@ -59,11 +59,6 @@
 #' )
 #'
 #' simulated
-#'
-#' # Example validation workflow:
-#' # observed <- files_to_table(...)
-#' # all_data <- cbind(observed, simulated)
-#' # hydroGOF::gof(sim = all_data$sim_station_a, obs = all_data$station_a)
 tbl_from_references <- function(
   raster_file,
   ref_points,

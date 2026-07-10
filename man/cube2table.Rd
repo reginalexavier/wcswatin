@@ -78,3 +78,22 @@ in sequential mode \code{future::plan(future::sequential)}, for parallel
 processing, the user must change to the desired mode (ex:
 future::plan(future::multisession, workers = 6)).
 }
+\examples{
+cube_file <- tempfile("wcswatin-cube-", fileext = ".tif")
+cube <- terra::rast(
+  nrows = 1,
+  ncols = 2,
+  nlyrs = 2,
+  vals = c(10, 20, 11, 21)
+)
+names(cube) <- c("X20200101", "X20200102")
+terra::writeRaster(cube, cube_file, overwrite = TRUE)
+cube2table(
+  input_path = cube_file,
+  var = NULL,
+  n_layers = 2,
+  study_area = data.frame(ID = 1:2),
+  side_effect = "none"
+)
+unlink(cube_file)
+}
