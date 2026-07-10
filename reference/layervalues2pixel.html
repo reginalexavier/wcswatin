@@ -95,13 +95,29 @@ overwrite.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Example (pseudo-code):</span></span></span>
-<span class="r-in"><span><span class="co"># lv &lt;- cube2table(input_path, var = "tmin", n_layers = 10, study_area)</span></span></span>
-<span class="r-in"><span><span class="co"># mt &lt;- main_input_var(study_area, var_name = "tmin")</span></span></span>
-<span class="r-in"><span><span class="co"># out &lt;- layervalues2pixel(lv, mt, col_name = "20220101",</span></span></span>
-<span class="r-in"><span><span class="co">#                         inline_output = TRUE)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">layer_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="input_table.html">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">11</span>, <span class="fl">21</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  layer_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"day_1"</span>, <span class="st">"day_1"</span>, <span class="st">"day_2"</span>, <span class="st">"day_2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">main_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="input_table.html">data.frame</a></span><span class="op">(</span>NAME <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tmin_1"</span>, <span class="st">"tmin_2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">layervalues2pixel</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  layer_values <span class="op">=</span> <span class="va">layer_values</span>,</span></span>
+<span class="r-in"><span>  main_tbl <span class="op">=</span> <span class="va">main_tbl</span>,</span></span>
+<span class="r-in"><span>  col_name <span class="op">=</span> <span class="st">"20200101"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $tmin_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    20200101</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:       11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $tmin_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    20200101</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;num&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:       20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:       21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

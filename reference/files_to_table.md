@@ -49,3 +49,30 @@ files_to_table(
 ## Value
 
 A `dataframe`.
+
+## Examples
+
+``` r
+series_dir <- tempfile("wcswatin-series-")
+dir.create(series_dir)
+utils::write.csv(
+  data.frame(value = c(1, 2)),
+  file.path(series_dir, "station_a.csv"),
+  row.names = FALSE
+)
+utils::write.csv(
+  data.frame(value = c(3, 4)),
+  file.path(series_dir, "station_b.csv"),
+  row.names = FALSE
+)
+files_to_table(
+  files_path = series_dir,
+  files_pattern = "station",
+  start_date = "2020-01-01",
+  end_date = "2020-01-02"
+)
+#>         date station_a station_b
+#> 1 2020-01-01         1         3
+#> 2 2020-01-02         2         4
+unlink(series_dir, recursive = TRUE)
+```

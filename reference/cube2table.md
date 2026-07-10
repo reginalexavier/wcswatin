@@ -101,3 +101,34 @@ A table containing the:
 - values: The values of the pixel;
 
 - layer_name: The layer name (date of the data collected).
+
+## Examples
+
+``` r
+cube_file <- tempfile("wcswatin-cube-", fileext = ".tif")
+cube <- terra::rast(
+  nrows = 1,
+  ncols = 2,
+  nlyrs = 2,
+  vals = c(10, 20, 11, 21)
+)
+names(cube) <- c("X20200101", "X20200102")
+terra::writeRaster(cube, cube_file, overwrite = TRUE)
+cube2table(
+  input_path = cube_file,
+  var = NULL,
+  n_layers = 2,
+  study_area = data.frame(ID = 1:2),
+  side_effect = "none"
+)
+#> The intermediate tables will be saved in: /tmp/RtmpbmtW3q/cube2table
+#> Step: Extraction - started at: 2026-07-10 16:13:34
+#> Step: Reading and joining tables at 2026-07-10 16:13:34
+#>       ID values layer_name
+#>    <int>  <int>     <char>
+#> 1:     1     10  X20200101
+#> 2:     2     20  X20200101
+#> 3:     1     11  X20200102
+#> 4:     2     21  X20200102
+unlink(cube_file)
+```
