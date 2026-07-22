@@ -40,12 +40,19 @@ Developed with funding from the [Critical Ecosystem Partnership Fund
 
 ## Installation
 
-Install the development version from GitHub:
+Install the released version from CRAN:
 
 ``` r
 
-# install.packages("devtools")
-devtools::install_github("reginalexavier/wcswatin")
+install.packages("wcswatin")
+```
+
+To install the development version from GitHub:
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("reginalexavier/wcswatin")
 ```
 
 ## Quick Start
@@ -230,19 +237,27 @@ by `wcswatin`.
 
 ## Citation
 
+To obtain the current citation in R, run:
+
+``` r
+
+citation("wcswatin")
+```
+
 If you use wcswatin in your research, please cite:
 
-Exavier R, Kawakubo F, Zeilhofer P (2026). wcswatin: Weather & Climate
-SWAT INput (WCSWATIN). R package version 0.1.1,
-<https://github.com/reginalexavier/wcswatin>
+Exavier R, Kawakubo F, Zeilhofer P (2026). *wcswatin: Weather and
+Climate Inputs for ‘SWAT’*. <doi:10.32614/CRAN.package.wcswatin>. R
+package version 0.1.1, <https://CRAN.R-project.org/package=wcswatin>.
 
 ``` R
-@software{
-  title = {wcswatin: Weather & Climate SWAT INput (WCSWATIN)},
+@Manual{
+  title = {wcswatin: Weather and Climate Inputs for 'SWAT'},
   author = {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},
   year = {2026},
   note = {R package version 0.1.1},
-  url = {https://github.com/reginalexavier/wcswatin},
+  url = {https://CRAN.R-project.org/package=wcswatin},
+  doi = {10.32614/CRAN.package.wcswatin},
 }
 ```
 

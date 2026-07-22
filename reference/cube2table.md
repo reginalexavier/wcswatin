@@ -121,9 +121,9 @@ cube2table(
   study_area = data.frame(ID = 1:2),
   side_effect = "none"
 )
-#> The intermediate tables will be saved in: /tmp/RtmpWI9UM3/cube2table
-#> Step: Extraction - started at: 2026-07-22 14:00:57
-#> Step: Reading and joining tables at 2026-07-22 14:00:57
+#> The intermediate tables will be saved in: /tmp/Rtmp4pKAwM/cube2table
+#> Step: Extraction - started at: 2026-07-22 14:19:23
+#> Step: Reading and joining tables at 2026-07-22 14:19:23
 #>       ID values layer_name
 #>    <int>  <int>     <char>
 #> 1:     1     10  X20200101
