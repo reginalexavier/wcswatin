@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Weather &amp; Climate SWAT INput (WCSWATIN) • wcswatin</title>
+<title>Weather and Climate Inputs for SWAT • wcswatin</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Weather &amp; Climate SWAT INput (WCSWATIN)">
-<meta name="description" content="Weather &amp; Climate SWAT INput (wcswatin) is an open-source R package for preparing weather and climate data from different sources for input in the Soil &amp; Water Assessment Tool (SWAT), funded by the Critical Ecosystem Partnership Fund (CEPF).">
-<meta property="og:description" content="Weather &amp; Climate SWAT INput (wcswatin) is an open-source R package for preparing weather and climate data from different sources for input in the Soil &amp; Water Assessment Tool (SWAT), funded by the Critical Ecosystem Partnership Fund (CEPF).">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Weather and Climate Inputs for SWAT">
+<meta name="description" content='Provides workflows to prepare weather and climate time series from gridded and station data for SWAT (Soil and Water Assessment Tool). Supports data extraction, aggregation, interpolation, quality control, unit conversion, and export of per-location model input files. For the underlying model, see Arnold et al. (1998) "Large Area Hydrologic Modeling and Assessment Part I: Model Development" &lt;doi:10.1111/j.1752-1688.1998.tb05961.x&gt;.'>
+<meta property="og:description" content='Provides workflows to prepare weather and climate time series from gridded and station data for SWAT (Soil and Water Assessment Tool). Supports data extraction, aggregation, interpolation, quality control, unit conversion, and export of per-location model input files. For the underlying model, see Arnold et al. (1998) "Large Area Hydrologic Modeling and Assessment Part I: Model Development" &lt;doi:10.1111/j.1752-1688.1998.tb05961.x&gt;.'>
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">wcswatin</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><strong>wcswatin</strong> (Weather &amp; Climate SWAT Input) is an open-source R package for preparing gridded climate data and weather station observations as inputs for the <a href="https://swat.tamu.edu/" class="external-link">Soil &amp; Water Assessment Tool (SWAT)</a>.</p>
+<p><strong>wcswatin</strong> provides workflows to prepare weather and climate time series from gridded and station data for the <a href="https://swat.tamu.edu/" class="external-link">Soil and Water Assessment Tool (SWAT)</a>. It supports data extraction, aggregation, interpolation, quality control, unit conversion, and export of per-location model input files.</p>
 <p>The package provides two complementary workflows:</p>
 <ul>
 <li>
@@ -86,15 +86,18 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install the development version from GitHub:</p>
+<p>Install the released version from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"reginalexavier/wcswatin"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"wcswatin"</span><span class="op">)</span></span></code></pre></div>
+<p>To install the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"reginalexavier/wcswatin"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/reginalexavier/wcswatin" class="external-link">wcswatin</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect a downloaded NetCDF file before choosing the processing route</span></span>
@@ -297,13 +300,19 @@ Conceptual workflow of the wcswatin package
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
+<p>To obtain the current citation in R, run:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"wcswatin"</span><span class="op">)</span></span></code></pre></div>
 <p>If you use wcswatin in your research, please cite:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="sc">@</span>software{wcswatin2025,</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  author <span class="ot">=</span> {Exavier, Reginal and Zeilhofer, Peter},</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  title <span class="ot">=</span> {wcswatin<span class="sc">:</span> Weather <span class="sc">&amp;</span> Climate SWAT Input},</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2025</span>},</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>reginalexavier<span class="sc">/</span>wcswatin}</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>}</span></code></pre></div>
+<p>Exavier R, Kawakubo F, Zeilhofer P (2026). <em>wcswatin: Weather and Climate Inputs for ‘SWAT’</em>. <a href="doi:10.32614/CRAN.package.wcswatin" class="uri">doi:10.32614/CRAN.package.wcswatin</a>. R package version 0.1.1, <a href="https://CRAN.R-project.org/package=wcswatin" class="external-link uri">https://CRAN.R-project.org/package=wcswatin</a>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="sc">@</span>Manual{</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  title <span class="ot">=</span> {wcswatin<span class="sc">:</span> Weather and Climate Inputs <span class="cf">for</span> <span class="st">'SWAT'</span>},</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  author <span class="ot">=</span> {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2026</span>},</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  note <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="fl">1.1</span>},</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  url <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>CRAN.R<span class="sc">-</span>project.org<span class="sc">/</span>package<span class="ot">=</span>wcswatin},</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  doi <span class="ot">=</span> {<span class="fl">10.32614</span><span class="sc">/</span>CRAN.package.wcswatin},</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -319,6 +328,7 @@ Conceptual workflow of the wcswatin package
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=wcswatin" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/reginalexavier/wcswatin/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/reginalexavier/wcswatin/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -343,14 +353,16 @@ Conceptual workflow of the wcswatin package
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Reginal Exavier <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-5237-523X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
-<li>Peter Zeilhofer <br><small class="roles"> Author </small>   </li>
+<li>Réginal Exavier <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-5237-523X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Fernando Shinji Kawakubo <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-2045-6318" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Peter Zeilhofer <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-7579-6408" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://CRAN.R-project.org/package=wcswatin" class="external-link"><img src="https://www.r-pkg.org/badges/version/wcswatin" alt="CRAN status"></a></li>
 <li><a href="https://github.com/reginalexavier/wcswatin/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/reginalexavier/wcswatin/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://www.gnu.org/licenses/gpl-3.0" class="external-link"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a></li>
 <li><a href="https://app.codecov.io/gh/reginalexavier/wcswatin?branch=main" class="external-link"><img src="https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
@@ -362,11 +374,11 @@ Conceptual workflow of the wcswatin package
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Reginal Exavier, Peter Zeilhofer.</p>
+  <p>Developed by Réginal Exavier, Fernando Shinji Kawakubo, Peter Zeilhofer.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

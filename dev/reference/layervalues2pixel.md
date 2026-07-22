@@ -55,11 +55,27 @@ A list of tables (when `inline_output = TRUE`) or a set of files in
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Example (pseudo-code):
-# lv <- cube2table(input_path, var = "tmin", n_layers = 10, study_area)
-# mt <- main_input_var(study_area, var_name = "tmin")
-# out <- layervalues2pixel(lv, mt, col_name = "20220101",
-#                         inline_output = TRUE)
-} # }
+layer_values <- data.frame(
+  ID = c(1, 2, 1, 2),
+  values = c(10, 20, 11, 21),
+  layer_name = c("day_1", "day_1", "day_2", "day_2")
+)
+main_tbl <- data.frame(NAME = c("tmin_1", "tmin_2"))
+layervalues2pixel(
+  layer_values = layer_values,
+  main_tbl = main_tbl,
+  col_name = "20200101"
+)
+#> $tmin_1
+#>    20200101
+#>       <num>
+#> 1:       10
+#> 2:       11
+#> 
+#> $tmin_2
+#>    20200101
+#>       <num>
+#> 1:       20
+#> 2:       21
+#> 
 ```

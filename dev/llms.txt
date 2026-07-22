@@ -2,10 +2,11 @@
 
 ## Overview
 
-**wcswatin** (Weather & Climate SWAT Input) is an open-source R package
-for preparing gridded climate data and weather station observations as
-inputs for the [Soil & Water Assessment Tool
-(SWAT)](https://swat.tamu.edu/).
+**wcswatin** provides workflows to prepare weather and climate time
+series from gridded and station data for the [Soil and Water Assessment
+Tool (SWAT)](https://swat.tamu.edu/). It supports data extraction,
+aggregation, interpolation, quality control, unit conversion, and export
+of per-location model input files.
 
 The package provides two complementary workflows:
 
@@ -39,12 +40,19 @@ Developed with funding from the [Critical Ecosystem Partnership Fund
 
 ## Installation
 
-Install the development version from GitHub:
+Install the released version from CRAN:
 
 ``` r
 
-# install.packages("devtools")
-devtools::install_github("reginalexavier/wcswatin")
+install.packages("wcswatin")
+```
+
+To install the development version from GitHub:
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("reginalexavier/wcswatin")
 ```
 
 ## Quick Start
@@ -229,14 +237,27 @@ by `wcswatin`.
 
 ## Citation
 
+To obtain the current citation in R, run:
+
+``` r
+
+citation("wcswatin")
+```
+
 If you use wcswatin in your research, please cite:
 
+Exavier R, Kawakubo F, Zeilhofer P (2026). *wcswatin: Weather and
+Climate Inputs for ‘SWAT’*. <doi:10.32614/CRAN.package.wcswatin>. R
+package version 0.1.1, <https://CRAN.R-project.org/package=wcswatin>.
+
 ``` R
-@software{wcswatin2025,
-  author = {Exavier, Reginal and Zeilhofer, Peter},
-  title = {wcswatin: Weather & Climate SWAT Input},
-  year = {2025},
-  url = {https://github.com/reginalexavier/wcswatin}
+@Manual{
+  title = {wcswatin: Weather and Climate Inputs for 'SWAT'},
+  author = {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},
+  year = {2026},
+  note = {R package version 0.1.1},
+  url = {https://CRAN.R-project.org/package=wcswatin},
+  doi = {10.32614/CRAN.package.wcswatin},
 }
 ```
 

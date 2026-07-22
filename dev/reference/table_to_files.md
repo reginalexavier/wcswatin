@@ -28,3 +28,10 @@ table_to_files(table, folder_path, first_date, file_extension = "txt")
 - file_extension:
 
   Character. `txt` or `csv`.
+
+## Value
+
+No return value (`NULL`), called for side effects. Writes one
+single-column `txt` or `csv` file per column in `table` to
+`folder_path`. Each file is named after its input column and uses
+`first_date` as its column name.

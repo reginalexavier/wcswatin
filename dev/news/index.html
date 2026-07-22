@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">wcswatin</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,58 @@
 <h2 class="pkg-version" data-toc-text="development version" id="wcswatin-development-version">wcswatin (development version)<a class="anchor" aria-label="anchor" href="#wcswatin-development-version"></a></h2>
 </div>
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="wcswatin-011">wcswatin 0.1.1<a class="anchor" aria-label="anchor" href="#wcswatin-011"></a></h2><p class="text-muted">CRAN release: 2026-07-19</p>
+<div class="section level3">
+<h3 id="maintenance-0-1-1">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-0-1-1"></a></h3>
+<ul><li>Minor maintenance release following CRAN pre-submission checks.</li>
+<li>Added package-specific terms to <code>inst/WORDLIST</code>.</li>
+<li>Excluded <code>cran-comments.md</code> from the source package.</li>
+<li>Updated package metadata and README citation examples to version 0.1.1.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0" id="wcswatin-010">wcswatin 0.1.0<a class="anchor" aria-label="anchor" href="#wcswatin-010"></a></h2>
+<div class="section level3">
+<h3 id="package-workflows-and-structure-0-1-0">Package workflows and structure<a class="anchor" aria-label="anchor" href="#package-workflows-and-structure-0-1-0"></a></h3>
+<ul><li>Reorganized R source files by logical domain, making the package structure match the main workflows more closely.</li>
+<li>Reorganized the test suite by the same logical domains and added shared test helpers for temporary files and directories.</li>
+<li>Added compact NetCDF example files to support runnable examples, metadata inspection, and raster workflow tests.</li>
+<li>Replaced the previous Makefile-based workflow with a <code>justfile</code> for common development tasks.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
+<ul><li>Added <code><a href="../reference/raster_info.html">raster_info()</a></code> to summarize raster and NetCDF metadata, including variables, units, layer counts, spatial extent, CRS, and time range.</li>
+<li>Added <code><a href="../reference/ts_point_to_files.html">ts_point_to_files()</a></code> to save <code><a href="../reference/ts_to_point.html">ts_to_point()</a></code> outputs as individual SWAT-style point files.</li>
+<li>Added <code>value_at_hour</code> support to <code><a href="../reference/daily_aggregation.html">daily_aggregation()</a></code> for products whose daily value is stored at a specific hour.</li>
+<li>Added <code>value_at_hour</code>, <code>date_shift_days</code>, and <code>drop_first_layer</code> support to <code><a href="../reference/datacube_aggregation.html">datacube_aggregation()</a></code> so hourly raster cubes can be reduced before extraction.</li>
+<li>Improved <code><a href="../reference/tbl_from_references.html">tbl_from_references()</a></code> so reference points can be supplied using the package’s standard table, vector, and path input patterns.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="breaking-changes-0-1-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-1-0"></a></h3>
+<ul><li>Standardized longitude column names to <code>LON</code>.</li>
+<li>Renamed the <code>take_out_first_record</code> argument in <code><a href="../reference/daily_aggregation.html">daily_aggregation()</a></code> to <code>drop_first_record</code>.</li>
+<li>Renamed the <code>negatif_number</code> argument in station/table preprocessing to <code>neg_to_zero</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-and-validation-0-1-0">Bug fixes and validation<a class="anchor" aria-label="anchor" href="#bug-fixes-and-validation-0-1-0"></a></h3>
+<ul><li>Added reusable input validation helpers and clearer error messages across raster, table, station, and interpolation workflows.</li>
+<li>Ensured variable derivation helpers create output directories consistently.</li>
+<li>Removed a duplicate internal <code><a href="../reference/file_name.html">file_name()</a></code> implementation.</li>
+<li>Removed the <code>vroom</code> dependency from the main file-reading workflow.</li>
+<li>Expanded test coverage for raster aggregation, cube extraction, metadata, reference extraction, station input, table aggregation, table I/O, variable derivation, and trend-surface interpolation.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0"></a></h3>
+<ul><li>Added a lightweight executable vignette using bundled example data.</li>
+<li>Added precomputed pkgdown articles for:
+<ul><li>ERA5-Land hourly data to SWAT inputs;</li>
+<li>station interpolation workflow;</li>
+<li>running a similar external case study.</li>
+</ul></li>
+<li>Updated README and pkgdown navigation to reflect the current package workflows.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1" id="wcswatin-001">wcswatin 0.0.1<a class="anchor" aria-label="anchor" href="#wcswatin-001"></a></h2>
 <div class="section level3">
 <h3 id="first-release-0-0-1">First Release<a class="anchor" aria-label="anchor" href="#first-release-0-0-1"></a></h3>
@@ -65,11 +117,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Reginal Exavier, Peter Zeilhofer.</p>
+  <p>Developed by Réginal Exavier, Fernando Shinji Kawakubo, Peter Zeilhofer.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

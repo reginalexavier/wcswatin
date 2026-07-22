@@ -87,9 +87,4 @@ simulated
 #>   sim_station_a sim_station_b
 #> 1             3             2
 #> 2            13            12
-
-# Example validation workflow:
-# observed <- files_to_table(...)
-# all_data <- cbind(observed, simulated)
-# hydroGOF::gof(sim = all_data$sim_station_a, obs = all_data$station_a)
 ```
