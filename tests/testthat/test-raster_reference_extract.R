@@ -27,7 +27,6 @@ create_test_points <- function() {
 test_that("tbl_from_references works with different input types", {
   testthat::skip_if_not_installed("terra")
   testthat::skip_if_not_installed("sf")
-  testthat::skip_if_not_installed("raster")
 
   # Create test raster and points
   test_raster <- create_test_raster()
@@ -198,47 +197,10 @@ test_that("tbl_from_references works with multi-layer rasters", {
   expect_equal(ncol(result), 3) # 3 stations
 })
 
-test_that("tbl_from_references works with legacy raster objects", {
-  skip_if_not_installed("raster")
-  skip_if_not_installed("terra")
-
-  test_points <- create_test_points()
-  raster_layer <- raster::raster(
-    nrows = 10,
-    ncols = 10,
-    vals = 1:100,
-    crs = "+proj=longlat +datum=WGS84 +no_defs",
-    xmn = -1,
-    xmx = 1,
-    ymn = -1,
-    ymx = 1
-  )
-  raster_stack <- raster::stack(raster_layer, raster_layer + 100)
-
-  result_layer <- tbl_from_references(
-    raster_file = raster_layer,
-    ref_points = test_points
-  )
-  result_stack <- tbl_from_references(
-    raster_file = raster_stack,
-    ref_points = test_points
-  )
-
-  expect_s3_class(result_layer, "data.frame")
-  expect_equal(nrow(result_layer), 1)
-  expect_equal(ncol(result_layer), 3)
-
-  expect_s3_class(result_stack, "data.frame")
-  expect_equal(nrow(result_stack), 2)
-  expect_equal(ncol(result_stack), 3)
-  expect_equal(names(result_stack), test_points$NAME)
-})
-
 # Test raster extraction with different methods
 
 test_that("tbl_from_references works with extraction parameters", {
   skip_if_not_installed("terra")
-  skip_if_not_installed("raster")
 
   test_raster <- create_test_raster()
   test_points <- create_test_points()

@@ -18,7 +18,7 @@ trend surface.}
 \item{resolution}{The resolution for the output raster in degree.}
 }
 \value{
-A rasterbrick
+A multi-layer \code{SpatRaster} with one layer per input file.
 }
 \description{
 This function make an interpolation whith the trend surface method where the
