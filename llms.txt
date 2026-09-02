@@ -104,10 +104,8 @@ ts_point_to_files(
 
 ## Workflow Overview
 
-![Conceptual workflow of the wcswatin
-package](reference/figures/wcswatin_flowchart150222.png)
-
-Conceptual workflow of the wcswatin package
+![Diagram of the gridded-data and station-data workflows implemented by
+wcswatin](reference/figures/wcswatin-workflow.png)
 
 ## Main Functions
 
