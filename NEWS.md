@@ -1,4 +1,14 @@
-# wcswatin (development version)
+# wcswatin 0.2.0
+
+## Breaking changes
+
+* Removed the superseded `raster` package dependency and standardized spatial
+  raster workflows on `terra` and `SpatRaster`.
+* `ts_to_area()` now returns a multi-layer `SpatRaster` and preserves input file
+  stems as layer names, such as `2020-01-01`.
+* `input_raster()` no longer accepts legacy `RasterLayer`, `RasterStack`, or
+  `RasterBrick` objects. Convert these objects with `terra::rast()` before
+  passing them to wcswatin.
 
 # wcswatin 0.1.1
 
