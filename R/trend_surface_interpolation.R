@@ -214,7 +214,7 @@ ts_point_start_date <- function(date, start_date = NULL) {
 #' trend surface.
 #' @param resolution The resolution for the output raster in degree.
 #'
-#' @return A rasterbrick
+#' @return A multi-layer `SpatRaster` with one layer per input file.
 #' @export
 #'
 #' @examples
@@ -237,18 +237,12 @@ ts_to_area <- function(
   validate_positive_whole_number(poly_degree, "poly_degree")
   validate_positive_number(resolution, "resolution")
 
-  var_files <- list.files(my_folder, full.names = TRUE, pattern = ".csv$")
+  var_files <- list.files(my_folder, full.names = TRUE, pattern = "\\.csv$")
   validate_files_found(var_files, my_folder, ".csv$", "time-series files")
 
   bassin_limit <- sf::read_sf(bassin_limit_path)
 
-  # temp_name <- list.files(my_folder,
-  #                         full.names = FALSE)
-
-  names_sans_ext <- tools::file_path_sans_ext(list.files(
-    my_folder,
-    full.names = FALSE
-  ))
+  names_sans_ext <- tools::file_path_sans_ext(basename(var_files))
 
   # blank list for future alocation
   raster_list <- vector(mode = "list", length = length(var_files))
@@ -295,9 +289,10 @@ ts_to_area <- function(
         grd_template_sl
       ))
     )
-    point_2_raster <- raster::rasterFromXYZ(
+    point_2_raster <- terra::rast(
       interpolation,
-      crs = "+proj=longlat +datum=WGS84 +no_defs"
+      type = "xyz",
+      crs = "EPSG:4326"
     )
 
     raster_list[[i]] <- point_2_raster
@@ -307,9 +302,7 @@ ts_to_area <- function(
 
   close(pb) # fim do bloco
 
-  # renaming the objects list by the date
-  names(raster_list) <- names_sans_ext
-
-  # creating a raster brick
-  raster::brick(raster_list)
+  output_raster <- terra::rast(raster_list)
+  names(output_raster) <- names_sans_ext
+  output_raster
 }

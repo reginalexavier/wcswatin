@@ -6,12 +6,6 @@
 \alias{character-raster}
 \alias{input_raster,SpatRaster-method}
 \alias{SpatRaster}
-\alias{input_raster,RasterLayer-method}
-\alias{RasterLayer}
-\alias{input_raster,RasterBrick-method}
-\alias{RasterBrick}
-\alias{input_raster,RasterStack-method}
-\alias{RasterStack}
 \title{Input Raster}
 \usage{
 input_raster(x, ...)
@@ -19,12 +13,6 @@ input_raster(x, ...)
 \S4method{input_raster}{character}(x, ...)
 
 \S4method{input_raster}{SpatRaster}(x, ...)
-
-\S4method{input_raster}{RasterLayer}(x, ...)
-
-\S4method{input_raster}{RasterBrick}(x, ...)
-
-\S4method{input_raster}{RasterStack}(x, ...)
 }
 \arguments{
 \item{x}{path (character) to the file or a SpatRaster object.}

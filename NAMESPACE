@@ -31,11 +31,17 @@ import(dplyr)
 importClassesFrom(data.table,data.table)
 importClassesFrom(terra,SpatRaster)
 importClassesFrom(terra,SpatVector)
-importFrom(methods,setGeneric)
-importFrom(methods,setMethod)
-importFrom(stats,as.formula)
-importFrom(stats,lm)
-importFrom(stats,na.omit)
-importFrom(stats,predict)
-importFrom(utils,setTxtProgressBar)
-importFrom(utils,txtProgressBar)
+importFrom(methods,
+  setGeneric,
+  setMethod
+)
+importFrom(stats,
+  as.formula,
+  lm,
+  na.omit,
+  predict
+)
+importFrom(utils,
+  setTxtProgressBar,
+  txtProgressBar
+)

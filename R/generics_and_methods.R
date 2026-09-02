@@ -62,42 +62,6 @@ methods::setMethod(
   }
 )
 
-# S4 method for signature 'RasterLayer'
-#' @rdname input_raster
-#' @aliases RasterLayer
-methods::setMethod(
-  "input_raster",
-  methods::signature(x = "RasterLayer"),
-  function(x, ...) {
-    terra::rast(x, ...)
-  }
-)
-
-
-# S4 method for signature 'RasterBrick'
-#' @rdname input_raster
-#' @aliases RasterBrick
-methods::setMethod(
-  "input_raster",
-  methods::signature(x = "RasterBrick"),
-  function(x, ...) {
-    terra::rast(x, ...)
-  }
-)
-
-
-# S4 method for signature 'RasterStack'
-#' @rdname input_raster
-#' @aliases RasterStack
-methods::setMethod(
-  "input_raster",
-  methods::signature(x = "RasterStack"),
-  function(x, ...) {
-    terra::rast(x, ...)
-  }
-)
-
-
 #' Input Vector
 #'
 #' Method to load a vector file and convert it into a SpatVector object.

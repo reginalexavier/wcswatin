@@ -1,6 +1,6 @@
 Package: wcswatin
 Title: Weather and Climate Inputs for 'SWAT'
-Version: 0.1.1.9000
+Version: 0.2.0
 Authors@R: c(
     person(given = "Réginal",
            family = "Exavier",
@@ -40,7 +40,6 @@ Config/testthat/edition: 3
 Imports:
     dplyr,
     tidyr,
-    raster,
     ncdf4,
     data.table,
     glue,
@@ -56,4 +55,4 @@ Imports:
 URL: https://github.com/reginalexavier/wcswatin, https://reginalexavier.github.io/wcswatin/
 BugReports: https://github.com/reginalexavier/wcswatin/issues
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

@@ -61,43 +61,6 @@ test_that("input_raster works with SpatRaster input", {
   expect_equal(result, r)
 })
 
-test_that("input_raster works with RasterLayer input", {
-  skip_if_not_installed("raster")
-  skip_if_not_installed("terra")
-
-  # Create a simple RasterLayer for testing
-  r <- raster::raster(nrows = 10, ncols = 10, vals = 1:100)
-
-  result <- input_raster(r)
-  expect_s4_class(result, "SpatRaster")
-})
-
-test_that("input_raster works with RasterBrick input", {
-  skip_if_not_installed("raster")
-  skip_if_not_installed("terra")
-
-  # Create a simple RasterBrick for testing
-  r1 <- raster::raster(nrows = 10, ncols = 10, vals = 1:100)
-  r2 <- raster::raster(nrows = 10, ncols = 10, vals = 101:200)
-  rb <- raster::brick(r1, r2)
-
-  result <- input_raster(rb)
-  expect_s4_class(result, "SpatRaster")
-})
-
-test_that("input_raster works with RasterStack input", {
-  skip_if_not_installed("raster")
-  skip_if_not_installed("terra")
-
-  # Create a simple RasterStack for testing
-  r1 <- raster::raster(nrows = 10, ncols = 10, vals = 1:100)
-  r2 <- raster::raster(nrows = 10, ncols = 10, vals = 101:200)
-  rs <- raster::stack(r1, r2)
-
-  result <- input_raster(rs)
-  expect_s4_class(result, "SpatRaster")
-})
-
 # Test input_vector generic and methods
 test_that("input_vector works with character input", {
   temp_dir <- local_test_dir("input_vector_character")

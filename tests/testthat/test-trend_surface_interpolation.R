@@ -212,9 +212,8 @@ test_that("ts_point_to_files validates input", {
   )
 })
 
-test_that("trend surface interpolation can create a raster brick", {
+test_that("trend surface interpolation creates a multi-layer SpatRaster", {
   skip_if_not_installed("sf")
-  skip_if_not_installed("raster")
 
   input_dir <- local_test_dir("ts_area_input")
   basin_file <- local_test_file("ts_area_basin", ".gpkg")
@@ -230,6 +229,7 @@ test_that("trend surface interpolation can create a raster brick", {
   data.table::fwrite(station_tbl, file.path(input_dir, "2020-01-01.csv"))
   station_tbl$pcp <- station_tbl$pcp + 1
   data.table::fwrite(station_tbl, file.path(input_dir, "2020-01-02.csv"))
+  writeLines("not an interpolation input", file.path(input_dir, "notes.txt"))
 
   basin <- sf::st_sf(
     id = 1,
@@ -253,10 +253,16 @@ test_that("trend surface interpolation can create a raster brick", {
     resolution = 0.5
   )
 
-  expect_s4_class(result, "RasterBrick")
-  expect_equal(raster::nlayers(result), 2)
-  expect_equal(names(result), c("X2020.01.01", "X2020.01.02"))
-  expect_true(all(raster::values(result) >= 0))
+  expect_s4_class(result, "SpatRaster")
+  expect_equal(terra::nlyr(result), 2)
+  expect_equal(names(result), c("2020-01-01", "2020-01-02"))
+  expect_true(all(terra::values(result) >= 0))
+  expect_equal(
+    unname(as.vector(terra::ext(result))),
+    c(-0.25, 1.25, -0.25, 1.25)
+  )
+  expect_equal(terra::res(result), c(0.5, 0.5))
+  expect_true(terra::same.crs(result, "EPSG:4326"))
 })
 
 test_that("ts_to_area validates input files and arguments", {
