@@ -117,9 +117,11 @@ ts_point_to_files(
 
 ## Workflow Overview
 
-```{r, echo=FALSE, out.width="100%", fig.alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin"}
-knitr::include_graphics("man/figures/wcswatin-workflow.png")
+```{r, echo=FALSE, out.width="100%", fig.alt="Compact diagram of the gridded-data and station-data workflows implemented by wcswatin"}
+knitr::include_graphics("man/figures/wcswatin-workflow-compact.png")
 ```
+
+[View the complete workflow in full resolution](man/figures/wcswatin-workflow.png)
 
 ## Main Functions
 

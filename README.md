@@ -109,7 +109,10 @@ ts_point_to_files(
 
 ## Workflow Overview
 
-<img src="man/figures/wcswatin-workflow.png" alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin" width="100%" />
+<img src="man/figures/wcswatin-workflow-compact.png" alt="Compact diagram of the gridded-data and station-data workflows implemented by wcswatin" width="100%" />
+
+[View the complete workflow in full
+resolution](man/figures/wcswatin-workflow.png)
 
 ## Main Functions
 
