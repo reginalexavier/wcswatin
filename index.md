@@ -109,7 +109,7 @@ implemented by
 wcswatin](reference/figures/wcswatin-workflow-compact.png)
 
 [View the complete workflow in full
-resolution](https://reginalexavier.github.io/wcswatin/man/figures/wcswatin-workflow.png)
+resolution](https://github.com/reginalexavier/wcswatin/blob/main/man/figures/wcswatin-workflow.png)
 
 ## Main Functions
 
