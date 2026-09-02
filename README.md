@@ -109,15 +109,7 @@ ts_point_to_files(
 
 ## Workflow Overview
 
-<div class="figure">
-
-<img src="man/figures/wcswatin_flowchart150222.png" alt="Conceptual workflow of the wcswatin package" width="100%" />
-<p class="caption">
-
-Conceptual workflow of the wcswatin package
-</p>
-
-</div>
+<img src="man/figures/wcswatin-workflow.png" alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin" width="100%" />
 
 ## Main Functions
 

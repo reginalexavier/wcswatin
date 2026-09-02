@@ -25,6 +25,18 @@ longer articles with a production-size ERA5-Land case study.
 library(wcswatin)
 ```
 
+## Workflow overview
+
+The package provides complementary workflows for gridded climate products and
+station observations. The first route extracts and aggregates raster values by
+study-area cell. The second prepares station series for quality control and
+trend-surface interpolation. Both routes produce SWAT-ready time-series files
+and support optional summaries or point-based comparison.
+
+```{r workflow-overview, echo=FALSE, out.width="100%", fig.cap="Gridded and station-data workflows implemented by wcswatin.", fig.alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin"}
+knitr::include_graphics("figures/wcswatin-workflow.png")
+```
+
 ## Example data
 
 ```{r example-data}
