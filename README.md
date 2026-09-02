@@ -10,7 +10,7 @@ status](https://www.r-pkg.org/badges/version/wcswatin)](https://CRAN.R-project.o
 [![R-CMD-check](https://github.com/reginalexavier/wcswatin/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/reginalexavier/wcswatin/actions/workflows/R-CMD-check.yaml)
 [![License: GPL
 v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![codecov](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg?token=ZVBTTCNBKX)](https://codecov.io/gh/reginalexavier/wcswatin)
+[![codecov](https://codecov.io/gh/reginalexavier/wcswatin/branch/main/graph/badge.svg?token=ZVBTTCNBKX)](https://app.codecov.io/gh/reginalexavier/wcswatin)
 <!-- badges: end -->
 
 ## Overview
@@ -113,6 +113,7 @@ ts_point_to_files(
 
 <img src="man/figures/wcswatin_flowchart150222.png" alt="Conceptual workflow of the wcswatin package" width="100%" />
 <p class="caption">
+
 Conceptual workflow of the wcswatin package
 </p>
 
