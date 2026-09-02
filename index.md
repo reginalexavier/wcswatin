@@ -104,8 +104,12 @@ ts_point_to_files(
 
 ## Workflow Overview
 
-![Diagram of the gridded-data and station-data workflows implemented by
-wcswatin](reference/figures/wcswatin-workflow.png)
+![Compact diagram of the gridded-data and station-data workflows
+implemented by
+wcswatin](reference/figures/wcswatin-workflow-compact.png)
+
+[View the complete workflow in full
+resolution](https://reginalexavier.github.io/wcswatin/man/figures/wcswatin-workflow.png)
 
 ## Main Functions
 

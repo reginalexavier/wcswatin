@@ -20,10 +20,13 @@ series for quality control and trend-surface interpolation. Both routes
 produce SWAT-ready time-series files and support optional summaries or
 point-based comparison.
 
-![Diagram of the gridded-data and station-data workflows implemented by
-wcswatin](figures/wcswatin-workflow.png)
+[![Diagram of the gridded-data and station-data workflows implemented by
+wcswatin](figures/wcswatin-workflow.png)](https://reginalexavier.github.io/wcswatin/articles/figures/wcswatin-workflow.png)
 
-Gridded and station-data workflows implemented by wcswatin.
+Gridded and station-data workflows implemented by wcswatin. Select the
+diagram to enlarge it.
+
+Close
 
 ## Example data
 
