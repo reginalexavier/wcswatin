@@ -1,6 +1,6 @@
 ## Test environments
 
-* local Ubuntu 24.04.4 LTS, R 4.6.1 (2026-07-10)
+* local Omarchy 4.0.2 (Arch Linux), R 4.6.1, checked 2026-09-09
 * GitHub Actions macOS latest, R release
 * GitHub Actions Windows latest, R release
 * GitHub Actions Ubuntu latest, R devel
@@ -13,15 +13,14 @@
 
 ## Submission notes
 
-This is a resubmission of version 0.1.1 following CRAN feedback.
+This is an update to version 0.2.0.
 
-* Rewrote the title and description to quote and explain 'SWAT', and added the
-  canonical 'SWAT' reference with its DOI.
-* Added explicit return-value documentation for `save_daily_tbl()` and
-  `table_to_files()`.
-* Replaced commented pseudo-examples and `\dontrun{}` with short executable
-  examples that use temporary files and clean them up.
-* Regenerated the Rd files from the updated roxygen source.
+* Removed the superseded 'raster' package dependency and standardized spatial
+  raster workflows on 'terra' and `SpatRaster`.
+* Updated `ts_to_area()` to return a multi-layer `SpatRaster` and preserve input
+  file stems as layer names.
+* Removed support for legacy `RasterLayer`, `RasterStack`, and `RasterBrick`
+  objects in `input_raster()`.
 
 ## Downstream dependencies
 
