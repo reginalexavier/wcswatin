@@ -227,13 +227,13 @@ If you use wcswatin in your research, please cite:
 
 Exavier R, Kawakubo F, Zeilhofer P (2026). *wcswatin: Weather and
 Climate Inputs for ‘SWAT’*. <doi:10.32614/CRAN.package.wcswatin>. R
-package version 0.1.1, <https://CRAN.R-project.org/package=wcswatin>.
+package version 0.2.0, <https://CRAN.R-project.org/package=wcswatin>.
 
     @Manual{
       title = {wcswatin: Weather and Climate Inputs for 'SWAT'},
       author = {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},
       year = {2026},
-      note = {R package version 0.1.1},
+      note = {R package version 0.2.0},
       url = {https://CRAN.R-project.org/package=wcswatin},
       doi = {10.32614/CRAN.package.wcswatin},
     }
