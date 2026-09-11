@@ -77,8 +77,8 @@ aggregates raster values by study-area cell. The second prepares station
 series for quality control and trend-surface interpolation. Both routes
 produce SWAT-ready time-series files and support optional summaries or
 point-based comparison.</p>
-<figure class="workflow-zoom-figure"><a class="workflow-zoom-link" href="figures/wcswatin-workflow.png" aria-haspopup="dialog" aria-controls="workflow-zoom-dialog">
-<img src="figures/wcswatin-workflow.png" alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin"></a>
+<figure class="workflow-zoom-figure"><button class="workflow-zoom-link" type="button" aria-haspopup="dialog" aria-controls="workflow-zoom-dialog">
+<img src="figures/wcswatin-workflow.png" alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin"></button>
 <figcaption>
 Gridded and station-data workflows implemented by wcswatin. Select the
 diagram to enlarge it.
@@ -94,6 +94,10 @@ diagram to enlarge it.
 
 .workflow-zoom-link {
   display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: zoom-in;
 }
 
