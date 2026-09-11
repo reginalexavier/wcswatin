@@ -1,6 +1,6 @@
 ## Test environments
 
-* local Omarchy 4.0.2 (Arch Linux), R 4.6.1, checked 2026-09-09
+* local Omarchy 4.0.2 (Arch Linux), R 4.6.1, checked 2026-09-11
 * GitHub Actions macOS latest, R release
 * GitHub Actions Windows latest, R release
 * GitHub Actions Ubuntu latest, R devel
@@ -13,8 +13,10 @@
 
 ## Submission notes
 
-This is an update to version 0.2.0.
+This is a resubmission of version 0.2.0 following CRAN feedback.
 
+* Replaced the invalid relative file URI in the package vignette with a button
+  that opens the embedded workflow image without referencing a local file.
 * Removed the superseded 'raster' package dependency and standardized spatial
   raster workflows on 'terra' and `SpatRaster`.
 * Updated `ts_to_area()` to return a multi-layer `SpatRaster` and preserve input
