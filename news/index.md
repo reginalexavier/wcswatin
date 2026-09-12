@@ -2,6 +2,8 @@
 
 ## wcswatin 0.2.0
 
+CRAN release: 2026-09-11
+
 ### Breaking changes
 
 - Removed the superseded `raster` package dependency and standardized
