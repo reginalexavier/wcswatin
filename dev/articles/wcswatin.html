@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">wcswatin</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,6 +69,112 @@ processing steps. The pkgdown site includes longer articles with a
 production-size ERA5-Land case study.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/reginalexavier/wcswatin" class="external-link">wcswatin</a></span><span class="op">)</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="workflow-overview">Workflow overview<a class="anchor" aria-label="anchor" href="#workflow-overview"></a>
+</h2>
+<p>The package provides complementary workflows for gridded climate
+products and station observations. The first route extracts and
+aggregates raster values by study-area cell. The second prepares station
+series for quality control and trend-surface interpolation. Both routes
+produce SWAT-ready time-series files and support optional summaries or
+point-based comparison.</p>
+<figure class="workflow-zoom-figure"><button class="workflow-zoom-link" type="button" aria-haspopup="dialog" aria-controls="workflow-zoom-dialog">
+<img src="figures/wcswatin-workflow.png" alt="Diagram of the gridded-data and station-data workflows implemented by wcswatin"></button>
+<figcaption>
+Gridded and station-data workflows implemented by wcswatin. Select the
+diagram to enlarge it.
+</figcaption></figure><dialog class="workflow-zoom-dialog" id="workflow-zoom-dialog" aria-label="Enlarged wcswatin workflow diagram"><button class="workflow-zoom-close" type="button" aria-label="Close enlarged diagram">Close</button>
+<div class="workflow-zoom-content">
+
+</div>
+<p></p></dialog><style>
+.workflow-zoom-figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.workflow-zoom-link {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.workflow-zoom-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.workflow-zoom-figure figcaption {
+  margin-top: 0.5rem;
+}
+
+.workflow-zoom-dialog {
+  width: 96vw;
+  max-width: none;
+  max-height: 96vh;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: #fff;
+}
+
+.workflow-zoom-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.workflow-zoom-close {
+  display: block;
+  margin: 0 0 0.5rem auto;
+}
+
+.workflow-zoom-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(96vh - 4rem);
+  object-fit: contain;
+}
+</style>
+<script>
+(function () {
+  var link = document.querySelector(".workflow-zoom-link");
+  var dialog = document.getElementById("workflow-zoom-dialog");
+  var closeButton = dialog && dialog.querySelector(".workflow-zoom-close");
+  var content = dialog && dialog.querySelector(".workflow-zoom-content");
+
+  if (!link || !dialog || !closeButton || !content || !dialog.showModal) {
+    return;
+  }
+
+  var enlargedImage = link.querySelector("img").cloneNode(false);
+  enlargedImage.removeAttribute("width");
+  enlargedImage.removeAttribute("height");
+  content.appendChild(enlargedImage);
+
+  link.addEventListener("click", function (event) {
+    event.preventDefault();
+    dialog.showModal();
+    closeButton.focus();
+  });
+
+  closeButton.addEventListener("click", function () {
+    dialog.close();
+    link.focus();
+  });
+
+  dialog.addEventListener("click", function (event) {
+    if (event.target === dialog) {
+      dialog.close();
+      link.focus();
+    }
+  });
+}());
+</script>
+</div>
 <div class="section level2">
 <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a>
 </h2>

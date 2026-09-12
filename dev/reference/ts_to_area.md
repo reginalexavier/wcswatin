@@ -32,7 +32,7 @@ ts_to_area(my_folder, bassin_limit_path, poly_degree = 2, resolution = 0.01)
 
 ## Value
 
-A rasterbrick
+A multi-layer `SpatRaster` with one layer per input file.
 
 ## Examples
 
@@ -46,14 +46,13 @@ ts_to_area(
   resolution = 0.5
 )
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
-#> class      : RasterBrick 
-#> dimensions : 4, 4, 16, 5  (nrow, ncol, ncell, nlayers)
-#> resolution : 0.5, 0.5  (x, y)
-#> extent     : -55.6531, -53.6531, -17.42436, -15.42436  (xmin, xmax, ymin, ymax)
-#> crs        : +proj=longlat +datum=WGS84 +no_defs 
-#> source     : memory
-#> names      : day_2002.01.01, day_2002.01.02, day_2002.01.03, day_2002.01.04, day_2002.01.05 
-#> min values :              0,              0,              0,              0,              0 
-#> max values :      70.404189,      26.468815,       3.372788,       7.704003,      25.763596 
-#> 
+#> class       : SpatRaster
+#> size        : 4, 4, 5  (nrow, ncol, nlyr)
+#> resolution  : 0.5, 0.5  (x, y)
+#> extent      : -55.6531, -53.6531, -17.42436, -15.42436  (xmin, xmax, ymin, ymax)
+#> coord. ref. : lon/lat WGS 84 (EPSG:4326)
+#> source(s)   : memory
+#> names       : day_2002-01-01, day_2002-01-02, day_2002-01-03, day_2002-01-04, day_2002-01-05
+#> min values  :              0,              0,              0,              0,              0
+#> max values  :      70.404189,      26.468815,       3.372788,       7.704003,      25.763596
 ```

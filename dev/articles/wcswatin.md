@@ -11,6 +11,23 @@ case study.
 library(wcswatin)
 ```
 
+## Workflow overview
+
+The package provides complementary workflows for gridded climate
+products and station observations. The first route extracts and
+aggregates raster values by study-area cell. The second prepares station
+series for quality control and trend-surface interpolation. Both routes
+produce SWAT-ready time-series files and support optional summaries or
+point-based comparison.
+
+![Diagram of the gridded-data and station-data workflows implemented by
+wcswatin](figures/wcswatin-workflow.png)
+
+Gridded and station-data workflows implemented by wcswatin. Select the
+diagram to enlarge it.
+
+Close
+
 ## Example data
 
 ``` r

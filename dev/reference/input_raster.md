@@ -13,15 +13,6 @@ input_raster(x, ...)
 
 # S4 method for class 'SpatRaster'
 input_raster(x, ...)
-
-# S4 method for class 'RasterLayer'
-input_raster(x, ...)
-
-# S4 method for class 'RasterBrick'
-input_raster(x, ...)
-
-# S4 method for class 'RasterStack'
-input_raster(x, ...)
 ```
 
 ## Arguments

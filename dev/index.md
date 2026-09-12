@@ -104,10 +104,12 @@ ts_point_to_files(
 
 ## Workflow Overview
 
-![Conceptual workflow of the wcswatin
-package](reference/figures/wcswatin_flowchart150222.png)
+![Compact diagram of the gridded-data and station-data workflows
+implemented by
+wcswatin](reference/figures/wcswatin-workflow-compact.png)
 
-Conceptual workflow of the wcswatin package
+[View the complete workflow in full
+resolution](https://github.com/reginalexavier/wcswatin/blob/main/man/figures/wcswatin-workflow.png)
 
 ## Main Functions
 
@@ -248,14 +250,14 @@ If you use wcswatin in your research, please cite:
 
 Exavier R, Kawakubo F, Zeilhofer P (2026). *wcswatin: Weather and
 Climate Inputs for ‘SWAT’*. <doi:10.32614/CRAN.package.wcswatin>. R
-package version 0.1.1, <https://CRAN.R-project.org/package=wcswatin>.
+package version 0.2.0, <https://CRAN.R-project.org/package=wcswatin>.
 
 ``` R
 @Manual{
   title = {wcswatin: Weather and Climate Inputs for 'SWAT'},
   author = {Réginal Exavier and Fernando Shinji Kawakubo and Peter Zeilhofer},
   year = {2026},
-  note = {R package version 0.1.1},
+  note = {R package version 0.2.0},
   url = {https://CRAN.R-project.org/package=wcswatin},
   doi = {10.32614/CRAN.package.wcswatin},
 }
